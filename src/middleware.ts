@@ -1,17 +1,21 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { SupabaseRateLimiter } from '@/lib/sb_limiter';
-import {supabaseAdmin} from '@/lib/sb_admin';
+import { supabaseAdmin } from '@/lib/sb_admin';
 
-// API and admin routes rate limiting
-const apiRateLimiter = new SupabaseRateLimiter({
-  prefix: "ratelimit:api",
-  ...SupabaseRateLimiter.slidingWindow(50, "1 m"), // 50 requests per minute
-  analytics: true
-});
+// Rate limiting state (in production, use Redis)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
-// Create a function to log security events
+// Clean up old entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (now > value.resetTime) {
+      rateLimitStore.delete(key);
+    }
+  }
+}, 60000); // Clean every minute
+
 async function logSecurityEvent(event: {
   type: string;
   path: string;
@@ -21,7 +25,6 @@ async function logSecurityEvent(event: {
   message?: string;
 }) {
   try {
-    // Log to Supabase security_logs table
     await supabaseAdmin.from("security_logs").insert({
       event_type: event.type,
       path: event.path,
@@ -36,11 +39,29 @@ async function logSecurityEvent(event: {
   }
 }
 
+function checkRateLimit(ip: string, limit: number = 60, windowMs: number = 60000): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const key = `${ip}`;
+  
+  const current = rateLimitStore.get(key);
+  
+  if (!current || now > current.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
+    return { allowed: true, remaining: limit - 1 };
+  }
+  
+  if (current.count >= limit) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  current.count++;
+  return { allowed: true, remaining: limit - current.count };
+}
+
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const pathname = url.pathname;
   
-  // Client information for logging
   const ip = 
     (request.headers.get('x-forwarded-for') || '').split(',').shift()?.trim() || 
     request.headers.get('x-real-ip') || 
@@ -49,40 +70,65 @@ export async function middleware(request: NextRequest) {
 
   // Skip middleware for static assets
   if (
-    pathname.includes('/api/') || 
     pathname.includes('/_next/') ||
     pathname.includes('/cdn-cgi/') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname.includes('.') // static files usually have extensions
+    pathname.includes('.') && !pathname.includes('/api/')
   ) {
     return NextResponse.next();
   }
 
   try {
-    // Apply rate limiting for admin routes
-    if (pathname.startsWith('/wali')) {
-      const { success, limit, reset } = await apiRateLimiter.limit(`admin:${ip}`);
+    // Apply rate limiting
+    const rateLimit = checkRateLimit(ip, 100, 60000); // 100 requests per minute
+    
+    if (!rateLimit.allowed) {
+      await logSecurityEvent({
+        type: 'rate_limit_exceeded',
+        path: pathname,
+        ip,
+        userAgent,
+        message: `Rate limit exceeded: ${ip}`
+      });
       
-      if (!success) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Too many requests",
+          message: "Rate limit exceeded. Please try again later."
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': '60',
+          }
+        }
+      );
+    }
+
+    // Apply stricter rate limiting for API routes
+    if (pathname.startsWith('/api/')) {
+      const apiRateLimit = checkRateLimit(`api:${ip}`, 30, 60000); // 30 API requests per minute
+      
+      if (!apiRateLimit.allowed) {
         await logSecurityEvent({
-          type: 'rate_limit_exceeded',
+          type: 'api_rate_limit_exceeded',
           path: pathname,
           ip,
           userAgent,
-          message: `Rate limit exceeded for admin route: ${limit} requests allowed per minute. Resets at ${new Date(reset).toISOString()}`
+          message: `API rate limit exceeded: ${ip}`
         });
         
-        // Return 429 Too Many Requests
         return new NextResponse(
           JSON.stringify({
-            error: "Too many requests",
-            message: `Rate limit exceeded. Try again in ${Math.ceil((reset - Date.now()) / 1000)} seconds.`
+            error: "API rate limit exceeded",
+            message: "Too many API requests. Please try again later."
           }),
           {
             status: 429,
             headers: {
               'Content-Type': 'application/json',
-              'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString(),
+              'Retry-After': '60',
             }
           }
         );
@@ -108,10 +154,10 @@ export async function middleware(request: NextRequest) {
       });
     }
 
-    // Check token freshness for admin routes - require re-auth after 30 minutes of inactivity
+    // Check token freshness for admin routes
     if (pathname.startsWith('/wali') && isAuthenticated) {
       const tokenLastVerified = token.lastVerified as number || 0;
-      const TOKEN_FRESHNESS_LIMIT = 30 * 60 * 1000; // 30 minutes in milliseconds
+      const TOKEN_FRESHNESS_LIMIT = 30 * 60 * 1000; // 30 minutes
       
       if (Date.now() - tokenLastVerified > TOKEN_FRESHNESS_LIMIT) {
         await logSecurityEvent({
@@ -123,9 +169,8 @@ export async function middleware(request: NextRequest) {
           message: 'Session expired due to inactivity'
         });
         
-        // CHANGE: Clear the token by redirecting to signout first
         const signoutUrl = new URL('/api/auth/logout', request.url);
-        signoutUrl.searchParams.set('callbackUrl', '/wall-e?reason=session_expired&callbackUrl=' + encodeURIComponent(pathname));
+        signoutUrl.searchParams.set('callbackUrl', '/wall-e?reason=session_expired');
         return NextResponse.redirect(signoutUrl);
       }
       
@@ -142,20 +187,17 @@ export async function middleware(request: NextRequest) {
     // Protected routes check
     if (pathname.startsWith('/wali')) {
       if (!isAuthenticated) {
-        // Store original URL to redirect back after login
         const loginUrl = new URL('/wall-e', request.url);
         loginUrl.searchParams.set('callbackUrl', pathname);
         return NextResponse.redirect(loginUrl);
       }
     }
 
-    // CHANGE: Check if this is a login page with session_expired reason
-    // Only redirect authenticated users if the reason is NOT session_expired
+    // Redirect authenticated users from login page
     if (pathname === '/wall-e' && isAuthenticated) {
       const reason = url.searchParams.get('reason');
       
       if (reason === 'session_expired') {
-        // Don't redirect if session expired, let them log in again
         return NextResponse.next();
       } else {
         return NextResponse.redirect(new URL('/wali', request.url));
@@ -164,7 +206,6 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error("Middleware error:", error);
-    // Log middleware errors
     await logSecurityEvent({
       type: 'middleware_error',
       path: pathname,
@@ -173,13 +214,12 @@ export async function middleware(request: NextRequest) {
       message: `Middleware error: ${error instanceof Error ? error.message : String(error)}`
     });
     
-    // If there's an error in auth and user is trying to access protected route, redirect to login
     if (pathname.startsWith('/wali')) {
       return NextResponse.redirect(new URL('/wall-e', request.url));
     }
   }
 
-  // Add security headers to all responses
+  // Add security headers
   const response = NextResponse.next();
   
   // Cache control for protected pages
@@ -189,29 +229,27 @@ export async function middleware(request: NextRequest) {
     response.headers.set('Expires', '0');
   }
   
-  // Add security headers to all responses
+  // Security headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('X-Frame-Options', 'DENY');
   
-  // UPDATED: Content Security Policy to allow Supabase Storage URLs
+  // Enhanced CSP
   response.headers.set(
     'Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://challenges.cloudflare.com https://*.gstatic.com https://cdn-cgi.cloudflare.com https://va.vercel-scripts.com; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "img-src 'self' data: blob: https://cdn.sanity.io https://*.googleapis.com https://*.gstatic.com https://mapsresources-pa.googleapis.com https://*.supabase.co https://*.supabase.in; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "connect-src 'self' data: https://api.supabase.co https://vhacbiaaaifuavginczh.supabase.co wss://vhacbiaaaifuavginczh.supabase.co https://*.googleapis.com https://*.gstatic.com https://challenges.cloudflare.com https://cdn-cgi.cloudflare.com https://va.vercel-scripts.com localhost:*; " +
-    "worker-src 'self' blob: https://maps.googleapis.com; " +
-    "frame-src 'self' https://challenges.cloudflare.com https://*.google.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: blob: https://*.supabase.co; " +
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; " +
+    "frame-src 'self' https://challenges.cloudflare.com; " +
     "frame-ancestors 'none';"
   );
   
   response.headers.set(
     'Permissions-Policy', 
-    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()'
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=()'
   );
 
   return response;

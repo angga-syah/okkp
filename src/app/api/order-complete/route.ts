@@ -58,6 +58,97 @@ interface WebFile {
   arrayBuffer(): Promise<ArrayBuffer>;
 }
 
+// Enhanced name validation
+function isValidName(name: string): boolean {
+  if (!name || name.trim().length < 2 || name.trim().length > 50) return false;
+  
+  // Allow letters, spaces, hyphens, apostrophes, and common Unicode characters
+  // But block suspicious patterns
+  const nameRegex = /^[a-zA-Z\s\u00C0-\u024F\u1E00-\u1EFF'\-\.]+$/;
+  
+  // Block suspicious patterns
+  const suspiciousPatterns = [
+    /<[^>]*>/g, // HTML tags
+    /javascript:/gi,
+    /vbscript:/gi,
+    /on\w+\s*=/gi, // Event handlers
+    /script/gi,
+    /eval\(/gi,
+    /expression\(/gi,
+    /url\(/gi,
+    /import\(/gi,
+    /@import/gi,
+    /&#/g, // HTML entities
+    /%[0-9a-f]{2}/gi, // URL encoded
+    /\\x[0-9a-f]{2}/gi, // Hex encoded
+    /\x00-\x1f/g, // Control characters
+  ];
+  
+  const trimmedName = name.trim();
+  
+  // Check basic regex
+  if (!nameRegex.test(trimmedName)) {
+    return false;
+  }
+  
+  // Check for suspicious patterns
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(trimmedName)) {
+      return false;
+    }
+  }
+  
+  // Additional checks
+  if (trimmedName.includes('..')) return false; // Path traversal
+  if (trimmedName.includes('null')) return false; // Null bytes
+  if (trimmedName.includes('\0')) return false; // Null character
+  
+  return true;
+}
+
+// Enhanced email validation
+function isValidEmail(email: string): boolean {
+  if (!email || email.trim().length === 0) return false;
+  
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const trimmedEmail = email.trim().toLowerCase();
+  
+  // Basic regex check
+  if (!emailRegex.test(trimmedEmail)) return false;
+  
+  // Length check
+  if (trimmedEmail.length > 100) return false;
+  
+  // Suspicious pattern check
+  const suspiciousPatterns = [
+    /<[^>]*>/g, // HTML tags
+    /javascript:/gi,
+    /script/gi,
+    /\x00-\x1f/g, // Control characters
+  ];
+  
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(trimmedEmail)) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+// Add this function to sanitize input
+function sanitizeInput(input: string): string {
+  if (!input) return '';
+  
+  return input
+    .replace(/[<>\"']/g, '') // Remove dangerous chars
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .trim()
+    .substring(0, 100); // Limit length
+}
+
 // Memoized form data parser
 const parseFormDataMemoized = (() => {
   const cache = new Map();
@@ -156,21 +247,6 @@ function isFieldKey(key: string): key is keyof FormFields {
     'sendPaymentLinkByEmail',
     'language'
   ].includes(key);
-}
-
-// Function to validate email format
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return emailRegex.test(email.trim());
-}
-
-// Function to validate customer name
-function isValidName(name: string): boolean {
-  if (!name || name.trim().length < 2) return false;
-  
-  // Allow letters, spaces, hyphens, apostrophes, and common Unicode characters for international names
-  const nameRegex = /^[a-zA-Z\s\u00C0-\u024F\u1E00-\u1EFF'-]+$/;
-  return nameRegex.test(name.trim()) && name.trim().length <= 100;
 }
 
 // Function to validate a service against the database
@@ -518,18 +594,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const serviceName = fields.serviceName;
     const requestedAmount = fields.amount ? Number(fields.amount) : 0;
     
-    // Input validation
-    if (!isValidName(customerName)) {
+    // Enhanced input validation
+    const sanitizedName = sanitizeInput(customerName);
+    const sanitizedEmail = customerEmail.trim().toLowerCase();
+
+    if (!isValidName(sanitizedName)) {
       return NextResponse.json({ 
         success: false, 
-        message: preferredLanguage === 'id' ? 'Nama tidak valid' : 'Invalid name'
+        message: preferredLanguage === 'id' ? 'Nama tidak valid. Gunakan hanya huruf, spasi, dan karakter umum.' : 'Invalid name. Use only letters, spaces, and common characters.'
       }, { status: 400 });
     }
-    
-    if (!isValidEmail(customerEmail)) {
+
+    if (!isValidEmail(sanitizedEmail)) {
       return NextResponse.json({ 
         success: false, 
-        message: preferredLanguage === 'id' ? 'Email tidak valid' : 'Invalid email'
+        message: preferredLanguage === 'id' ? 'Email tidak valid' : 'Invalid email address'
       }, { status: 400 });
     }
 
@@ -575,8 +654,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const invoiceData = {
         externalId: `INV-${Date.now()}`,
         amount: amount,
-        payerEmail: customerEmail.trim(),
-        description: `Pembayaran untuk ${customerName.trim()}`,
+        payerEmail: sanitizedEmail,
+        description: `Pembayaran untuk ${sanitizedName}`,
         currency: "IDR",
         invoiceDuration: "90", //invoice expired
       };
@@ -621,8 +700,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         
         // Store data in Supabase - customizing the object to match your interface
         const customerData = {
-          name: customerName,
-          email: customerEmail,
+          name: sanitizedName,
+          email: sanitizedEmail,
           service_id: parseInt(serviceId),
           service_name: serviceName,
           invoice_id: invoiceId || undefined,
@@ -678,8 +757,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     
     // Step 3: Create customer info object
     const customerInfo = {
-      name: customerName,
-      email: customerEmail,
+      name: sanitizedName,
+      email: sanitizedEmail,
       serviceName: serviceName,
       invoiceId: invoiceId,
       paymentUrl: paymentUrl
@@ -766,32 +845,33 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       storedInDatabase: supabaseResult.success,
       databaseId: supabaseResult.id || null,
       documentPath: supabaseResult.documentPath || null,
-      emailStatus: webhookResult.success ? 'webhook_sent' : (fallbackEmailResult.success ? 'fallback_sent' : 'failed')
-    }, { status: 200 });
+      emailStatus: webhookResult.success ? 'webhook_sent' : (fallbackEmailResult.success ? 'fallback_sent' : 'failed'),
+      encrypted: process.env.ENABLE_DOCUMENT_ENCRYPTION === 'true'
+}, { status: 200 });
 
-  } catch (error) {
-    console.error(`[${requestId}] Unhandled error in order-complete:`, error);
-    
-    // Log error
-    await logSecurityEvent({
-      event_type: 'order_error',
-      path: '/api/order-complete',
-      ip_address: clientIp,
-      user_agent: req.headers.get('user-agent') || 'unknown',
-      message: `Error in order-complete: ${error instanceof Error ? error.message : String(error)}`
-    });
-    
-    // Get language from request headers as fallback
-    let language = 'en';
-    const preferredLanguage = req.headers.get('x-preferred-language');
-    if (preferredLanguage) {
-      language = preferredLanguage;
-    }
-    
-    return NextResponse.json({ 
-      success: false, 
-      message: language === 'id' ? 'Gagal memproses pesanan' : 'Failed to process order',
-      error: process.env.NODE_ENV === 'development' ? String(error) : 'Server error'
-    }, { status: 500 });
-  }
+ } catch (error) {
+   console.error(`[${requestId}] Unhandled error in order-complete:`, error);
+   
+   // Log error
+   await logSecurityEvent({
+     event_type: 'order_error',
+     path: '/api/order-complete',
+     ip_address: clientIp,
+     user_agent: req.headers.get('user-agent') || 'unknown',
+     message: `Error in order-complete: ${error instanceof Error ? error.message : String(error)}`
+   });
+   
+   // Get language from request headers as fallback
+   let language = 'en';
+   const preferredLanguage = req.headers.get('x-preferred-language');
+   if (preferredLanguage) {
+     language = preferredLanguage;
+   }
+   
+   return NextResponse.json({ 
+     success: false, 
+     message: language === 'id' ? 'Gagal memproses pesanan' : 'Failed to process order',
+     error: process.env.NODE_ENV === 'development' ? String(error) : 'Server error'
+   }, { status: 500 });
+ }
 }
