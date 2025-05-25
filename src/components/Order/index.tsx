@@ -1,3 +1,4 @@
+//E:\kp\kp normal\kp normal\src\components\Order\index.tsx
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -271,42 +272,91 @@ const handleSubmit = async (e: React.FormEvent) => {
           </p>
         </motion.div>
       
-        {/* REMOVED: Alert Messages from here, they will be displayed below the Order Now button */}
-        
-        {/* Show success message and payment button instead of auto-redirect */}
+        {/* Show success message and payment instructions */}
         {paymentUrl && (
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <div className="p-4 text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300 border-l-4 border-green-500 rounded-r-lg flex items-center mb-4">
+            {/* Success Message */}
+            <div className="p-4 text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300 border-l-4 border-green-500 rounded-r-lg flex items-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               {successMessage}
             </div>
+
+            {/* Email Check Instructions */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-700 mb-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {language === 'id' ? 'Periksa Email Anda' : 'Check Your Email'}
+                  </h3>
+                  <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <p>
+                      {language === 'id' 
+                        ? `Kami telah mengirim link pembayaran dan informasi pesanan ke:`
+                        : `We have sent the payment link and order information to:`
+                      }
+                    </p>
+                    <p className="font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border">
+                      {customerEmail}
+                    </p>
+                    <div className="mt-4 space-y-1">
+                      <p className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === 'id' ? 'Cek folder inbox email Anda' : 'Check your email inbox'}
+                      </p>
+                      <p className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === 'id' ? 'Jika tidak ada, periksa folder spam/junk' : 'If not found, check spam/junk folder'}
+                      </p>
+                      <p className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {language === 'id' ? 'Email berisi link pembayaran dan detail pesanan' : 'Email contains payment link and order details'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             
+            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <motion.button
                 onClick={() => window.location.href = '/'}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-6 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 rounded-lg shadow font-medium transition duration-300 flex justify-center items-center space-x-2"
+                className="px-6 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 rounded-lg shadow font-medium transition duration-300 flex justify-center items-center space-x-2"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
                 </svg>
-                <span>{t.messages.payLater}</span>
+                <span>{language === 'id' ? 'Kembali ke Beranda' : 'Back to Homepage'}</span>
               </motion.button>
               
               <motion.button
                 onClick={handlePaymentRedirect}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-6 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow font-medium transition duration-300 flex justify-center items-center space-x-2"
+                className="px-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg shadow font-medium transition duration-300 flex justify-center items-center space-x-2"
               >
-                <span>{t.messages.continueToPayment}</span>
+                <span>{language === 'id' ? 'Bayar Sekarang' : 'Pay Now'}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
@@ -484,7 +534,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
                 </motion.div>
                 
-                {/* Submit Button with animation */}
+{/* Submit Button with animation */}
                 <motion.button
                   type="submit"
                   disabled={loading}

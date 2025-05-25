@@ -1,3 +1,4 @@
+//E:\kp\kp normal\kp normal\src\components\Wali\modals\ColumnSettingsModal.tsx
 import { useState, useEffect } from "react";
 
 type ColumnSettings = {
@@ -10,6 +11,7 @@ type ColumnSettings = {
   note: boolean;
   invoice: boolean;
   result: boolean;
+  downloadPassword: boolean; // Tambahkan ini
   actions: boolean;
 };
 
@@ -39,6 +41,7 @@ export default function ColumnSettingsModal({
     note: false,
     invoice: false,
     result: false,
+    downloadPassword: false, // Tambahkan ini
     actions: false
   });
   
@@ -67,6 +70,7 @@ export default function ColumnSettingsModal({
       note: selected,
       invoice: selected,
       result: selected,
+      downloadPassword: selected, // Tambahkan ini
       actions: selected
     };
     setTempSettings(updatedSettings);
@@ -125,7 +129,7 @@ export default function ColumnSettingsModal({
         
         {/* Select All Option */}
         <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 mb-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 font-bold">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {areAllSelected() ? "Batal Pilih Semua" : "Pilih Semua"}
           </label>
           <div className="flex items-center">
@@ -260,6 +264,21 @@ export default function ColumnSettingsModal({
                 type="checkbox"
                 checked={tempSettings.result}
                 onChange={() => handleToggle('result')}
+                className="h-4 w-4 text-blue-600 rounded border-gray-300"
+              />
+            </div>
+          </div>
+          
+          {/* Tambahkan Download Password Column */}
+          <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Password Download
+            </label>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={tempSettings.downloadPassword}
+                onChange={() => handleToggle('downloadPassword')}
                 className="h-4 w-4 text-blue-600 rounded border-gray-300"
               />
             </div>

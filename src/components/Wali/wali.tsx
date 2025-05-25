@@ -22,32 +22,6 @@ import { useSortOrders } from './hooks/useSortOrders';
 import { useMobileDetection } from './hooks/useMobileDetection';
 import { useLocalStorage } from './hooks/useLocalStorage';
 
-// Add security check function
-const sanitizeDisplayData = (data: any): any => {
-  if (typeof data === 'string') {
-    return data
-      .replace(/<script[^>]*>.*?<\/script>/gi, '[SCRIPT_REMOVED]')
-      .replace(/<[^>]*>/g, '')
-      .replace(/javascript:/gi, '[JS_REMOVED]')
-      .replace(/vbscript:/gi, '[VBS_REMOVED]')
-      .replace(/on\w+\s*=/gi, '[EVENT_REMOVED]')
-      .replace(/&#\d+;/g, '') // Remove HTML entities
-      .replace(/%[0-9a-f]{2}/gi, '') // Remove URL encoded
-      .replace(/\x00-\x1f/g, ''); // Remove control characters
-  }
-  if (Array.isArray(data)) {
-    return data.map(sanitizeDisplayData);
-  }
-  if (typeof data === 'object' && data !== null) {
-    const sanitized: any = {};
-    for (const [key, value] of Object.entries(data)) {
-      sanitized[key] = sanitizeDisplayData(value);
-    }
-    return sanitized;
-  }
-  return data;
-};
-
 // Dynamically import components with loading fallbacks
 // These components are loaded only when needed and not in the initial JS bundle
 const DashboardHeader = dynamic(() => import('./components/DashboardHeader'), {
@@ -147,6 +121,7 @@ export default function AdminDashboard() {
     note: true,
     invoice: true,
     result: true,
+    downloadPassword: true,
     actions: true
   });
 
@@ -162,6 +137,7 @@ export default function AdminDashboard() {
     invoice: boolean;
     result: boolean;
     actions: boolean;
+    downloadPassword: boolean;
   };
   
   // Sorting and pagination
@@ -189,20 +165,6 @@ export default function AdminDashboard() {
     startIndex, 
     paginationButtons 
   } = usePagination(filteredOrders, currentPage, rowsPerPage, setCurrentPage);
-
-  // Security: Sanitize orders data when it loads
-  useEffect(() => {
-    if (orders.length > 0) {
-      const originalOrdersString = JSON.stringify(orders);
-      const sanitizedOrders = orders.map(order => sanitizeDisplayData(order));
-      const sanitizedOrdersString = JSON.stringify(sanitizedOrders);
-      
-      // Only update if there are actual changes to prevent infinite loop
-      if (originalOrdersString !== sanitizedOrdersString) {
-        setOrders(sanitizedOrders);
-      }
-    }
-  }, []); // Empty dependency to run only once
 
   // Reset current page when filters change
   useEffect(() => {
@@ -367,9 +329,7 @@ export default function AdminDashboard() {
   // Handle form data changes
   const handleEditFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    // Sanitize input before setting
-    const sanitizedValue = sanitizeDisplayData(value);
-    setEditFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+    setEditFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
   // Start editing an order
@@ -377,10 +337,10 @@ export default function AdminDashboard() {
     if (!permissions.canEditOrders) return;
     setEditingOrder(order.id);
     setEditFormData({
-      name: sanitizeDisplayData(order.name),
-      email: sanitizeDisplayData(order.email),
-      service_name: sanitizeDisplayData(order.service_name),
-      note: sanitizeDisplayData(order.note || '')
+      name: order.name,
+      email: order.email,
+      service_name: order.service_name,
+      note: order.note || ''
     });
   }, [permissions.canEditOrders]);
 
@@ -393,20 +353,19 @@ export default function AdminDashboard() {
   const startEditingNote = useCallback((order: Order) => {
     if (!permissions.canEditOrders) return;
     setEditingNote(order.id);
-    setNoteText(sanitizeDisplayData(order.note || ''));
+    setNoteText(order.note || '');
   }, [permissions.canEditOrders]);
 
   // Save note
   const saveNote = useCallback(async (orderId: string) => {
     if (!permissions.canEditOrders) return;
     try {
-      const sanitizedNote = sanitizeDisplayData(noteText);
       const response = await fetch('/api/update-note', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           orderId,
-          note: sanitizedNote
+          note: noteText
         }),
       });
       
@@ -419,7 +378,7 @@ export default function AdminDashboard() {
       setOrders(orders => orders.map(order => 
         order.id === orderId ? { 
           ...order, 
-          note: sanitizedNote
+          note: noteText
         } : order
       ));
       
@@ -588,20 +547,18 @@ export default function AdminDashboard() {
   const saveOrderChanges = useCallback(async (orderId: string) => {
     if (!permissions.canEditOrders) return;
     try {
-      const sanitizedFormData = {
-        name: sanitizeDisplayData(editFormData.name),
-        email: sanitizeDisplayData(editFormData.email),
-        service_name: sanitizeDisplayData(editFormData.service_name),
-        note: sanitizeDisplayData(editFormData.note),
-        updated_at: new Date().toISOString()
-      };
-
       const response = await fetch('/api/update-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           orderId,
-          data: sanitizedFormData
+          data: {
+            name: editFormData.name,
+            email: editFormData.email,
+            service_name: editFormData.service_name,
+            note: editFormData.note,
+            updated_at: new Date().toISOString()
+          }
         }),
       });
       
@@ -614,10 +571,10 @@ export default function AdminDashboard() {
       setOrders(orders => orders.map(order => 
         order.id === orderId ? { 
           ...order, 
-          name: sanitizedFormData.name,
-          email: sanitizedFormData.email,
-          service_name: sanitizedFormData.service_name,
-          note: sanitizedFormData.note
+          name: editFormData.name,
+          email: editFormData.email,
+          service_name: editFormData.service_name,
+          note: editFormData.note
         } : order
       ));
       
@@ -650,13 +607,12 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       
-      const sanitizedMessage = sanitizeDisplayData(message);
       const response = await fetch('/api/save-revision-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           orderId, 
-          revisionMessage: sanitizedMessage
+          revisionMessage: message
         }),
       });
       
@@ -670,7 +626,7 @@ export default function AdminDashboard() {
         order.id === orderId ? { 
           ...order, 
           status: 'pending_document' as OrderStatus,
-          revision_message: sanitizedMessage
+          revision_message: message
         } : order
       ));
       
@@ -737,9 +693,7 @@ export default function AdminDashboard() {
         throw error;
       }
       
-      // Sanitize data before setting
-      const sanitizedData = data ? data.map(order => sanitizeDisplayData(order)) : [];
-      setOrders(sanitizedData);
+      setOrders(data || []);
     } catch (err: any) {
       setError(err.message || "Gagal mengambil data pesanan");
     } finally {
@@ -775,316 +729,316 @@ export default function AdminDashboard() {
           (payload) => {
             if (payload.eventType === 'INSERT') {
               setOrders(currentOrders => {
-const newOrder = sanitizeDisplayData(payload.new as Order);
-               // Check if order already exists
-               if (currentOrders.some(order => order.id === newOrder.id)) {
-                 return currentOrders;
-               }
-               // Add new order at the beginning of the array
-               const updatedOrders = [newOrder, ...currentOrders];
-               return updatedOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-             });
-           }
-           
-           if (payload.eventType === 'UPDATE') {
-             setOrders(currentOrders => 
-               currentOrders.map(order => 
-                 order.id === payload.new.id ? sanitizeDisplayData(payload.new as Order) : order
-               )
-             );
-           }
-           
-           if (payload.eventType === 'DELETE') {
-             setOrders(currentOrders => 
-               currentOrders.filter(order => order.id !== payload.old.id)
-             );
-           }
-         }
-       )
-       .subscribe();
-   };
-   
-   // Delay setting up real-time subscription
-   const subscriptionTimer = setTimeout(() => {
-     setupRealtimeSubscription();
-   }, 500);
-   
-   // Cleanup function to unsubscribe when component unmounts
-   return () => {
-     clearTimeout(subscriptionTimer);
-     if (channel) {
-       supabaseClient.removeChannel(channel);
-     }
-   };
- }, []);
+                const newOrder = payload.new as Order;
+                // Check if order already exists
+                if (currentOrders.some(order => order.id === newOrder.id)) {
+                  return currentOrders;
+                }
+                // Add new order at the beginning of the array
+                const updatedOrders = [newOrder, ...currentOrders];
+                return updatedOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+              });
+            }
+            
+            if (payload.eventType === 'UPDATE') {
+              setOrders(currentOrders => 
+                currentOrders.map(order => 
+                  order.id === payload.new.id ? payload.new as Order : order
+                )
+              );
+            }
+            
+            if (payload.eventType === 'DELETE') {
+              setOrders(currentOrders => 
+                currentOrders.filter(order => order.id !== payload.old.id)
+              );
+            }
+          }
+        )
+        .subscribe();
+    };
+    
+    // Delay setting up real-time subscription
+    const subscriptionTimer = setTimeout(() => {
+      setupRealtimeSubscription();
+    }, 500);
+    
+    // Cleanup function to unsubscribe when component unmounts
+    return () => {
+      clearTimeout(subscriptionTimer);
+      if (channel) {
+        supabaseClient.removeChannel(channel);
+      }
+    };
+  }, []);
 
- // Loading state component to improve user experience
- const LoadingState = () => (
-   <div className="w-full p-4">
-     <div className="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mb-4"></div>
-     <div className="w-full h-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mb-4"></div>
-     <div className="grid grid-cols-1 gap-4">
-       {[...Array(5)].map((_, i) => (
-         <div key={i} className="w-full h-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>
-       ))}
-     </div>
-   </div>
- );
+  // Loading state component to improve user experience
+  const LoadingState = () => (
+    <div className="w-full p-4">
+      <div className="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mb-4"></div>
+      <div className="w-full h-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mb-4"></div>
+      <div className="grid grid-cols-1 gap-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="w-full h-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>
+        ))}
+      </div>
+    </div>
+  );
 
- return (
-   <AuthGuard requiredPermission="canViewDashboard">
-     <motion.div 
-       initial={{ opacity: 0 }}
-       animate={{ opacity: 1 }}
-       transition={{ duration: 0.5 }}
-       className="w-full p-2"
-     >
-       {/* Header */}
-       <DashboardHeader 
-         session={session}
-         permissions={permissions}
-         handleExport={handleExport}
-         filteredOrders={filteredOrders}
-         loading={loading}
-         isCardView={isCardView}
-         setIsCardView={setIsCardView}
-         setShowColumnSettings={setShowColumnSettings}
-         setShowAddAdminModal={setShowAddAdminModal}
-         handleLogout={handleLogout}
-       />
-       
-       {/* Error message */}
-       {error && (
-         <motion.div 
-           initial={{ opacity: 0, y: 10 }}
-           animate={{ opacity: 1, y: 0 }}
-           className={`${
-             error.includes("Berhasil") || 
-             error.includes("success") 
-               ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100' 
-               : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
-           } p-4 rounded mb-4`}
-         >
-           {error}
-           <button 
-             className="ml-2 text-sm underline" 
-             onClick={() => setError(null)}
-           >
-             Tutup
-           </button>
-         </motion.div>
-       )}
-       
-       {/* Conditionally render modals only when needed */}
-       {permissions.canAddAdmin && showAddAdminModal && (
-         <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-           <AddAdminModal 
-             isOpen={showAddAdminModal} 
-             onClose={() => setShowAddAdminModal(false)} 
-           />
-         </Suspense>
-       )}
-       
-       {/* Column Settings Modal - only load when visible */}
-       {showColumnSettings && (
-         <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-           <ColumnSettingsModal 
-             isOpen={showColumnSettings} 
-             onClose={() => setShowColumnSettings(false)}
-             visibleColumns={visibleColumns}
-             toggleColumnVisibility={toggleColumnVisibility}
-             updateMultipleColumns={updateMultipleColumns}
-           />
-         </Suspense>
-       )}
-       
-       {/* Status change confirmation modal - only load when needed */}
-       {pendingStatusChange && (
-         <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-           <StatusChangeModal 
-             pendingStatus={pendingStatusChange.newStatus}
-             onConfirm={confirmStatusChange}
-             onCancel={cancelStatusChange}
-           />
-         </Suspense>
-       )}
-       
-       {/* Delete confirmation modal - only load when needed */}
-       {pendingDelete && (
-         <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-           <DeleteOrderModal 
-             onConfirm={confirmDeleteOrder}
-             onCancel={cancelDeleteOrder}
-           />
-         </Suspense>
-       )}
+  return (
+    <AuthGuard requiredPermission="canViewDashboard">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full p-2"
+      >
+        {/* Header */}
+        <DashboardHeader 
+          session={session}
+          permissions={permissions}
+          handleExport={handleExport}
+          filteredOrders={filteredOrders}
+          loading={loading}
+          isCardView={isCardView}
+          setIsCardView={setIsCardView}
+          setShowColumnSettings={setShowColumnSettings}
+          setShowAddAdminModal={setShowAddAdminModal}
+          handleLogout={handleLogout}
+        />
+        
+        {/* Error message */}
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`${
+              error.includes("Berhasil") || 
+              error.includes("success") 
+                ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100' 
+                : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100'
+            } p-4 rounded mb-4`}
+          >
+            {error}
+            <button 
+              className="ml-2 text-sm underline" 
+              onClick={() => setError(null)}
+            >
+              Tutup
+            </button>
+          </motion.div>
+        )}
+        
+        {/* Conditionally render modals only when needed */}
+        {permissions.canAddAdmin && showAddAdminModal && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
+            <AddAdminModal 
+              isOpen={showAddAdminModal} 
+              onClose={() => setShowAddAdminModal(false)} 
+            />
+          </Suspense>
+        )}
+        
+        {/* Column Settings Modal - only load when visible */}
+        {showColumnSettings && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
+            <ColumnSettingsModal 
+              isOpen={showColumnSettings} 
+              onClose={() => setShowColumnSettings(false)}
+              visibleColumns={visibleColumns}
+              toggleColumnVisibility={toggleColumnVisibility}
+              updateMultipleColumns={updateMultipleColumns}
+            />
+          </Suspense>
+        )}
+        
+        {/* Status change confirmation modal - only load when needed */}
+        {pendingStatusChange && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
+            <StatusChangeModal 
+              pendingStatus={pendingStatusChange.newStatus}
+              onConfirm={confirmStatusChange}
+              onCancel={cancelStatusChange}
+            />
+          </Suspense>
+        )}
+        
+        {/* Delete confirmation modal - only load when needed */}
+        {pendingDelete && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
+            <DeleteOrderModal 
+              onConfirm={confirmDeleteOrder}
+              onCancel={cancelDeleteOrder}
+            />
+          </Suspense>
+        )}
 
-       {/* Delete Result File confirmation modal - only load when needed */}
-       {pendingDeleteResult && (
-         <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-           <DeleteResultModal 
-             onConfirm={confirmDeleteResultFile}
-             onCancel={cancelDeleteResultFile}
-           />
-         </Suspense>
-       )}
-       
-       {/* Filters Panel */}
-       <FiltersPanel 
-         statusFilter={statusFilter}
-         setStatusFilter={setStatusFilter}
-         serviceFilter={serviceFilter}
-         setServiceFilter={setServiceFilter}
-         dayFilter={dayFilter}
-         setDayFilter={setDayFilter}
-         monthFilter={monthFilter}
-         setMonthFilter={setMonthFilter}
-         yearFilter={yearFilter}
-         setYearFilter={setYearFilter}
-         searchQuery={searchQuery}
-         setSearchQuery={setSearchQuery}
-         resetFilters={resetFilters}
-         rowsPerPage={rowsPerPage}
-         setRowsPerPage={setRowsPerPage}
-         setCurrentPage={setCurrentPage}
-       />
+        {/* Delete Result File confirmation modal - only load when needed */}
+        {pendingDeleteResult && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
+            <DeleteResultModal 
+              onConfirm={confirmDeleteResultFile}
+              onCancel={cancelDeleteResultFile}
+            />
+          </Suspense>
+        )}
+        
+        {/* Filters Panel */}
+        <FiltersPanel 
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          serviceFilter={serviceFilter}
+          setServiceFilter={setServiceFilter}
+          dayFilter={dayFilter}
+          setDayFilter={setDayFilter}
+          monthFilter={monthFilter}
+          setMonthFilter={setMonthFilter}
+          yearFilter={yearFilter}
+          setYearFilter={setYearFilter}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          resetFilters={resetFilters}
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+        />
 
-       {/* Show loading state while initial data is loading */}
-       {loading ? (
-         <LoadingState />
-       ) : (
-         <>
-           {/* Mobile card view - conditionally render based on view preference */}
-           {isCardView ? (
-             <OrderCards 
-               paginatedOrders={paginatedOrders}
-               startIndex={startIndex}
-               expandedCardId={expandedCardId}
-               toggleCardExpansion={toggleCardExpansion}
-               editingOrder={editingOrder}
-               editFormData={editFormData}
-               handleEditFormChange={handleEditFormChange}
-               saveOrderChanges={saveOrderChanges}
-               cancelEditing={cancelEditing}
-               editingNote={editingNote}
-               noteText={noteText}
-               setNoteText={setNoteText}
-               saveNote={saveNote}
-               cancelEditingNote={cancelEditingNote}
-               startEditingNote={startEditingNote}
-               uploadingResultFor={uploadingResultFor}
-               startUploadingResultFileOnly={startUploadingResultFileOnly}
-               cancelUploadingResult={cancelUploadingResult}
-               handleResultFileUpload={handleResultFileUpload}
-               viewResultFile={viewResultFile}
-               handleDeleteResultFile={handleDeleteResultFile}
-               handleStatusChange={handleStatusChange}
-               startEditing={startEditing}
-               handleDeleteOrder={handleDeleteOrder}
-               viewDocument={viewDocument}
-               requestDocumentRevision={requestDocumentRevision}
-             />
-           ) : (
-             // Table view with dynamic columns
-             <OrdersTable 
-               paginatedOrders={paginatedOrders}
-               startIndex={startIndex}
-               visibleColumns={visibleColumns}
-               handleSort={handleSort}
-               sortField={sortField}
-               sortDirection={sortDirection}
-               editingOrder={editingOrder}
-               editFormData={editFormData}
-               handleEditFormChange={handleEditFormChange}
-               saveOrderChanges={saveOrderChanges}
-               cancelEditing={cancelEditing}
-               editingNote={editingNote}
-               noteText={noteText}
-               setNoteText={setNoteText}
-               saveNote={saveNote}
-               cancelEditingNote={cancelEditingNote}
-               startEditingNote={startEditingNote}
-               uploadingResultFor={uploadingResultFor}
-               startUploadingResultFileOnly={startUploadingResultFileOnly}
-               cancelUploadingResult={cancelUploadingResult}
-               handleResultFileUpload={handleResultFileUpload}
-               viewResultFile={viewResultFile}
-               handleDeleteResultFile={handleDeleteResultFile}
-               handleStatusChange={handleStatusChange}
-               startEditing={startEditing}
-               handleDeleteOrder={handleDeleteOrder}
-               viewDocument={viewDocument}
-               requestDocumentRevision={requestDocumentRevision}
-             />
-           )}
-         </>
-       )}
+        {/* Show loading state while initial data is loading */}
+        {loading ? (
+          <LoadingState />
+        ) : (
+          <>
+            {/* Mobile card view - conditionally render based on view preference */}
+            {isCardView ? (
+              <OrderCards 
+                paginatedOrders={paginatedOrders}
+                startIndex={startIndex}
+                expandedCardId={expandedCardId}
+                toggleCardExpansion={toggleCardExpansion}
+                editingOrder={editingOrder}
+                editFormData={editFormData}
+                handleEditFormChange={handleEditFormChange}
+                saveOrderChanges={saveOrderChanges}
+                cancelEditing={cancelEditing}
+                editingNote={editingNote}
+                noteText={noteText}
+                setNoteText={setNoteText}
+                saveNote={saveNote}
+                cancelEditingNote={cancelEditingNote}
+                startEditingNote={startEditingNote}
+                uploadingResultFor={uploadingResultFor}
+                startUploadingResultFileOnly={startUploadingResultFileOnly}
+                cancelUploadingResult={cancelUploadingResult}
+                handleResultFileUpload={handleResultFileUpload}
+                viewResultFile={viewResultFile}
+                handleDeleteResultFile={handleDeleteResultFile}
+                handleStatusChange={handleStatusChange}
+                startEditing={startEditing}
+                handleDeleteOrder={handleDeleteOrder}
+                viewDocument={viewDocument}
+                requestDocumentRevision={requestDocumentRevision}
+              />
+            ) : (
+              // Table view with dynamic columns
+              <OrdersTable 
+                paginatedOrders={paginatedOrders}
+                startIndex={startIndex}
+                visibleColumns={visibleColumns}
+                handleSort={handleSort}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                editingOrder={editingOrder}
+                editFormData={editFormData}
+                handleEditFormChange={handleEditFormChange}
+                saveOrderChanges={saveOrderChanges}
+                cancelEditing={cancelEditing}
+                editingNote={editingNote}
+                noteText={noteText}
+                setNoteText={setNoteText}
+                saveNote={saveNote}
+                cancelEditingNote={cancelEditingNote}
+                startEditingNote={startEditingNote}
+                uploadingResultFor={uploadingResultFor}
+                startUploadingResultFileOnly={startUploadingResultFileOnly}
+                cancelUploadingResult={cancelUploadingResult}
+                handleResultFileUpload={handleResultFileUpload}
+                viewResultFile={viewResultFile}
+                handleDeleteResultFile={handleDeleteResultFile}
+                handleStatusChange={handleStatusChange}
+                startEditing={startEditing}
+                handleDeleteOrder={handleDeleteOrder}
+                viewDocument={viewDocument}
+                requestDocumentRevision={requestDocumentRevision}
+              />
+            )}
+          </>
+        )}
 
-       {/* Responsive pagination controls - only render when we have multiple pages */}
-       {totalPages > 1 && (
-         <div className="flex flex-wrap items-center justify-center mt-6 gap-2">
-           <button
-             onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
-             disabled={currentPage === 1}
-             className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-           >
-             &lt;
-           </button>
+        {/* Responsive pagination controls - only render when we have multiple pages */}
+        {totalPages > 1 && (
+          <div className="flex flex-wrap items-center justify-center mt-6 gap-2">
+            <button
+              onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              &lt;
+            </button>
 
-           {/* On mobile, show fewer pagination buttons */}
-           <div className="flex gap-1">
-             {typeof window !== 'undefined' && window.innerWidth < 640 ? (
-               // Simplified pagination for mobile
-               <>
-                 <span className="px-3 py-1 text-sm">
-                   {currentPage} / {totalPages}
-                 </span>
-               </>
-             ) : (
-               // Full pagination for desktop
-               <>{paginationButtons}</>
-             )}
-           </div>
+            {/* On mobile, show fewer pagination buttons */}
+            <div className="flex gap-1">
+              {typeof window !== 'undefined' && window.innerWidth < 640 ? (
+                // Simplified pagination for mobile
+                <>
+                  <span className="px-3 py-1 text-sm">
+                    {currentPage} / {totalPages}
+                  </span>
+                </>
+              ) : (
+                // Full pagination for desktop
+                <>{paginationButtons}</>
+              )}
+            </div>
 
-           <button
-             onClick={() => setCurrentPage(currentPage < totalPages ? currentPage + 1 : totalPages)}
-             disabled={currentPage === totalPages}
-             className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-           >
-             &gt;
-           </button>
-         </div>
-       )}
+            <button
+              onClick={() => setCurrentPage(currentPage < totalPages ? currentPage + 1 : totalPages)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              &gt;
+            </button>
+          </div>
+        )}
 
-       {/* Display number of results - responsive text */}
-       <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
-         Menampilkan {paginatedOrders.length} dari {filteredOrders.length} pesanan
-       </div>
-       
-       {/* Revision Request Modal - only load when needed */}
-       {showRevisionModal && selectedOrderForRevision && (
-         <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-           <RevisionRequestModal
-             orderId={selectedOrderForRevision}
-             orderLanguage={selectedOrderLanguage} // Pass the language prop
-             onSave={saveRevisionRequest}
-             onCancel={cancelRevisionRequest}
-           />
-         </Suspense>
-       )}
+        {/* Display number of results - responsive text */}
+        <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
+          Menampilkan {paginatedOrders.length} dari {filteredOrders.length} pesanan
+        </div>
+        
+        {/* Revision Request Modal - only load when needed */}
+        {showRevisionModal && selectedOrderForRevision && (
+          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
+            <RevisionRequestModal
+              orderId={selectedOrderForRevision}
+              orderLanguage={selectedOrderLanguage} // Pass the language prop
+              onSave={saveRevisionRequest}
+              onCancel={cancelRevisionRequest}
+            />
+          </Suspense>
+        )}
 
-       {/* Floating action button for mobile - Quick actions */}
-       <div className="md:hidden fixed bottom-6 right-6">
-         <button
-           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-           className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
-         >
-           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-           </svg>
-         </button>
-       </div>
-     </motion.div>
-   </AuthGuard>
- );
+        {/* Floating action button for mobile - Quick actions */}
+        <div className="md:hidden fixed bottom-6 right-6">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        </div>
+      </motion.div>
+    </AuthGuard>
+  );
 }

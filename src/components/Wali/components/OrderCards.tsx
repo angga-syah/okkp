@@ -68,6 +68,17 @@ export default function OrderCards({
   viewDocument,
   requestDocumentRevision
 }: OrderCardsProps) {
+  
+  // Function to copy text to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // Optional: You can add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {paginatedOrders.map((order, index) => {
@@ -98,6 +109,18 @@ export default function OrderCards({
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {formatDate(order.created_at)}
                 </div>
+                
+                {/* Show download password in summary if result file exists */}
+                {order.result_file_path && order.download_password && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <span className="inline-flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      Password: {order.download_password}
+                    </span>
+                  </div>
+                )}
               </div>
               
               <div className="flex flex-col items-end">
@@ -333,6 +356,31 @@ export default function OrderCards({
                         )}
                       </div>
                     </div>
+                    
+                    {/* Download Password Section - Tambahkan ini */}
+                    {order.download_password && (
+                      <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                        <label className="block text-xs font-medium text-yellow-800 dark:text-yellow-300 mb-2">
+                          Password Download Customer
+                        </label>
+                        <div className="flex items-center justify-between">
+                          <code className="bg-white dark:bg-gray-800 px-3 py-2 rounded text-sm font-mono border border-yellow-300 dark:border-yellow-700 flex-1 mr-2">
+                            {order.download_password}
+                          </code>
+                          <button
+                            onClick={() => copyToClipboard(order.download_password || '')}
+                            className="p-2 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-200 hover:bg-yellow-100 dark:hover:bg-yellow-800/30 rounded transition-colors"
+                            title="Copy password">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                        </div>
+                        <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                          Password ini akan dikirim ke email customer untuk mengunduh file hasil
+                        </p>
+                      </div>
+                    )}
                     
                     <div>
                       <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">

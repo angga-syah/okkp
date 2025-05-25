@@ -103,6 +103,18 @@ export default function OrdersTable({
   viewDocument,
   requestDocumentRevision
 }: OrdersTableProps) {
+  
+  // Function to copy text to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // Optional: You can add a toast notification here
+      console.log('Password copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
@@ -158,6 +170,10 @@ export default function OrdersTable({
               
               {visibleColumns.result && (
                 <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-24">Hasil Layanan</th>
+              )}
+              
+              {visibleColumns.downloadPassword && (
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">Password Download</th>
               )}
               
               {visibleColumns.actions && (
@@ -380,6 +396,29 @@ export default function OrdersTable({
                   </td>
                 )}
                 
+                {visibleColumns.downloadPassword && (
+                  <td className="px-3 py-3 text-sm">
+                    {order.download_password ? (
+                      <div className="flex items-center space-x-2">
+                        <code className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 px-2 py-1 rounded text-xs font-mono text-yellow-800 dark:text-yellow-300">
+                          {order.download_password}
+                        </code>
+                        <button
+                          onClick={() => copyToClipboard(order.download_password || '')}
+                          className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-200 hover:bg-yellow-100 dark:hover:bg-yellow-800/30 rounded transition-colors"
+                          title="Copy password"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">-</span>
+                    )}
+                  </td>
+                )}
+                
                 {visibleColumns.actions && (
                   <td className="px-3 py-3 text-sm">
                     <div className="flex flex-col gap-2">
@@ -451,4 +490,3 @@ export default function OrdersTable({
     </div>
   );
 }
-
