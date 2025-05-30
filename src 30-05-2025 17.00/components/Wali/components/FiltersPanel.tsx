@@ -1,5 +1,6 @@
-// src/components/Wali/components/FiltersPanel.tsx - FIXED VERSION
+// src/components/Wali/components/FiltersPanel.tsx - ENHANCED UI VERSION
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // 🔧 FIXED: Updated interface to use proper React state setters
 interface FiltersPanelProps {
@@ -55,6 +56,9 @@ export default function FiltersPanel({
   setCurrentPage
 }: FiltersPanelProps) {
 
+  // 🔧 NEW: Show/hide filters state
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+
   // 🔧 FIXED: Dynamic status options from API
   const [availableStatuses, setAvailableStatuses] = useState<StatusOption[]>([]);
   const [availableServices, setAvailableServices] = useState<ServiceOption[]>([]);
@@ -67,7 +71,6 @@ export default function FiltersPanel({
 
   // 🔧 FIXED: Add status normalization function
   const normalizeStatus = useCallback((status: string): string => {
-    // Convert to lowercase and replace spaces with underscores
     return status.toLowerCase().replace(/\s+/g, '_');
   }, []);
 
@@ -136,7 +139,6 @@ export default function FiltersPanel({
       'cancelled': 'Dibatalkan',
       'payment_expired': 'Pembayaran Kedaluwarsa',
       
-      // Handle database variations
       'Pending Payment': 'Menunggu Pembayaran',
       'Payment Verified': 'Pembayaran Terverifikasi',
       'Document Verification': 'Verifikasi Dokumen',
@@ -216,7 +218,6 @@ export default function FiltersPanel({
       setLoadingStatuses(true);
       setStatusError('');
       
-      // 🔧 FIX: Try to fetch from new status endpoint
       const response = await fetch('/api/orders/statuses', {
         method: 'GET',
         headers: {
@@ -232,7 +233,6 @@ export default function FiltersPanel({
       const data = await response.json();
       
       if (data.success && Array.isArray(data.data)) {
-        // Map API response to status options with explicit typing
         const statusOptions: StatusOption[] = data.data.map((status: string) => {
           const defaultStatus = getDefaultStatuses().find((s: StatusOption) => s.value === status);
           return defaultStatus || {
@@ -253,7 +253,6 @@ export default function FiltersPanel({
     } catch (error) {
       console.warn('⚠️ Failed to fetch statuses from API:', error);
       
-      // 🔧 FIX: Fallback to default statuses
       const defaultStatuses = getDefaultStatuses();
       setAvailableStatuses(defaultStatuses);
       setStatusError('Menggunakan status default (API tidak tersedia)');
@@ -267,7 +266,6 @@ export default function FiltersPanel({
   // 🔧 FIXED: Fetch available services
   const fetchAvailableServices = useCallback(async (): Promise<void> => {
     try {
-      // 🔧 FIX: Try to fetch from services endpoint
       const response = await fetch('/api/orders/services', {
         method: 'GET',
         headers: {
@@ -296,7 +294,6 @@ export default function FiltersPanel({
     } catch (error) {
       console.warn('⚠️ Failed to fetch services from API:', error);
       
-      // 🔧 FIX: Fallback to default services
       const defaultServices = getDefaultServices();
       setAvailableServices(defaultServices);
       console.log('✅ Using default services:', defaultServices.length);
@@ -313,16 +310,14 @@ export default function FiltersPanel({
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
     
-    // Clear existing timer
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
     }
     
-    // Set new timer
     const timer = setTimeout(() => {
       setSearchQuery(value);
-      setCurrentPage(1); // Reset to first page when searching
-    }, 300); // 300ms debounce
+      setCurrentPage(1);
+    }, 300);
     
     setSearchDebounceTimer(timer);
   }, [searchDebounceTimer, setSearchQuery, setCurrentPage]);
@@ -403,7 +398,6 @@ export default function FiltersPanel({
     setDayFilter(value);
     setCurrentPage(1);
     
-    // Optional: Auto-set current month/year if day is selected but they're empty
     if (value && !monthFilter && !yearFilter) {
       const now = new Date();
       setMonthFilter((now.getMonth() + 1).toString().padStart(2, '0'));
@@ -415,7 +409,6 @@ export default function FiltersPanel({
     setMonthFilter(value);
     setCurrentPage(1);
     
-    // Optional: Auto-set current year if month is selected but year is empty
     if (value && !yearFilter) {
       setYearFilter(new Date().getFullYear().toString());
     }
@@ -465,239 +458,261 @@ export default function FiltersPanel({
     checked, 
     onChange 
   }) => (
-    <label className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded">
+    <label className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 p-2 rounded-lg transition-colors">
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="form-checkbox h-3 w-3 text-blue-600"
+        className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
       />
-      <span className="text-gray-700 dark:text-gray-300 text-xs">{label}</span>
+      <span className="text-gray-700 dark:text-gray-300 text-sm">{label}</span>
     </label>
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
-        {/* 🔧 FIXED: Enhanced search bar with real-time feedback */}
-        <div className="relative w-full md:w-1/3 mb-2 md:mb-0">
-          <input
-            type="text"
-            placeholder="Cari pesanan... (nama, email, layanan, invoice)"
-            value={searchInput}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full p-2 pl-8 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            maxLength={200}
-          />
-          <div className="absolute left-2 top-2.5 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-            </svg>
-          </div>
-          {/* 🔧 FIX: Show search status */}
-          {searchInput !== searchQuery && (
-            <div className="absolute right-2 top-2.5 text-blue-400">
-              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    <div>
+      {/* Enhanced Search and Filter Toggle Section */}
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 mb-6"
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="relative w-full md:w-1/2">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
               </svg>
             </div>
-          )}
-          {searchInput && (
-            <button
-              onClick={() => handleSearchChange('')}
-              className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600 focus:outline-none"
-              title="Clear search"
+            <input
+              type="text"
+              placeholder="Cari pesanan berdasarkan nama, email, layanan, atau invoice..."
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 backdrop-blur-sm"
+              maxLength={200}
+            />
+            {searchInput !== searchQuery && (
+              <div className="absolute right-12 top-3.5 text-blue-400">
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            )}
+            {searchInput && (
+              <button
+                onClick={() => handleSearchChange('')}
+                className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none"
+                title="Clear search"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          
+          <div className="flex gap-3 w-full md:w-auto">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg ${
+                showFilters 
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200' 
+                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 hover:shadow-xl'
+              }`}
+              type="button"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-            </button>
-          )}
+              {showFilters ? 'Sembunyikan Filter' : 'Tampilkan Filter'}
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleResetFilters}
+              className="flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:shadow-xl text-gray-700 dark:text-gray-200 px-6 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg"
+              type="button"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset Filter
+            </motion.button>
+          </div>
         </div>
-        
-        {/* Reset filters button */}
-        <button
-          onClick={handleResetFilters}
-          className="flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded text-sm w-full md:w-auto transition-colors"
-          title="Reset semua filter"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Reset Filter
-        </button>
-      </div>
+      </motion.div>
       
       {/* Status loading/error indicator */}
       {statusError && (
-        <div className="mb-4 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-yellow-700 dark:text-yellow-300 text-xs">
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl text-yellow-700 dark:text-yellow-300 text-sm">
           ⚠️ {statusError}
         </div>
       )}
       
-      {/* 🔧 FIXED: Enhanced filters grid - Responsive layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {/* 🔧 FIXED: Multi-select status filter */}
-        <div className="space-y-2 md:col-span-2 lg:col-span-1">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Status ({statusFilter.length} dipilih)
-            {loadingStatuses && (
-              <span className="ml-1 text-blue-500">
-                <svg className="inline animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-              </span>
-            )}
-          </label>
-          <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 p-2">
-            <div className="grid grid-cols-2 gap-1">
-              {availableStatuses.map((status: StatusOption) => (
-                <MultiSelectCheckbox
-                  key={status.value}
-                  label={status.label}
-                  checked={statusFilter.includes(status.value)}
-                  onChange={() => handleStatusChange(status.value)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        {/* 🔧 FIXED: Multi-select service filter */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Layanan ({serviceFilter.length} dipilih)
-          </label>
-          <div className="border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 p-2">
-            {availableServices.map((service: ServiceOption) => (
-              <MultiSelectCheckbox
-                key={service.value}
-                label={service.label}
-                checked={serviceFilter.includes(service.value)}
-                onChange={() => handleServiceChange(service.value)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Date filters */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Filter Tanggal
-            <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
-              {getDateFilterHelperText()}
-            </span>
-          </label>
-          <div className="flex space-x-1">
-            <select
-              value={dayFilter}
-              onChange={(e) => handleDayChange(e.target.value)}
-              className="w-1/3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              title="Pilih tanggal (opsional)"
-            >
-              <option value="">Tgl</option>
-              {days.map((day: string) => (
-                <option key={day} value={day}>{day}</option>
-              ))}
-            </select>
-            
-            <select
-              value={monthFilter}
-              onChange={(e) => handleMonthChange(e.target.value)}
-              className="w-1/3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              title="Pilih bulan (opsional)"
-            >
-              <option value="">Bln</option>
-              {months.map((month) => (
-                <option key={month.value} value={month.value}>{month.label}</option>
-              ))}
-            </select>
-            
-            <select
-              value={yearFilter}
-              onChange={(e) => handleYearChange(e.target.value)}
-              className="w-1/3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              title="Pilih tahun (opsional)"
-            >
-              <option value="">Thn</option>
-              {years.map((year: number) => (
-                <option key={year} value={year.toString()}>{year}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* 🔧 FIXED: Enhanced rows per page selector */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Baris per Halaman
-          </label>
-          <select
-            value={rowsPerPage}
-            onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
-            className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded p-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition-colors"
+      {/* Enhanced Collapsible Advanced Filters Section */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, y: -20 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
-            <option value={5}>5 baris</option>
-            <option value={10}>10 baris</option>
-            <option value={25}>25 baris</option>
-            <option value={50}>50 baris</option>
-            <option value={100}>100 baris</option>
-          </select>
-        </div>
-
-        {/* 🔧 FIX: Filter summary/info */}
-        <div className="lg:col-span-4 xl:col-span-1">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mt-5">
-            <div className="flex flex-wrap gap-2">
-              {statusFilter.length > 0 && (
-                <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
-                  Status ({statusFilter.length})
-                </span>
-              )}
-              {serviceFilter.length > 0 && (
-                <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
-                  Layanan ({serviceFilter.length})
-                </span>
-              )}
-              {searchQuery && (
-                <span className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
-                  Pencarian: {searchQuery}
-                </span>
-              )}
-              {(dayFilter || monthFilter || yearFilter) && (
-                <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs">
-                  Tanggal: {dayFilter && `${dayFilter}/`}{monthFilter && `${monthFilter}/`}{yearFilter}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* 🔧 FIX: Status legend (show available statuses with colors)
-          {!loadingStatuses && availableStatuses.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <details className="group">
-                <summary className="cursor-pointer text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  Legenda Status ({availableStatuses.length} tersedia)
-                  <span className="ml-1 inline-block transition-transform group-open:rotate-90">▶</span>
-                </summary>
-                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {availableStatuses.map((status: StatusOption) => (
-                    <div 
-                      key={status.value}
-                      className={`px-2 py-1 rounded text-xs ${status.color || 'bg-gray-100 text-gray-800'}`}
-                      title={status.description || status.label}
-                    >
-                      {status.label}
+            <div className="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                
+                {/* Enhanced Status Filter */}
+                <div className="space-y-3 md:col-span-2 lg:col-span-1">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    Status ({statusFilter.length} dipilih)
+                    {loadingStatuses && (
+                      <span className="ml-1 text-blue-500">
+                        <svg className="inline animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                      </span>
+                    )}
+                  </label>
+                  <div className="border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white/50 dark:bg-gray-800/50 p-4 backdrop-blur-sm">
+                    <div className="grid grid-cols-1 gap-2">
+                      {availableStatuses.map((status: StatusOption) => (
+                        <MultiSelectCheckbox
+                          key={status.value}
+                          label={status.label}
+                          checked={statusFilter.includes(status.value)}
+                          onChange={() => handleStatusChange(status.value)}
+                        />
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </details>
+                
+                {/* Enhanced Service Filter */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Layanan ({serviceFilter.length} dipilih)
+                  </label>
+                  <div className="border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white/50 dark:bg-gray-800/50 p-4 backdrop-blur-sm">
+                    {availableServices.map((service: ServiceOption) => (
+                      <MultiSelectCheckbox
+                        key={service.value}
+                        label={service.label}
+                        checked={serviceFilter.includes(service.value)}
+                        onChange={() => handleServiceChange(service.value)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Enhanced Date filters */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    Filter Tanggal
+                    <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      {getDateFilterHelperText()}
+                    </span>
+                  </label>
+                  <div className="flex space-x-2">
+                    <select
+                      value={dayFilter}
+                      onChange={(e) => handleDayChange(e.target.value)}
+                      className="w-1/3 border-2 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 rounded-xl p-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-purple-500/30 focus:border-purple-500 transition-all duration-300 backdrop-blur-sm"
+                      title="Pilih tanggal (opsional)"
+                    >
+                      <option value="">Tgl</option>
+                      {days.map((day: string) => (
+                        <option key={day} value={day}>{day}</option>
+                      ))}
+                    </select>
+                    
+                    <select
+                      value={monthFilter}
+                      onChange={(e) => handleMonthChange(e.target.value)}
+                      className="w-1/3 border-2 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 rounded-xl p-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-purple-500/30 focus:border-purple-500 transition-all duration-300 backdrop-blur-sm"
+                      title="Pilih bulan (opsional)"
+                    >
+                      <option value="">Bln</option>
+                      {months.map((month) => (
+                        <option key={month.value} value={month.value}>{month.label}</option>
+                      ))}
+                    </select>
+                    
+                    <select
+                      value={yearFilter}
+                      onChange={(e) => handleYearChange(e.target.value)}
+                      className="w-1/3 border-2 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 rounded-xl p-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-purple-500/30 focus:border-purple-500 transition-all duration-300 backdrop-blur-sm"
+                      title="Pilih tahun (opsional)"
+                    >
+                      <option value="">Thn</option>
+                      {years.map((year: number) => (
+                        <option key={year} value={year.toString()}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Enhanced rows per page selector */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                    Baris per Halaman
+                  </label>
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+                    className="w-full border-2 border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-300 backdrop-blur-sm"
+                  >
+                    <option value={5}>5 baris</option>
+                    <option value={10}>10 baris</option>
+                    <option value={25}>25 baris</option>
+                    <option value={50}>50 baris</option>
+                    <option value={100}>100 baris</option>
+                  </select>
+                </div>
+
+                {/* Filter summary/info */}
+                <div className="lg:col-span-4 xl:col-span-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-5">
+                    <div className="flex flex-wrap gap-2">
+                      {statusFilter.length > 0 && (
+                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                          Status ({statusFilter.length})
+                        </span>
+                      )}
+                      {serviceFilter.length > 0 && (
+                        <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs">
+                          Layanan ({serviceFilter.length})
+                        </span>
+                      )}
+                      {searchQuery && (
+                        <span className="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
+                          Pencarian: {searchQuery}
+                        </span>
+                      )}
+                      {(dayFilter || monthFilter || yearFilter) && (
+                        <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs">
+                          Tanggal: {dayFilter && `${dayFilter}/`}{monthFilter && `${monthFilter}/`}{yearFilter}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          )} */}
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

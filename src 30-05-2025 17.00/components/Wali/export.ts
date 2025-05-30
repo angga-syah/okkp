@@ -25,14 +25,14 @@ interface Order {
 // Enhanced service pricing with proper error handling and validation
 const getServicePrice = (serviceName: string | null | undefined): number => {
   if (!serviceName || typeof serviceName !== 'string') {
-    console.warn('❌ Invalid service name provided:', serviceName);
+    console.warn('Invalid service name provided:', serviceName);
     return 0;
   }
   
   const normalizedServiceName = serviceName.trim();
   
   if (!normalizedServiceName) {
-    console.warn('❌ Empty service name after trimming');
+    console.warn('Empty service name after trimming');
     return 0;
   }
   
@@ -67,16 +67,16 @@ const getServicePrice = (serviceName: string | null | undefined): number => {
     
     if (lowerServiceName.includes('single')) {
       price = 5000000;
-      console.log('✅ Matched single entry service via partial match:', normalizedServiceName);
+      console.log('Matched single entry service via partial match:', normalizedServiceName);
     } else if (lowerServiceName.includes('multiple')) {
       price = 7000000;
-      console.log('✅ Matched multiple entry service via partial match:', normalizedServiceName);
+      console.log('Matched multiple entry service via partial match:', normalizedServiceName);
     }
   }
   
   // Log unknown services for debugging
   if (price === undefined) {
-    console.warn('❌ Unknown service name:', normalizedServiceName);
+    console.warn('Unknown service name:', normalizedServiceName);
     console.warn('Available services:', Object.keys(prices));
     return 0;
   }
@@ -98,7 +98,7 @@ const formatCurrency = (amount: number | null | undefined): string => {
       maximumFractionDigits: 0,
     }).format(amount);
   } catch (error) {
-    console.error('❌ Error formatting currency:', error);
+    console.error('Error formatting currency:', error);
     return `Rp ${amount.toLocaleString('id-ID')}`;
   }
 };
@@ -113,7 +113,7 @@ const formatDate = (dateString: string | null | undefined): string => {
     const date = new Date(dateString);
     
     if (isNaN(date.getTime())) {
-      console.warn('❌ Invalid date string:', dateString);
+      console.warn('Invalid date string:', dateString);
       return 'Tanggal tidak valid';
     }
     
@@ -122,7 +122,7 @@ const formatDate = (dateString: string | null | undefined): string => {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   } catch (error) {
-    console.error('❌ Error formatting date:', error);
+    console.error('Error formatting date:', error);
     return 'Error tanggal';
   }
 };
@@ -132,7 +132,7 @@ const getDisplayStatus = (order: Order): string => {
   const status = order.status;
   
   if (!status || typeof status !== 'string') {
-    console.warn('❌ Invalid status for order:', order.id, status);
+    console.warn('Invalid status for order:', order.id, status);
     return 'Status Tidak Diketahui';
   }
   
@@ -178,7 +178,7 @@ const getDisplayStatus = (order: Order): string => {
     return statusMapping[matchingKey];
   }
   
-  console.warn('❌ Unknown status:', status, 'for order:', order.id);
+  console.warn('Unknown status:', status, 'for order:', order.id);
   
   return status.split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -187,43 +187,43 @@ const getDisplayStatus = (order: Order): string => {
 
 // 🔧 COMPLETELY FIXED: Order processing with proper array handling
 const processOrders = (orders: Order[]): Array<Record<string, any>> => {
-  console.log(`📊 processOrders called with ${orders?.length || 0} orders`);
+  console.log(`processOrders called with ${orders?.length || 0} orders`);
   
   // 🔧 FIX: Proper validation
   if (!orders) {
-    console.error('❌ Orders is null or undefined');
+    console.error('Orders is null or undefined');
     return [];
   }
   
   if (!Array.isArray(orders)) {
-    console.error('❌ Orders is not an array, type:', typeof orders);
+    console.error('Orders is not an array, type:', typeof orders);
     return [];
   }
   
   if (orders.length === 0) {
-    console.warn('⚠️ Orders array is empty');
+    console.warn('Orders array is empty');
     return [];
   }
   
-  console.log(`📊 Processing ${orders.length} orders for export...`);
+  console.log(`Processing ${orders.length} orders for export...`);
   
   // 🔧 FIX: Use proper map function without filtering nulls initially
   const processedOrders = orders.map((order, index) => {
     try {
       // 🔧 FIX: Better validation
       if (!order) {
-        console.warn(`❌ Invalid order at index ${index}: null/undefined`);
+        console.warn(`Invalid order at index ${index}: null/undefined`);
         return null;
       }
       
       if (typeof order !== 'object') {
-        console.warn(`❌ Invalid order at index ${index}: not an object, type: ${typeof order}`);
+        console.warn(`Invalid order at index ${index}: not an object, type: ${typeof order}`);
         return null;
       }
       
       // 🔧 FIX: Validate required fields
       if (!order.id) {
-        console.warn(`❌ Order at index ${index} missing ID`);
+        console.warn(`Order at index ${index} missing ID`);
         return null;
       }
       
@@ -254,7 +254,7 @@ const processOrders = (orders: Order[]): Array<Record<string, any>> => {
       
       // 🔧 FIX: Log processed order for debugging (only for first few orders)
       if (index < 3) {
-        console.log(`✅ Processed order ${index + 1}:`, {
+        console.log(`Processed order ${index + 1}:`, {
           id: processedOrder['ID Pesanan'],
           name: processedOrder['Nama Pelanggan'],
           service: processedOrder['Layanan'],
@@ -264,7 +264,7 @@ const processOrders = (orders: Order[]): Array<Record<string, any>> => {
       
       return processedOrder;
     } catch (error) {
-      console.error(`❌ Error processing order at index ${index}:`, error);
+      console.error(`Error processing order at index ${index}:`, error);
       console.error('Order data:', order);
       return {
         'No.': index + 1,
@@ -284,10 +284,10 @@ const processOrders = (orders: Order[]): Array<Record<string, any>> => {
     }
   });
   
-  console.log(`✅ Successfully processed ${validProcessedOrders.length} valid orders out of ${orders.length} total`);
+  console.log(`Successfully processed ${validProcessedOrders.length} valid orders out of ${orders.length} total`);
   
   if (validProcessedOrders.length === 0) {
-    console.error('❌ No valid orders after processing!');
+    console.error('No valid orders after processing!');
   }
   
   return validProcessedOrders;
@@ -296,8 +296,8 @@ const processOrders = (orders: Order[]): Array<Record<string, any>> => {
 // 🔧 COMPLETELY FIXED: Excel generation with comprehensive error handling
 export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise<boolean> => {
   try {
-    console.log('📊 ======= STARTING EXCEL EXPORT =======');
-    console.log('📊 Input validation:', {
+    console.log('======= STARTING EXCEL EXPORT =======');
+    console.log('Input validation:', {
       ordersType: typeof orders,
       isArray: Array.isArray(orders),
       length: orders?.length || 0,
@@ -306,42 +306,42 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
     
     // 🔧 FIXED: Enhanced input validation
     if (!orders) {
-      console.error('❌ Export failed: orders is null or undefined');
+      console.error('Export failed: orders is null or undefined');
       throw new Error('Tidak ada data untuk diekspor - data kosong');
     }
     
     if (!Array.isArray(orders)) {
-      console.error('❌ Export failed: orders is not an array, type:', typeof orders);
+      console.error('Export failed: orders is not an array, type:', typeof orders);
       throw new Error('Format data tidak valid - bukan array');
     }
     
     if (orders.length === 0) {
-      console.warn('❌ Export failed: orders array is empty');
+      console.warn('Export failed: orders array is empty');
       throw new Error('Tidak ada data untuk diekspor - array kosong');
     }
     
-    console.log(`📊 Starting Excel export with ${orders.length} orders`);
+    console.log(`Starting Excel export with ${orders.length} orders`);
     
     // 🔧 COMPLETELY FIXED: Process data with enhanced error handling
-    console.log('📊 Processing orders data...');
+    console.log('Processing orders data...');
     const exportData = processOrders(orders);
     
     if (!exportData || !Array.isArray(exportData)) {
-      console.error('❌ processOrders returned invalid data:', typeof exportData);
+      console.error('processOrders returned invalid data:', typeof exportData);
       throw new Error('Gagal memproses data untuk ekspor');
     }
     
     if (exportData.length === 0) {
-      console.error('❌ No valid orders after processing');
+      console.error('No valid orders after processing');
       console.error('Original orders sample:', orders.slice(0, 2));
       throw new Error('Tidak ada data valid untuk diekspor setelah diproses');
     }
     
-    console.log(`✅ Successfully processed ${exportData.length} valid orders for Excel export`);
-    console.log('📊 Sample processed data:', exportData[0]);
+    console.log(`Successfully processed ${exportData.length} valid orders for Excel export`);
+    console.log('Sample processed data:', exportData[0]);
     
     // Create workbook and worksheet
-    console.log('📊 Creating Excel workbook...');
+    console.log('Creating Excel workbook...');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Data Pesanan E-Visa');
     
@@ -367,7 +367,7 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
       { header: 'Bahasa', key: 'Bahasa', width: 10 }
     ];
     
-    console.log('📊 Setting up worksheet columns...');
+    console.log('Setting up worksheet columns...');
     worksheet.columns = columnDefinitions;
     
     // 🔧 COMPLETELY FIXED: Add rows with comprehensive error handling
@@ -381,7 +381,7 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
       exportData.forEach((rowData, index) => {
         try {
           if (!rowData || typeof rowData !== 'object') {
-            console.warn(`❌ Invalid row data at index ${index}:`, rowData);
+            console.warn(`Invalid row data at index ${index}:`, rowData);
             failedRows++;
             return;
           }
@@ -391,7 +391,7 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
           const hasRequiredKeys = requiredKeys.some(key => rowData[key] !== undefined);
           
           if (!hasRequiredKeys) {
-            console.warn(`❌ Row ${index} missing required keys:`, Object.keys(rowData));
+            console.warn(`Row ${index} missing required keys:`, Object.keys(rowData));
             failedRows++;
             return;
           }
@@ -404,20 +404,20 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
             console.log(`📝 Added ${addedRows} rows...`);
           }
         } catch (rowError) {
-          console.error(`❌ Error adding row ${index + 1}:`, rowError);
+          console.error(`Error adding row ${index + 1}:`, rowError);
           console.error('Row data that failed:', rowData);
           failedRows++;
         }
       });
       
-      console.log(`✅ Successfully added ${addedRows} rows to worksheet (${failedRows} failed)`);
+      console.log(`Successfully added ${addedRows} rows to worksheet (${failedRows} failed)`);
       
       if (addedRows === 0) {
         throw new Error('Tidak berhasil menambahkan data apapun ke Excel');
       }
       
     } catch (error) {
-      console.error('❌ Critical error adding rows:', error);
+      console.error('Critical error adding rows:', error);
       throw new Error('Gagal menambahkan data ke worksheet: ' + (error instanceof Error ? error.message : String(error)));
     }
     
@@ -499,10 +499,10 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
         }
       });
       
-      console.log('✅ Successfully applied styling to worksheet');
+      console.log('Successfully applied styling to worksheet');
       
     } catch (error) {
-      console.error('❌ Error applying styles:', error);
+      console.error('Error applying styles:', error);
       // Continue without styling - not critical
     }
     
@@ -555,10 +555,10 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
         const exportInfoValueCell = worksheet.getCell(`B${summaryRowNumber + 5}`);
         exportInfoValueCell.value = formatDate(new Date().toISOString());
         
-        console.log(`✅ Added summary: ${exportData.length} orders, total value: ${formatCurrency(totalValue)}`);
+        console.log(`Added summary: ${exportData.length} orders, total value: ${formatCurrency(totalValue)}`);
       }
     } catch (error) {
-      console.error('❌ Error adding summary:', error);
+      console.error('Error adding summary:', error);
       // Continue without summary - not critical
     }
     
@@ -572,7 +572,7 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
       const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9\-_]/g, '_');
       const finalFileName = `${sanitizedFileName}-${datePart}-${timePart}.xlsx`;
       
-      console.log('📁 Generating Excel file:', finalFileName);
+      console.log('Generating Excel file:', finalFileName);
       
       // Generate and download file
       const buffer = await workbook.xlsx.writeBuffer();
@@ -581,7 +581,7 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
         throw new Error('Generated Excel file is empty');
       }
       
-      console.log(`📁 Generated Excel file successfully, size: ${buffer.byteLength} bytes`);
+      console.log(`Generated Excel file successfully, size: ${buffer.byteLength} bytes`);
       
       const blob = new Blob([buffer], { 
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
@@ -594,18 +594,18 @@ export const exportToExcel = async (orders: Order[], fileName = 'data'): Promise
       saveAs(blob, finalFileName);
       
       console.log('🎉 ======= EXCEL EXPORT COMPLETED SUCCESSFULLY =======');
-      console.log(`📁 File: ${finalFileName}, Records: ${exportData.length}, Size: ${blob.size} bytes`);
+      console.log(`File: ${finalFileName}, Records: ${exportData.length}, Size: ${blob.size} bytes`);
       
       return true;
       
     } catch (error) {
-      console.error('❌ Error generating/saving file:', error);
+      console.error('Error generating/saving file:', error);
       throw new Error('Gagal menyimpan file Excel: ' + (error instanceof Error ? error.message : String(error)));
     }
     
   } catch (error) {
-    console.error('❌ ======= EXCEL EXPORT FAILED =======');
-    console.error('❌ Excel export error details:', error);
+    console.error('======= EXCEL EXPORT FAILED =======');
+    console.error('Excel export error details:', error);
     
     // Enhanced user-friendly error messages
     let userMessage = 'Terjadi kesalahan tidak diketahui';
@@ -641,7 +641,7 @@ export const validateOrdersData = (orders: any[]): { valid: Order[]; invalid: an
   const invalid: any[] = [];
   const errors: string[] = [];
   
-  console.log('📊 Validating orders data...');
+  console.log('Validating orders data...');
   
   if (!Array.isArray(orders)) {
     errors.push('Data bukan berupa array');
@@ -682,23 +682,23 @@ export const validateOrdersData = (orders: any[]): { valid: Order[]; invalid: an
     valid.push(order as Order);
   });
   
-  console.log(`✅ Validation complete: ${valid.length} valid, ${invalid.length} invalid`);
+  console.log(`Validation complete: ${valid.length} valid, ${invalid.length} invalid`);
   
   return { valid, invalid, errors };
 };
 
 // 🔧 ENHANCED: Export with validation wrapper
 export const exportToExcelWithValidation = async (orders: any[], fileName = 'data'): Promise<boolean> => {
-  console.log('📊 Starting export with validation...');
+  console.log('Starting export with validation...');
   
   const validation = validateOrdersData(orders);
   
   if (validation.errors.length > 0) {
-    console.warn('⚠️ Data validation warnings:', validation.errors.slice(0, 5)); // Show first 5 errors
+    console.warn('Data validation warnings:', validation.errors.slice(0, 5)); // Show first 5 errors
   }
   
   if (validation.valid.length === 0) {
-    console.error('❌ No valid orders to export');
+    console.error('No valid orders to export');
     const errorSummary = validation.errors.slice(0, 10).join('\n'); // Show first 10 errors
     if (typeof window !== 'undefined' && window.alert) {
       window.alert(`Tidak ada data valid untuk diekspor!\n\nError (${validation.errors.length} total):\n${errorSummary}${validation.errors.length > 10 ? '\n...' : ''}`);
@@ -706,7 +706,7 @@ export const exportToExcelWithValidation = async (orders: any[], fileName = 'dat
     return false;
   }
   
-  console.log(`✅ Exporting ${validation.valid.length} valid orders (${validation.invalid.length} invalid skipped)`);
+  console.log(`Exporting ${validation.valid.length} valid orders (${validation.invalid.length} invalid skipped)`);
   
   return exportToExcel(validation.valid, fileName);
 };

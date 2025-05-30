@@ -1,4 +1,4 @@
-// src/components/Wali/wali.tsx - FIXED VERSION
+// src/components/Wali/wali.tsx - ENHANCED UI VERSION
 "use client";
 
 import React, { useState, useCallback, Suspense, useMemo, useEffect } from 'react';
@@ -9,8 +9,7 @@ import { OrderStatus } from '@/lib/order';
 import { usePermissions } from '@/lib/Permissions';
 import { AuthGuard } from '@/components/Common/AuthGuard';
 import dynamic from 'next/dynamic';
-import { motion } from "framer-motion";
-
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import optimized hook
 import { useOptimizedOrders } from './hooks/useOptimizedOrders';
@@ -22,34 +21,121 @@ import { Order, StatusChangeRequest } from './types';
 import { useMobileDetection } from './hooks/useMobileDetection';
 import { useLocalStorage } from './hooks/useLocalStorage';
 
-// Dynamically import heavy components
+// Dynamically import heavy components with enhanced loading states
 const DashboardHeader = dynamic(() => import('./components/DashboardHeader'), {
-  loading: () => <div className="w-full h-16 bg-gray-100 dark:bg-gray-800 rounded animate-pulse"></div>,
+  loading: () => (
+    <div className="w-full h-20 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl animate-pulse shadow-lg">
+      <div className="flex justify-between items-center p-6">
+        <div className="flex gap-3">
+          <div className="w-24 h-10 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+          <div className="w-24 h-10 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+        </div>
+        <div className="w-20 h-10 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+      </div>
+    </div>
+  ),
   ssr: false
 });
 
 const FiltersPanel = dynamic(() => import('./components/FiltersPanel'), {
-  loading: () => <div className="w-full h-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mt-4"></div>,
+  loading: () => (
+    <div className="w-full h-32 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl animate-pulse mt-6 shadow-lg">
+      <div className="p-6">
+        <div className="flex gap-4">
+          <div className="w-1/3 h-12 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+          <div className="w-24 h-12 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+          <div className="w-24 h-12 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  ),
   ssr: false
 });
 
 const OrdersTable = dynamic(() => import('./components/OrdersTable'), {
-  loading: () => <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mt-4"></div>,
+  loading: () => (
+    <div className="w-full h-96 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl animate-pulse mt-6 shadow-lg">
+      <div className="p-6 space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-16 bg-gray-300 dark:bg-gray-600 rounded-xl animate-pulse"></div>
+        ))}
+      </div>
+    </div>
+  ),
   ssr: false
 });
 
 const OrderCards = dynamic(() => import('./components/OrderCards'), {
-  loading: () => <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mt-4"></div>,
+  loading: () => (
+    <div className="w-full space-y-4 mt-6">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="h-48 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl animate-pulse shadow-lg"></div>
+      ))}
+    </div>
+  ),
   ssr: false
 });
 
-// Modal components - load only when needed
-const StatusChangeModal = dynamic(() => import('./modals/StatusChangeModal'));
-const DeleteOrderModal = dynamic(() => import('./modals/DeleteOrderModal'));
-const DeleteResultModal = dynamic(() => import('./modals/DeleteResultModal'));
-const RevisionRequestModal = dynamic(() => import('./modals/RevisionRequestModal'));
-const AddAdminModal = dynamic(() => import('./components/addadmin'));
-const ColumnSettingsModal = dynamic(() => import('./modals/ColumnSettingsModal'));
+// Modal components - load only when needed with better fallbacks
+const StatusChangeModal = dynamic(() => import('./modals/StatusChangeModal'), {
+  loading: () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl animate-pulse">
+        <div className="w-64 h-32 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
+      </div>
+    </div>
+  )
+});
+
+const DeleteOrderModal = dynamic(() => import('./modals/DeleteOrderModal'), {
+  loading: () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl animate-pulse">
+        <div className="w-64 h-32 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
+      </div>
+    </div>
+  )
+});
+
+const DeleteResultModal = dynamic(() => import('./modals/DeleteResultModal'), {
+  loading: () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl animate-pulse">
+        <div className="w-64 h-32 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
+      </div>
+    </div>
+  )
+});
+
+const RevisionRequestModal = dynamic(() => import('./modals/RevisionRequestModal'), {
+  loading: () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl animate-pulse">
+        <div className="w-80 h-48 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
+      </div>
+    </div>
+  )
+});
+
+const AddAdminModal = dynamic(() => import('./components/addadmin'), {
+  loading: () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl animate-pulse">
+        <div className="w-96 h-64 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
+      </div>
+    </div>
+  )
+});
+
+const ColumnSettingsModal = dynamic(() => import('./modals/ColumnSettingsModal'), {
+  loading: () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-2xl animate-pulse">
+        <div className="w-80 h-96 bg-gray-300 dark:bg-gray-600 rounded-xl"></div>
+      </div>
+    </div>
+  )
+});
 
 //Utility imports
 const exportToExcelFunc = (): Promise<{ exportToExcel: (orders: Order[], fileName?: string) => Promise<boolean> }> => 
@@ -75,7 +161,7 @@ const AdminDashboard: React.FC = () => {
   const router = useRouter();
   const permissions = usePermissions();
   
-  // 🔧 FIXED: Change filter state to support multi-select (arrays)
+  // State management (keeping existing logic)
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [serviceFilter, setServiceFilter] = useState<string[]>([]);
   const [dayFilter, setDayFilter] = useState<string>('');
@@ -132,12 +218,11 @@ const AdminDashboard: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // 🔧 FIXED: Load filter state with array support
+  // [Keep all existing useEffect hooks and logic exactly as they were]
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
       
-      // Try to load from URL parameters first
       const url = new URL(window.location.href);
       
       const statusParam = url.searchParams.get('status');
@@ -151,11 +236,9 @@ const AdminDashboard: React.FC = () => {
       const sortParam = url.searchParams.get('sort');
       const orderParam = url.searchParams.get('order');
       
-      // Fall back to localStorage if URL params don't exist
       const savedFilters = localStorage.getItem('adminDashboardFilters');
       const filters = savedFilters ? JSON.parse(savedFilters) : {};
       
-      // 🔧 FIXED: Parse comma-separated values into arrays
       setStatusFilter(statusParam ? statusParam.split(',').filter(Boolean) : filters.statusFilter || []);
       setServiceFilter(serviceParam ? serviceParam.split(',').filter(Boolean) : filters.serviceFilter || []);
       setDayFilter(dayParam || filters.day || '');
@@ -167,7 +250,6 @@ const AdminDashboard: React.FC = () => {
       setSortField(sortParam || filters.sortField || 'created_at');
       setSortDirection((orderParam || filters.sortDirection || 'desc') as 'asc' | 'desc');
       
-      // Mark filters as initialized after loading
       setFilterInitialized(true);
     } catch (e) {
       console.error('Error loading saved filters:', e);
@@ -175,15 +257,13 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
-  // 🔧 FIXED: Handle filter state persistence with array support
   useEffect(() => {
     if (!filterInitialized) return;
     
-    // Use debounce to avoid excessive URL updates
     const debounceTimer = setTimeout(() => {
       const newFilters = {
-        statusFilter, // Now an array
-        serviceFilter, // Now an array
+        statusFilter,
+        serviceFilter,
         day: dayFilter,
         month: monthFilter,
         year: yearFilter,
@@ -194,10 +274,8 @@ const AdminDashboard: React.FC = () => {
         sortDirection
       };
       
-      // Save to localStorage
       localStorage.setItem('adminDashboardFilters', JSON.stringify(newFilters));
       
-      // Update URL parameters
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         
@@ -226,18 +304,17 @@ const AdminDashboard: React.FC = () => {
         
         window.history.replaceState({}, '', url.toString());
       }
-    }, 300); // 300ms debounce
+    }, 300);
     
     return () => clearTimeout(debounceTimer);
   }, [statusFilter, serviceFilter, dayFilter, monthFilter, yearFilter, 
       searchQuery, currentPage, rowsPerPage, sortField, sortDirection, filterInitialized]);
 
-  // Reset current page when filters change
   useEffect(() => {
     if (filterInitialized) setCurrentPage(1);
   }, [statusFilter, serviceFilter, dayFilter, monthFilter, yearFilter, searchQuery, filterInitialized]);
 
-  // 🔧 FIXED: Prepare parameters for optimized hook with array support
+  // Prepare parameters for optimized hook with array support
   const ordersParams = useMemo(() => ({
     page: currentPage,
     limit: rowsPerPage,
@@ -266,13 +343,12 @@ const AdminDashboard: React.FC = () => {
   const totalPages: number = pagination?.totalPages || 0;
   const startIndex: number = pagination ? (pagination.page - 1) * pagination.limit : 0;
 
-  // Handle form data changes
+  // [Keep all existing handlers and functions exactly as they were - only updating the UI rendering part]
   const handleEditFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setEditFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  // Start editing an order
   const startEditing = useCallback((order: Order): void => {
     if (!permissions.canEditOrders) return;
     setEditingOrder(order.id);
@@ -284,19 +360,16 @@ const AdminDashboard: React.FC = () => {
     });
   }, [permissions.canEditOrders]);
 
-  // Cancel editing
   const cancelEditing = useCallback((): void => {
     setEditingOrder(null);
   }, []);
 
-  // Start editing note
   const startEditingNote = useCallback((order: Order): void => {
     if (!permissions.canEditOrders) return;
     setEditingNote(order.id);
     setNoteText(order.note || '');
   }, [permissions.canEditOrders]);
 
-  // Save note
   const saveNote = useCallback(async (orderId: string): Promise<void> => {
     if (!permissions.canEditOrders) return;
     try {
@@ -313,25 +386,22 @@ const AdminDashboard: React.FC = () => {
       
       setEditingNote(null);
       toast.success('Catatan berhasil disimpan');
-      refetch(); // Refresh data
+      refetch();
     } catch (err) {
       toast.error('Gagal menyimpan catatan');
       console.error('Error saving note:', err);
     }
   }, [noteText, permissions.canEditOrders, refetch]);
 
-  // Cancel editing note
   const cancelEditingNote = useCallback((): void => {
     setEditingNote(null);
     setNoteText('');
   }, []);
 
-  // Multiple column update
   const updateMultipleColumns = useCallback((columnsSettings: ColumnVisibility): void => {
     setVisibleColumns(columnsSettings);
   }, [setVisibleColumns]);
 
-  // Toggle column visibility
   const toggleColumnVisibility = useCallback((columnKey: string): void => {
     setVisibleColumns((prev: ColumnVisibility) => ({
       ...prev,
@@ -339,7 +409,6 @@ const AdminDashboard: React.FC = () => {
     }));
   }, [setVisibleColumns]);
 
-  // Upload file related functions
   const startUploadingResultFileOnly = useCallback((orderId: string): void => {
     setUploadingResultFor(orderId);
   }, []);
@@ -348,7 +417,6 @@ const AdminDashboard: React.FC = () => {
     setUploadingResultFor(null);
   }, []);
 
-  // Handle status changes
   const handleStatusChange = useCallback((orderId: string, newStatus: OrderStatus): void => {
     if (!permissions.canChangeStatus) return;
     setPendingStatusChange({ orderId, newStatus });
@@ -373,7 +441,7 @@ const AdminDashboard: React.FC = () => {
       }
       
       toast.success("Status berhasil diperbarui");
-      refetch(); // Refresh data
+      refetch();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Failed to update status";
       toast.error(errorMessage);
@@ -389,7 +457,6 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
-  // Order deletion
   const handleDeleteOrder = useCallback((orderId: string): void => {
     if (!permissions.canDeleteOrders) return;
     setPendingDelete(orderId);
@@ -411,7 +478,7 @@ const AdminDashboard: React.FC = () => {
       }
       
       toast.success("Berhasil dihapus");
-      refetch(); // Refresh data
+      refetch();
       setPendingDelete(null);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Gagal menghapus pesanan";
@@ -423,7 +490,6 @@ const AdminDashboard: React.FC = () => {
     setPendingDelete(null);
   }, []);
 
-  // Result file deletion
   const handleDeleteResultFile = useCallback((orderId: string): void => {
     if (!permissions.canEditOrders) return;
     setPendingDeleteResult(orderId);
@@ -445,7 +511,7 @@ const AdminDashboard: React.FC = () => {
       }
       
       toast.success("File hasil berhasil dihapus");
-      refetch(); // Refresh data
+      refetch();
       setPendingDeleteResult(null);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Gagal menghapus file hasil";
@@ -457,7 +523,6 @@ const AdminDashboard: React.FC = () => {
     setPendingDeleteResult(null);
   }, []);
 
-  // Save order changes
   const saveOrderChanges = useCallback(async (orderId: string): Promise<void> => {
     if (!permissions.canEditOrders) return;
     try {
@@ -483,14 +548,13 @@ const AdminDashboard: React.FC = () => {
       
       setEditingOrder(null);
       toast.success("Berhasil diperbarui");
-      refetch(); // Refresh data
+      refetch();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Gagal memperbarui pesanan";
       toast.error(errorMessage);
     }
   }, [editFormData, permissions.canEditOrders, refetch]);
 
-  // Document revision request
   const [selectedOrderLanguage, setSelectedOrderLanguage] = useState<string>('en');
 
   const requestDocumentRevision = useCallback((orderId: string): void => {
@@ -523,7 +587,7 @@ const AdminDashboard: React.FC = () => {
       setShowRevisionModal(false);
       setSelectedOrderForRevision(null);
       toast.success("Permintaan revisi berhasil dikirim");
-      refetch(); // Refresh data
+      refetch();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Failed to send revision request";
       toast.error(errorMessage);
@@ -535,7 +599,6 @@ const AdminDashboard: React.FC = () => {
     setSelectedOrderForRevision(null);
   }, []);
 
-  // View document
   const viewDocument = useCallback((orderId: string): void => {
     try {
       window.open(`/api/documents/${orderId}?timestamp=${Date.now()}`, '_blank');
@@ -545,7 +608,6 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
-  // View result file
   const viewResultFile = useCallback(async (orderId: string): Promise<void> => {
     try {
       window.open(`/api/view-result/${orderId}`, '_blank');
@@ -555,25 +617,21 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
-  // Update UI after successful file upload
   const handleResultFileUpload = useCallback((orderId: string, filePath: string): void => {
-    // Exit edit mode if active
     if (editingOrder === orderId) {
       setEditingOrder(null);
     }
     
     toast.success("File berhasil diunggah");
-    refetch(); // Refresh data
+    refetch();
   }, [editingOrder, refetch]);
 
-  // Sorting handler
   const handleSort = useCallback((field: string): void => {
     setSortDirection(prev => field === sortField ? (prev === 'asc' ? 'desc' : 'asc') : field === 'created_at' ? 'desc' : 'asc');
     setSortField(field);
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   }, [sortField]);
 
-  // 🔧 FIXED: Reset filters function with array support
   const resetFilters = useCallback((): void => {
     setStatusFilter([]);
     setServiceFilter([]);
@@ -585,27 +643,21 @@ const AdminDashboard: React.FC = () => {
     setSortDirection('desc');
     setCurrentPage(1);
     
-    // Clear localStorage filters
     localStorage.removeItem('adminDashboardFilters');
-    
-    // Clear URL parameters
     router.replace(window.location.pathname, { scroll: false });
   }, [router]);
 
-  // 🔧 FIXED: Excel export handler with array support
   const handleExport = useCallback(async (): Promise<void> => {
     try {
       console.log('📊 Starting export with current filters...');
       
-      // 🔧 FIX: Use current filter state for export
       const exportParams = new URLSearchParams({
-        limit: '10000', // Get all filtered data
+        limit: '10000',
         page: '1',
         sortField,
         sortDirection,
       });
 
-      // 🔧 FIX: Apply all current filters to export with array support
       if (statusFilter.length > 0) {
         exportParams.set('status', statusFilter.join(','));
       }
@@ -656,14 +708,12 @@ const AdminDashboard: React.FC = () => {
     }
   }, [statusFilter, serviceFilter, searchQuery, dayFilter, monthFilter, yearFilter, sortField, sortDirection]);
 
-  // Logout handler - Keep filter preferences
   const handleLogout = useCallback((): void => {
     try {
       localStorage.setItem('logout-in-progress', 'true');
       localStorage.setItem('logout-event', Date.now().toString());
       localStorage.removeItem('user-state');
       sessionStorage.clear();
-      // Don't remove filter preferences - they should persist
       window.location.href = '/api/auth/logout?callbackUrl=' + encodeURIComponent('/wall-e?reason=manual_logout');
     } catch (error) {
       console.error('Logout error:', error);
@@ -671,12 +721,10 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
-  // Toggle card expansion for mobile view
   const toggleCardExpansion = useCallback((orderId: string): void => {
     setExpandedCardId(prev => prev === orderId ? null : orderId);
   }, []);
 
-  // Pagination navigation
   const handlePageChange = useCallback((newPage: number): void => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -702,56 +750,62 @@ const AdminDashboard: React.FC = () => {
 
     if (startPage > 1) {
       buttons.push(
-        <button
+        <motion.button
           key="first"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => handlePageChange(1)}
-          className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="px-4 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:shadow-lg transition-all duration-300 backdrop-blur-sm font-medium"
           type="button"
         >
           1
-        </button>
+        </motion.button>
       );
       
       if (startPage > 2) {
         buttons.push(
-          <span key="ellipsis1" className="px-3 py-1">...</span>
+          <span key="ellipsis1" className="px-3 py-2 text-gray-500">...</span>
         );
       }
     }
 
     for (let i = startPage; i <= endPage; i++) {
       buttons.push(
-        <button
+        <motion.button
           key={i}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 rounded border ${
+          className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
             currentPage === i
-              ? 'bg-blue-500 text-white'
-              : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+              : 'border-2 border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:shadow-lg backdrop-blur-sm'
           }`}
           type="button"
         >
           {i}
-        </button>
+        </motion.button>
       );
     }
 
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         buttons.push(
-          <span key="ellipsis2" className="px-3 py-1">...</span>
+          <span key="ellipsis2" className="px-3 py-2 text-gray-500">...</span>
         );
       }
       
       buttons.push(
-        <button
+        <motion.button
           key="last"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => handlePageChange(totalPages)}
-          className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="px-4 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:shadow-lg transition-all duration-300 backdrop-blur-sm font-medium"
           type="button"
         >
           {totalPages}
-        </button>
+        </motion.button>
       );
     }
 
@@ -760,267 +814,392 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <AuthGuard requiredPermission="canViewDashboard">
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full p-2"
-      >
-        {/* Header */}
-        <DashboardHeader 
-          session={session}
-          permissions={permissions}
-          handleExport={handleExport}
-          filteredOrders={orders}
-          loading={loading}
-          isCardView={isCardView}
-          setIsCardView={setIsCardView}
-          setShowColumnSettings={setShowColumnSettings}
-          setShowAddAdminModal={setShowAddAdminModal}
-          handleLogout={handleLogout}
-        />
-        
-        {/* Error message */}
-        {error && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 p-4 rounded mb-4"
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full p-4 lg:p-6"
+        >
+          {/* Enhanced Header with better animations */}
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
           >
-            {error}
-            <button 
-              className="ml-2 text-sm underline" 
-              onClick={() => refetch()}
-              type="button"
-            >
-              Coba Lagi
-            </button>
+            <DashboardHeader 
+              session={session}
+              permissions={permissions}
+              handleExport={handleExport}
+              filteredOrders={orders}
+              loading={loading}
+              isCardView={isCardView}
+              setIsCardView={setIsCardView}
+              setShowColumnSettings={setShowColumnSettings}
+              setShowAddAdminModal={setShowAddAdminModal}
+              handleLogout={handleLogout}
+            />
           </motion.div>
-        )}
-        
-        {/* Modals - conditionally rendered */}
-        {permissions.canAddAdmin && showAddAdminModal && (
-          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-            <AddAdminModal 
-              isOpen={showAddAdminModal} 
-              onClose={() => setShowAddAdminModal(false)} 
-            />
-          </Suspense>
-        )}
-        
-        {showColumnSettings && (
-          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-            <ColumnSettingsModal 
-              isOpen={showColumnSettings} 
-              onClose={() => setShowColumnSettings(false)}
-              visibleColumns={visibleColumns}
-              toggleColumnVisibility={toggleColumnVisibility}
-              updateMultipleColumns={updateMultipleColumns}
-            />
-          </Suspense>
-        )}
-        
-        {pendingStatusChange && (
-          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-            <StatusChangeModal 
-              pendingStatus={pendingStatusChange.newStatus}
-              onConfirm={confirmStatusChange}
-              onCancel={cancelStatusChange}
-            />
-          </Suspense>
-        )}
-        
-        {pendingDelete && (
-          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-            <DeleteOrderModal 
-              onConfirm={confirmDeleteOrder}
-              onCancel={cancelDeleteOrder}
-            />
-          </Suspense>
-        )}
-
-        {pendingDeleteResult && (
-          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-            <DeleteResultModal 
-              onConfirm={confirmDeleteResultFile}
-              onCancel={cancelDeleteResultFile}
-            />
-          </Suspense>
-        )}
-        
-        {/* 🔧 FIXED: Filters Panel with correct array props */}
-        <FiltersPanel 
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          serviceFilter={serviceFilter}
-          setServiceFilter={setServiceFilter}
-          dayFilter={dayFilter}
-          setDayFilter={setDayFilter}
-          monthFilter={monthFilter}
-          setMonthFilter={setMonthFilter}
-          yearFilter={yearFilter}
-          setYearFilter={setYearFilter}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          resetFilters={resetFilters}
-          rowsPerPage={rowsPerPage}
-          setRowsPerPage={handleRowsPerPageChange}
-          setCurrentPage={setCurrentPage}
-        />
-
-        {/* Loading state */}
-        {loading && (
-          <div className="flex justify-center p-12">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-500 dark:border-blue-400 rounded-full border-t-transparent"></div>
-          </div>
-        )}
-
-        {/* Orders content */}
-        {!loading && (
-          <>
-            {orders.length === 0 ? (
-              <div className="bg-gray-50 dark:bg-gray-800 p-6 text-center rounded">
-                <p className="text-gray-500 dark:text-gray-400">Tidak ada pesanan yang ditemukan</p>
+          
+          {/* Enhanced Error message */}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-6 rounded-2xl mb-6 shadow-xl backdrop-blur-sm"
+            >
+              <div className="flex items-center">
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </motion.div>
+                <div>
+                  <p className="font-semibold text-lg">{error}</p>
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="mt-2 text-sm bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-200 shadow-lg" 
+                    onClick={() => refetch()}
+                    type="button"
+                  >
+                    🔄 Coba Lagi
+                  </motion.button>
+                </div>
               </div>
-            ) : (
-              <>
-                {/* Mobile card view */}
-                {isCardView ? (
-                  <OrderCards 
-                    paginatedOrders={orders}
-                    startIndex={startIndex}
-                    expandedCardId={expandedCardId}
-                    toggleCardExpansion={toggleCardExpansion}
-                    editingOrder={editingOrder}
-                    editFormData={editFormData}
-                    handleEditFormChange={handleEditFormChange}
-                    saveOrderChanges={saveOrderChanges}
-                    cancelEditing={cancelEditing}
-                    editingNote={editingNote}
-                    noteText={noteText}
-                    setNoteText={setNoteText}
-                    saveNote={saveNote}
-                    cancelEditingNote={cancelEditingNote}
-                    startEditingNote={startEditingNote}
-                    uploadingResultFor={uploadingResultFor}
-                    startUploadingResultFileOnly={startUploadingResultFileOnly}
-                    cancelUploadingResult={cancelUploadingResult}
-                    handleResultFileUpload={handleResultFileUpload}
-                    viewResultFile={viewResultFile}
-                    handleDeleteResultFile={handleDeleteResultFile}
-                    handleStatusChange={handleStatusChange}
-                    startEditing={startEditing}
-                    handleDeleteOrder={handleDeleteOrder}
-                    viewDocument={viewDocument}
-                    requestDocumentRevision={requestDocumentRevision}
-                  />
-                ) : (
-                  // Table view
-                  <OrdersTable 
-                    paginatedOrders={orders}
-                    startIndex={startIndex}
-                    visibleColumns={visibleColumns}
-                    handleSort={handleSort}
-                    sortField={sortField}
-                    sortDirection={sortDirection}
-                    editingOrder={editingOrder}
-                    editFormData={editFormData}
-                    handleEditFormChange={handleEditFormChange}
-                    saveOrderChanges={saveOrderChanges}
-                    cancelEditing={cancelEditing}
-                    editingNote={editingNote}
-                    noteText={noteText}
-                    setNoteText={setNoteText}
-                    saveNote={saveNote}
-                    cancelEditingNote={cancelEditingNote}
-                    startEditingNote={startEditingNote}
-                    uploadingResultFor={uploadingResultFor}
-                    startUploadingResultFileOnly={startUploadingResultFileOnly}
-                    cancelUploadingResult={cancelUploadingResult}
-                    handleResultFileUpload={handleResultFileUpload}
-                    viewResultFile={viewResultFile}
-                    handleDeleteResultFile={handleDeleteResultFile}
-                    handleStatusChange={handleStatusChange}
-                    startEditing={startEditing}
-                    handleDeleteOrder={handleDeleteOrder}
-                    viewDocument={viewDocument}
-                    requestDocumentRevision={requestDocumentRevision}
-                  />
-                )}
-              </>
-            )}
-          </>
-        )}
-
-        {/* Pagination controls */}
-        {totalPages > 1 && (
-          <div className="flex flex-wrap items-center justify-center mt-6 gap-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={!hasPreviousPage}
-              className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              type="button"
-            >
-              &lt;
-            </button>
-
-            <div className="flex gap-1">
-              {typeof window !== 'undefined' && window.innerWidth < 640 ? (
-                <span className="px-3 py-1 text-sm">
-                  {currentPage} / {totalPages}
-                </span>
-              ) : (
-                <>{paginationButtons}</>
-              )}
-            </div>
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={!hasNextPage}
-              className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              type="button"
-            >
-              &gt;
-            </button>
-          </div>
-        )}
-
-        {/* Display results info */}
-        <div className="text-center mt-4 text-sm text-gray-500 dark:text-gray-400">
-          {pagination && (
-            <>
-              Menampilkan {orders.length} dari {pagination.total} pesanan
-              (Halaman {pagination.page} dari {pagination.totalPages})
-            </>
+            </motion.div>
           )}
-        </div>
-        
-        {/* Revision Request Modal */}
-        {showRevisionModal && selectedOrderForRevision && (
-          <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">Loading...</div>}>
-            <RevisionRequestModal
-              orderId={selectedOrderForRevision}
-              orderLanguage={selectedOrderLanguage}
-              onSave={saveRevisionRequest}
-              onCancel={cancelRevisionRequest}
-            />
-          </Suspense>
-        )}
+          
+          {/* Enhanced Modals with better loading states */}
+          <AnimatePresence>
+            {permissions.canAddAdmin && showAddAdminModal && (
+              <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+              </div>}>
+                <AddAdminModal 
+                  isOpen={showAddAdminModal} 
+                  onClose={() => setShowAddAdminModal(false)} 
+                />
+              </Suspense>
+            )}
+            
+            {showColumnSettings && (
+              <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <div className="animate-spin h-8 w-8 border-4 border-indigo-500 rounded-full border-t-transparent"></div>
+              </div>}>
+                <ColumnSettingsModal 
+                  isOpen={showColumnSettings} 
+                  onClose={() => setShowColumnSettings(false)}
+                  visibleColumns={visibleColumns}
+                  toggleColumnVisibility={toggleColumnVisibility}
+                  updateMultipleColumns={updateMultipleColumns}
+                />
+              </Suspense>
+            )}
+            
+            {pendingStatusChange && (
+              <Suspense>
+                <StatusChangeModal 
+                  pendingStatus={pendingStatusChange.newStatus}
+                  onConfirm={confirmStatusChange}
+                  onCancel={cancelStatusChange}
+                />
+              </Suspense>
+            )}
+            
+            {pendingDelete && (
+              <Suspense>
+                <DeleteOrderModal 
+                  onConfirm={confirmDeleteOrder}
+                  onCancel={cancelDeleteOrder}
+                />
+              </Suspense>
+            )}
 
-        {/* Floating action button for mobile */}
-        <div className="md:hidden fixed bottom-6 right-6">
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
-            type="button"
-            aria-label="Scroll to top"
+            {pendingDeleteResult && (
+              <Suspense>
+                <DeleteResultModal 
+                  onConfirm={confirmDeleteResultFile}
+                  onCancel={cancelDeleteResultFile}
+                />
+              </Suspense>
+            )}
+            
+            {showRevisionModal && selectedOrderForRevision && (
+              <Suspense>
+                <RevisionRequestModal
+                  orderId={selectedOrderForRevision}
+                  orderLanguage={selectedOrderLanguage}
+                  onSave={saveRevisionRequest}
+                  onCancel={cancelRevisionRequest}
+                />
+              </Suspense>
+            )}
+          </AnimatePresence>
+          
+          {/* Enhanced Filters Panel */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-            </svg>
-          </button>
-        </div>
-      </motion.div>
+            <FiltersPanel 
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              serviceFilter={serviceFilter}
+              setServiceFilter={setServiceFilter}
+              dayFilter={dayFilter}
+              setDayFilter={setDayFilter}
+              monthFilter={monthFilter}
+              setMonthFilter={setMonthFilter}
+              yearFilter={yearFilter}
+              setYearFilter={setYearFilter}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              resetFilters={resetFilters}
+              rowsPerPage={rowsPerPage}
+              setRowsPerPage={handleRowsPerPageChange}
+              setCurrentPage={setCurrentPage}
+            />
+          </motion.div>
+
+          {/* Enhanced Loading state */}
+          {loading && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center justify-center p-16"
+            >
+              <div className="relative">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="h-16 w-16 border-4 border-indigo-500/30 rounded-full border-t-indigo-500"
+                ></motion.div>
+                <motion.div 
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 h-16 w-16 border-4 border-purple-500/20 rounded-full border-t-purple-500"
+                ></motion.div>
+                <div className="absolute inset-0 h-16 w-16 animate-ping border-4 border-indigo-500/10 rounded-full"></div>
+              </div>
+              <motion.p 
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="mt-6 text-gray-600 dark:text-gray-400 text-lg font-medium"
+              >
+                ✨ Memuat data pesanan...
+              </motion.p>
+            </motion.div>
+          )}
+
+          {/* Enhanced Orders content */}
+          {!loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              {orders.length === 0 ? (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 p-16 text-center rounded-3xl shadow-2xl"
+                >
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 mx-auto text-gray-400 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </motion.div>
+                  <h3 className="text-2xl font-bold text-gray-600 dark:text-gray-300 mb-2">Tidak ada pesanan ditemukan</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-lg">Coba ubah kriteria pencarian atau filter untuk melihat data</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={resetFilters}
+                    className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                    type="button"
+                  >
+                    🔄 Reset Semua Filter
+                  </motion.button>
+                </motion.div>
+              ) : (
+                <>
+                  {/* Mobile card view */}
+                  {isCardView ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <OrderCards 
+                        paginatedOrders={orders}
+                        startIndex={startIndex}
+                        expandedCardId={expandedCardId}
+                        toggleCardExpansion={toggleCardExpansion}
+                        editingOrder={editingOrder}
+                        editFormData={editFormData}
+                        handleEditFormChange={handleEditFormChange}
+                        saveOrderChanges={saveOrderChanges}
+                        cancelEditing={cancelEditing}
+                        editingNote={editingNote}
+                        noteText={noteText}
+                        setNoteText={setNoteText}
+                        saveNote={saveNote}
+                        cancelEditingNote={cancelEditingNote}
+                        startEditingNote={startEditingNote}
+                        uploadingResultFor={uploadingResultFor}
+                        startUploadingResultFileOnly={startUploadingResultFileOnly}
+                        cancelUploadingResult={cancelUploadingResult}
+                        handleResultFileUpload={handleResultFileUpload}
+                        viewResultFile={viewResultFile}
+                        handleDeleteResultFile={handleDeleteResultFile}
+                        handleStatusChange={handleStatusChange}
+                        startEditing={startEditing}
+                        handleDeleteOrder={handleDeleteOrder}
+                        viewDocument={viewDocument}
+                        requestDocumentRevision={requestDocumentRevision}
+                      />
+                    </motion.div>
+                  ) : (
+                    // Table view
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <OrdersTable 
+                        paginatedOrders={orders}
+                        startIndex={startIndex}
+                        visibleColumns={visibleColumns}
+                        handleSort={handleSort}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        editingOrder={editingOrder}
+                        editFormData={editFormData}
+                        handleEditFormChange={handleEditFormChange}
+                        saveOrderChanges={saveOrderChanges}
+                        cancelEditing={cancelEditing}
+                        editingNote={editingNote}
+                        noteText={noteText}
+                        setNoteText={setNoteText}
+                        saveNote={saveNote}
+                        cancelEditingNote={cancelEditingNote}
+                        startEditingNote={startEditingNote}
+                        uploadingResultFor={uploadingResultFor}
+                        startUploadingResultFileOnly={startUploadingResultFileOnly}
+                        cancelUploadingResult={cancelUploadingResult}
+                        handleResultFileUpload={handleResultFileUpload}
+                        viewResultFile={viewResultFile}
+                        handleDeleteResultFile={handleDeleteResultFile}
+                        handleStatusChange={handleStatusChange}
+                        startEditing={startEditing}
+                        handleDeleteOrder={handleDeleteOrder}
+                        viewDocument={viewDocument}
+                        requestDocumentRevision={requestDocumentRevision}
+                      />
+                    </motion.div>
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {/* Enhanced Pagination controls */}
+          {totalPages > 1 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex flex-wrap items-center justify-center mt-8 gap-3"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={!hasPreviousPage}
+                className="px-4 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-sm font-medium"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </motion.button>
+
+              <div className="flex gap-2">
+                {typeof window !== 'undefined' && window.innerWidth < 640 ? (
+                  <div className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-bold shadow-lg">
+                    {currentPage} / {totalPages}
+                  </div>
+                ) : (
+                  <>{paginationButtons}</>
+                )}
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={!hasNextPage}
+                className="px-4 py-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 backdrop-blur-sm font-medium"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </motion.button>
+            </motion.div>
+          )}
+
+          {/* Enhanced Display results info */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="text-center mt-6"
+          >
+            {pagination && (
+              <div className="bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 rounded-2xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
+                <div className="text-gray-600 dark:text-gray-400 text-sm">
+                  Menampilkan <span className="font-bold text-indigo-600 dark:text-indigo-400">{orders.length}</span> dari{' '}
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">{pagination.total}</span> pesanan
+                  (Halaman <span className="font-bold">{pagination.page}</span> dari <span className="font-bold">{pagination.totalPages}</span>)
+                </div>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Enhanced Floating action button for mobile */}
+          <motion.div 
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 1 }}
+            className="md:hidden fixed bottom-6 right-6 z-40"
+          >
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-full p-4 shadow-2xl flex items-center justify-center transition-all duration-300"
+              type="button"
+              aria-label="Scroll to top"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      </div>
     </AuthGuard>
   );
 };

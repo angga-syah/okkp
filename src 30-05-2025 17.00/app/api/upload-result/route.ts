@@ -199,7 +199,7 @@ async function cleanupOldResultFiles(orderId: string): Promise<boolean> {
     });
     
     if (deleteResponse.ok) {
-      console.log('✅ Successfully cleaned up old result files via API');
+      console.log('Successfully cleaned up old result files via API');
       return true;
     } else {
       const errorData = await deleteResponse.json();
@@ -207,7 +207,7 @@ async function cleanupOldResultFiles(orderId: string): Promise<boolean> {
       
       // If no file found, that's ok - continue with upload
       if (errorData.error?.includes('No result file found')) {
-        console.log('📁 No existing file to delete, continuing...');
+        console.log('No existing file to delete, continuing...');
         return true;
       }
       
@@ -238,7 +238,7 @@ async function manualCleanupFiles(orderId: string): Promise<boolean> {
     }
     
     if (!currentOrder?.result_file_path) {
-      console.log('📁 No existing file path in database');
+      console.log('No existing file path in database');
       return true;
     }
     
@@ -253,7 +253,7 @@ async function manualCleanupFiles(orderId: string): Promise<boolean> {
       console.warn('⚠️ Storage deletion failed:', deleteError.message);
       // Don't fail the upload because of this
     } else {
-      console.log('✅ Successfully deleted old file from storage');
+      console.log('Successfully deleted old file from storage');
     }
     
     return true;
@@ -416,7 +416,7 @@ export async function POST(request: NextRequest) {
     const filename = `result_${sanitizedOrderId}_${timestamp}_${nanoTime}_${randomSuffix}_${userHash}${fileExtension}`;
     const filePath = `results/${sanitizedOrderId}/${filename}`;
     
-    console.log('📁 Generated unique file path:', filePath);
+    console.log('Generated unique file path:', filePath);
     
     // Convert file to buffer
     let fileBuffer: Buffer;
@@ -505,7 +505,7 @@ export async function POST(request: NextRequest) {
       uploadError = uploadResult.error;
       
       if (!uploadError) {
-        console.log('✅ File uploaded successfully');
+        console.log('File uploaded successfully');
         break;
       }
       
@@ -593,7 +593,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log('✅ Database updated and verified successfully');
+    console.log('Database updated and verified successfully');
     
     // Send email if requested
     if (shouldSendEmail && orderData.email) {
