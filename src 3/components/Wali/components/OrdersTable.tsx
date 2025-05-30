@@ -1,0 +1,558 @@
+// src/components/Wali/components/OrdersTable.tsx - ENHANCED VERSION
+"use client";
+
+import React, { useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { formatDate } from '../utils/formatters';
+import { StatusBadge } from '../status';
+import { OrderStatus, StatusSelector } from '@/lib/order';
+import ResultFileUploader from './ResultFileUploader';
+import type { Order, ColumnVisibility, FormChangeHandler } from '../types';
+
+interface OrdersTableProps {
+  paginatedOrders: Order[];
+  startIndex: number;
+  visibleColumns: ColumnVisibility;
+  handleSort: (field: string) => void;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+  editingOrder: string | null;
+  editFormData: {
+    name: string;
+    email: string;
+    service_name: string;
+    note: string;
+  };
+  handleEditFormChange: FormChangeHandler;
+  saveOrderChanges: (orderId: string) => Promise<void>;
+  cancelEditing: () => void;
+  editingNote: string | null;
+  noteText: string;
+  setNoteText: (text: string) => void;
+  saveNote: (orderId: string) => Promise<void>;
+  cancelEditingNote: () => void;
+  startEditingNote: (order: Order) => void;
+  uploadingResultFor: string | null;
+  startUploadingResultFileOnly: (orderId: string) => void;
+  cancelUploadingResult: () => void;
+  handleResultFileUpload: (orderId: string, filePath: string) => void;
+  viewResultFile: (orderId: string) => Promise<void>;
+  handleDeleteResultFile: (orderId: string) => void;
+  handleStatusChange: (orderId: string, newStatus: OrderStatus) => void;
+  startEditing: (order: Order) => void;
+  handleDeleteOrder: (orderId: string) => void;
+  viewDocument: (orderId: string) => void;
+  requestDocumentRevision: (orderId: string) => void;
+}
+
+// SortIndicator component
+interface SortIndicatorProps {
+  field: string;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+}
+
+const SortIndicator: React.FC<SortIndicatorProps> = ({ field, sortField, sortDirection }) => {
+  if (sortField !== field) {
+    return (
+      <span className="ml-1 inline-block text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      </span>
+    );
+  }
+  
+  if (sortDirection === 'asc') {
+    return (
+      <span className="ml-1 inline-block text-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+        </svg>
+      </span>
+    );
+  } else {
+    return (
+      <span className="ml-1 inline-block text-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </span>
+    );
+  }
+};
+
+const OrdersTable: React.FC<OrdersTableProps> = ({
+  paginatedOrders,
+  startIndex,
+  visibleColumns,
+  handleSort,
+  sortField,
+  sortDirection,
+  editingOrder,
+  editFormData,
+  handleEditFormChange,
+  saveOrderChanges,
+  cancelEditing,
+  editingNote,
+  noteText,
+  setNoteText,
+  saveNote,
+  cancelEditingNote,
+  startEditingNote,
+  uploadingResultFor,
+  startUploadingResultFileOnly,
+  cancelUploadingResult,
+  handleResultFileUpload,
+  viewResultFile,
+  handleDeleteResultFile,
+  handleStatusChange,
+  startEditing,
+  handleDeleteOrder,
+  viewDocument,
+  requestDocumentRevision
+}) => {
+  
+  // Function to copy text to clipboard
+  const copyToClipboard = useCallback(async (text: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      console.log('Password copied to clipboard');
+      // Optional: You can add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  }, []);
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-auto">
+          <thead className="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              {/* Dynamic columns based on visibility settings */}
+              {visibleColumns.number && (
+                <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
+                  No.
+                </th>
+              )}
+              
+              {visibleColumns.id && (
+                <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
+                  ID Pesanan
+                </th>
+              )}
+              
+              {visibleColumns.date && (
+                <th 
+                  scope="col" 
+                  className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 w-32"
+                  onClick={() => handleSort('created_at')}
+                >
+                  Tanggal
+                  <SortIndicator field="created_at" sortField={sortField} sortDirection={sortDirection} />
+                </th>
+              )}
+              
+              {visibleColumns.customer && (
+                <th 
+                  scope="col" 
+                  className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 w-48"
+                  onClick={() => handleSort('name')}
+                >
+                  Pelanggan
+                  <SortIndicator field="name" sortField={sortField} sortDirection={sortDirection} />
+                </th>
+              )}
+              
+              {visibleColumns.service && (
+                <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-56">
+                  Layanan
+                </th>
+              )}
+              
+              {visibleColumns.status && (
+                <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
+                  Status
+                </th>
+              )}
+              
+              {visibleColumns.note && (
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-48">
+                  Catatan
+                </th>
+              )}
+              
+              {visibleColumns.invoice && (
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-40">
+                  Invoice
+                </th>
+              )}
+              
+              {visibleColumns.result && (
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-40">
+                  Hasil Layanan
+                </th>
+              )}
+              
+              {visibleColumns.downloadPassword && (
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-40">
+                  Password Download
+                </th>
+              )}
+              
+              {visibleColumns.actions && (
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-64">
+                  Aksi
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {paginatedOrders.map((order, index) => (
+              <motion.tr 
+                key={order.id}
+                className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                {/* Dynamic cells based on visibility settings */}
+                {visibleColumns.number && (
+                  <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {startIndex + index + 1}
+                  </td>
+                )}
+                
+                {visibleColumns.id && (
+                  <td className="px-2 py-3 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-gray-100">
+                    <span title={order.id}>
+                      {order.id.slice(0, 8)}...
+                    </span>
+                  </td>
+                )}
+                
+                {visibleColumns.date && (
+                  <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    {formatDate(order.created_at)}
+                  </td>
+                )}
+                
+                {visibleColumns.customer && (
+                  <td className="px-3 py-3 text-sm text-gray-900 dark:text-gray-100">
+                    {editingOrder === order.id ? (
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="text"
+                          name="name"
+                          value={editFormData.name}
+                          onChange={handleEditFormChange}
+                          placeholder="Nama Pelanggan"
+                          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-3 py-2 w-full text-sm"
+                        />
+                        <input
+                          type="email"
+                          name="email"
+                          value={editFormData.email}
+                          onChange={handleEditFormChange}
+                          placeholder="Email Pelanggan"
+                          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-3 py-2 w-full text-sm"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{order.name}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate" title={order.email}>
+                          {order.email}
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                )}
+                
+                {visibleColumns.service && (
+                  <td className="px-2 py-3 text-sm text-gray-900 dark:text-gray-100">
+                    {editingOrder === order.id ? (
+                      <select
+                        name="service_name"
+                        value={editFormData.service_name}
+                        onChange={handleEditFormChange}
+                        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-2 py-1 w-full text-sm"
+                      >
+                        <option value="E-Visa Business Single Entry">E-Visa Business Single Entry</option>
+                        <option value="E-Visa Business Multiple Entry">E-Visa Business Multiple Entry</option>
+                      </select>
+                    ) : (
+                      <div className="text-xs" title={order.service_name}>
+                        {order.service_name.length > 30 
+                          ? `${order.service_name.substring(0, 30)}...`
+                          : order.service_name
+                        }
+                      </div>
+                    )}
+                  </td>
+                )}
+                
+                {visibleColumns.status && (
+                  <td className="px-2 py-3 whitespace-nowrap text-xs">
+                    <StatusBadge status={order.status} />
+                  </td>
+                )}
+                
+                {visibleColumns.note && (
+                  <td className="px-3 py-3 text-sm">
+                    {editingOrder === order.id ? (
+                      <textarea
+                        name="note"
+                        value={editFormData.note}
+                        onChange={handleEditFormChange}
+                        placeholder="Catatan..."
+                        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-3 py-2 w-full h-20 resize-none text-sm"
+                      />
+                    ) : editingNote === order.id ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          value={noteText}
+                          onChange={(e) => setNoteText(e.target.value)}
+                          placeholder="Catatan..."
+                          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded px-3 py-2 w-full h-20 resize-none text-sm"
+                        />
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => saveNote(order.id)}
+                            className="bg-green-500 hover:bg-green-600 text-white rounded px-3 py-1 text-xs transition-colors"
+                            type="button"
+                          >
+                            Simpan
+                          </button>
+                          <button
+                            onClick={cancelEditingNote}
+                            className="bg-gray-500 hover:bg-gray-600 text-white rounded px-3 py-1 text-xs transition-colors"
+                            type="button"
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={() => startEditingNote(order)} 
+                        className="min-h-[40px] cursor-pointer border border-gray-200 dark:border-gray-700 rounded p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            startEditingNote(order);
+                          }
+                        }}
+                      >
+                        {order.note || <span className="text-gray-400 italic">Klik untuk menambah catatan</span>}
+                      </div>
+                    )}
+                  </td>
+                )}
+                
+                {visibleColumns.invoice && (
+                  <td className="px-3 py-3 text-sm">
+                    {order.invoice_id ? (
+                      <div className="flex flex-col space-y-1">
+                        <span className="font-mono text-xs text-gray-500 dark:text-gray-400" title={order.invoice_id}>
+                          {order.invoice_id.length > 15 
+                            ? `${order.invoice_id.substring(0, 15)}...`
+                            : order.invoice_id
+                          }
+                        </span>
+                        {order.payment_url && (
+                          <a 
+                            href={order.payment_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            Tautan Pembayaran
+                          </a>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Belum Ada Invoice</span>
+                    )}
+                  </td>
+                )}
+                
+                {visibleColumns.result && (
+                  <td className="px-3 py-3 text-sm">
+                    {uploadingResultFor === order.id ? (
+                      <div className="flex flex-col gap-2">
+                        <ResultFileUploader 
+                          orderId={order.id} 
+                          onUploadComplete={(orderId, filePath) => {
+                            handleResultFileUpload(orderId, filePath);
+                            cancelUploadingResult();
+                          }} 
+                        />
+                        <button
+                          onClick={cancelUploadingResult}
+                          className="bg-gray-500 hover:bg-gray-600 text-white rounded px-3 py-1 text-xs transition-colors"
+                          type="button"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col space-y-1">
+                        {order.result_file_path ? (
+                          <>
+                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                              ✓ File tersedia
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              <button
+                                onClick={() => viewResultFile(order.id)}
+                                className="bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-200 rounded px-2 py-1 text-xs transition-colors"
+                                type="button"
+                              >
+                                Lihat
+                              </button>
+                              {order.status === 'completed' && (
+                                <>
+                                  <button
+                                    onClick={() => startUploadingResultFileOnly(order.id)}
+                                    className="bg-green-100 dark:bg-green-900 hover:bg-green-200 dark:hover:bg-green-800 text-green-800 dark:text-green-200 rounded px-2 py-1 text-xs transition-colors"
+                                    type="button"
+                                  >
+                                    Ganti
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteResultFile(order.id)}
+                                    className="bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200 rounded px-2 py-1 text-xs transition-colors"
+                                    type="button"
+                                  >
+                                    Hapus
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {order.status === 'completed' ? (
+                              <button
+                                onClick={() => startUploadingResultFileOnly(order.id)}
+                                className="bg-amber-100 dark:bg-amber-900 hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200 rounded px-3 py-1 text-xs transition-colors"
+                                type="button"
+                              >
+                                Unggah Hasil
+                              </button>
+                            ) : (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">-</span>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                )}
+                
+                {visibleColumns.downloadPassword && (
+                  <td className="px-3 py-3 text-sm">
+                    {order.download_password ? (
+                      <div className="flex items-center space-x-2">
+                        <code className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 px-2 py-1 rounded text-xs font-mono text-yellow-800 dark:text-yellow-300 max-w-[120px] truncate">
+                          {order.download_password}
+                        </code>
+                        <button
+                          onClick={() => copyToClipboard(order.download_password || '')}
+                          className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-200 hover:bg-yellow-100 dark:hover:bg-yellow-800/30 rounded transition-colors"
+                          title="Copy password"
+                          type="button"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">-</span>
+                    )}
+                  </td>
+                )}
+                
+                {visibleColumns.actions && (
+                  <td className="px-3 py-3 text-sm">
+                    <div className="flex flex-col gap-2">
+                      {editingOrder === order.id ? (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => saveOrderChanges(order.id)}
+                            className="bg-green-500 hover:bg-green-600 text-white rounded px-3 py-1 text-xs transition-colors"
+                            type="button"
+                          >
+                            Simpan
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            className="bg-gray-500 hover:bg-gray-600 text-white rounded px-3 py-1 text-xs transition-colors"
+                            type="button"
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <StatusSelector 
+                            order={order} 
+                            onChange={handleStatusChange}
+                          />
+                          
+                          <div className="flex flex-wrap gap-1">
+                            <button
+                              onClick={() => startEditing(order)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white rounded px-2 py-1 text-xs transition-colors"
+                              type="button"
+                            >
+                              Edit
+                            </button>
+                            
+                            <button
+                              onClick={() => handleDeleteOrder(order.id)}
+                              className="bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 text-xs transition-colors"
+                              type="button"
+                            >
+                              Hapus
+                            </button>
+                            
+                            {order.document_path && (
+                              <button
+                                onClick={() => viewDocument(order.id)}
+                                className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded px-2 py-1 text-xs transition-colors"
+                                type="button"
+                              >
+                                Dokumen
+                              </button>
+                            )}
+                            
+                            {(order.status === 'document_verification') && (
+                              <button
+                                onClick={() => requestDocumentRevision(order.id)}
+                                className="bg-amber-500 hover:bg-amber-600 text-white rounded px-2 py-1 text-xs transition-colors"
+                                type="button"
+                              >
+                                Revisi
+                              </button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                )}
+              </motion.tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default OrdersTable;
