@@ -1,0 +1,418 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Settings.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             Background="{DynamicResource MaterialDesignPaper}">
+
+    <UserControl.Resources>
+        <!-- Settings Category Card Template -->
+        <DataTemplate x:Key="SettingsCategoryTemplate">
+            <materialDesign:Card Margin="8" Padding="20" 
+                               materialDesign:ElevationAssist.Elevation="Dp2"
+                               Background="{DynamicResource MaterialDesignCardBackground}"
+                               Cursor="Hand">
+                <materialDesign:Card.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" 
+                                 Command="{Binding DataContext.NavigateToSettingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                 CommandParameter="{Binding}"/>
+                </materialDesign:Card.InputBindings>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Icon -->
+                    <materialDesign:PackIcon Grid.Row="0" 
+                                           Kind="{Binding IconKind}" 
+                                           Width="48" Height="48"
+                                           Foreground="{Binding IconColor}"
+                                           HorizontalAlignment="Center" Margin="0,0,0,16"/>
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="1" 
+                              Text="{Binding Title}" 
+                              Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                              HorizontalAlignment="Center" Margin="0,0,0,8"/>
+
+                    <!-- Description -->
+                    <TextBlock Grid.Row="2" 
+                              Text="{Binding Description}" 
+                              Style="{StaticResource MaterialDesignBody2TextBlock}"
+                              TextWrapping="Wrap" TextAlignment="Center"
+                              Opacity="0.8" Margin="0,0,0,16"/>
+
+                    <!-- Status/Info -->
+                    <Border Grid.Row="3" 
+                           Background="{Binding StatusColor}" 
+                           CornerRadius="12" Padding="8,4" 
+                           HorizontalAlignment="Center"
+                           Visibility="{Binding HasStatus, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="{Binding StatusText}" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  Foreground="White" FontWeight="Bold"/>
+                    </Border>
+                </Grid>
+
+                <!-- Hover Effect -->
+                <materialDesign:Card.Style>
+                    <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </materialDesign:Card.Style>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <!-- Quick Setting Item Template -->
+        <DataTemplate x:Key="QuickSettingTemplate">
+            <materialDesign:Card Margin="4" Padding="16" 
+                               materialDesign:ElevationAssist.Elevation="Dp1"
+                               Background="{DynamicResource MaterialDesignCardBackground}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Icon -->
+                    <materialDesign:PackIcon Grid.Column="0" 
+                                           Kind="{Binding IconKind}" 
+                                           Width="24" Height="24"
+                                           Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                    <!-- Setting Info -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Title}" 
+                                  Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                  FontWeight="Bold"/>
+                        <TextBlock Text="{Binding CurrentValue}" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  Opacity="0.8"/>
+                    </StackPanel>
+
+                    <!-- Control -->
+                    <ContentPresenter Grid.Column="2" 
+                                     Content="{Binding SettingControl}"
+                                     VerticalAlignment="Center"/>
+                </Grid>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <!-- Animation Storyboards -->
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                           From="0" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="SlideInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(TranslateTransform.Y)"
+                           From="30" To="0" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <UserControl.RenderTransform>
+        <TranslateTransform/>
+    </UserControl.RenderTransform>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" Margin="16,16,16,8" Padding="24" 
+                            materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <materialDesign:PackIcon Kind="Settings" Width="32" Height="32" 
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                               VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Text="Application Settings" 
+                                  Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                  Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Configure application preferences and system settings" 
+                              Style="{StaticResource MaterialDesignBody1TextBlock}"
+                              Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- Header Actions -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding RefreshSettingsCommand}"
+                            Margin="0,0,8,0" Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" VerticalAlignment="Center"/>
+                            <TextBlock Text="Refresh" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding ExportSettingsCommand}"
+                            Margin="0,0,8,0" Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Export" VerticalAlignment="Center"/>
+                            <TextBlock Text="Export" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Command="{Binding ImportSettingsCommand}"
+                            Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Import" VerticalAlignment="Center"/>
+                            <TextBlock Text="Import Settings" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- System Status -->
+        <materialDesign:Card Grid.Row="1" Margin="16,0,16,8" Padding="16"
+                            materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Database Status -->
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Database" Width="24" Height="24" 
+                                           Foreground="{Binding DatabaseStatus.StatusColor}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Database" 
+                              Style="{StaticResource MaterialDesignBody2TextBlock}"
+                              HorizontalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding DatabaseStatus.StatusText}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- Application Version -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Information" Width="24" Height="24" 
+                                           Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Version" 
+                              Style="{StaticResource MaterialDesignBody2TextBlock}"
+                              HorizontalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding ApplicationVersion}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- Last Backup -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Backup" Width="24" Height="24" 
+                                           Foreground="{Binding BackupStatus.StatusColor}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Last Backup" 
+                              Style="{StaticResource MaterialDesignBody2TextBlock}"
+                              HorizontalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding LastBackupTime, StringFormat='{0:dd/MM/yyyy}'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- System Performance -->
+                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Speedometer" Width="24" Height="24" 
+                                           Foreground="{Binding PerformanceStatus.StatusColor}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Performance" 
+                              Style="{StaticResource MaterialDesignBody2TextBlock}"
+                              HorizontalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding PerformanceStatus.StatusText}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Quick Settings -->
+        <materialDesign:Card Grid.Row="2" Margin="16,0,16,8" Padding="16"
+                            materialDesign:ElevationAssist.Elevation="Dp1">
+            <Expander Header="Quick Settings" IsExpanded="True">
+                <ItemsControl ItemsSource="{Binding QuickSettings}" 
+                             ItemTemplate="{StaticResource QuickSettingTemplate}"
+                             Margin="0,16,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="2" Columns="2"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Expander>
+        </materialDesign:Card>
+
+        <!-- Settings Categories -->
+        <ScrollViewer Grid.Row="3" Margin="16,0,16,16" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Section Header -->
+                <TextBlock Grid.Row="0" Text="Settings Categories" 
+                          Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                          Margin="8,0,0,16" Opacity="0.8"/>
+
+                <!-- Settings Categories Grid -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding SettingsCategories}"
+                             ItemTemplate="{StaticResource SettingsCategoryTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <!-- Apply slide-in animation to items -->
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <TranslateTransform/>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard Storyboard="{StaticResource SlideInAnimation}"/>
+                                </EventTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="4" Background="#80000000" 
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                            Value="0" IsIndeterminate="True" Width="60" Height="60"/>
+                <TextBlock Text="Loading settings..." 
+                          Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                          Foreground="White" Margin="0,16,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Settings Import/Export Dialog -->
+        <Grid Grid.RowSpan="4" Background="#80000000" 
+              Visibility="{Binding ShowImportExportDialog, Converter={StaticResource BoolToVisibilityConverter}}">
+            <materialDesign:Card MaxWidth="500" MaxHeight="400" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Padding="24" materialDesign:ElevationAssist.Elevation="Dp8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Dialog Header -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                        <TextBlock Text="{Binding ImportExportDialogTitle}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
+                        <TextBlock Text="Manage application settings backup and restore" 
+                                  Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                  Opacity="0.8"/>
+                    </StackPanel>
+
+                    <!-- Dialog Content -->
+                    <StackPanel Grid.Row="1" Spacing="16">
+                        <!-- Export Options -->
+                        <StackPanel Visibility="{Binding IsExportMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="Export Settings" 
+                                      Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                      FontWeight="Bold" Margin="0,0,0,8"/>
+                            
+                            <CheckBox Content="Database Connection Settings" 
+                                     IsChecked="{Binding ExportDatabaseSettings}" Margin="0,4"/>
+                            <CheckBox Content="Invoice Format Settings" 
+                                     IsChecked="{Binding ExportFormatSettings}" Margin="0,4"/>
+                            <CheckBox Content="Bank Account Information" 
+                                     IsChecked="{Binding ExportBankSettings}" Margin="0,4"/>
+                            <CheckBox Content="User Preferences" 
+                                     IsChecked="{Binding ExportUserSettings}" Margin="0,4"/>
+                            <CheckBox Content="Application Preferences" 
+                                     IsChecked="{Binding ExportAppSettings}" Margin="0,4"/>
+
+                            <TextBox Text="{Binding ExportFilePath, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Export File Path"
+                                    Margin="0,16,0,0"/>
+                        </StackPanel>
+
+                        <!-- Import Options -->
+                        <StackPanel Visibility="{Binding IsImportMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="Import Settings" 
+                                      Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                      FontWeight="Bold" Margin="0,0,0,8"/>
+                            
+                            <TextBox Text="{Binding ImportFilePath, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Import File Path"
+                                    Margin="0,0,0,16"/>
+
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                   Command="{Binding BrowseImportFileCommand}"
+                                   Content="Browse File" HorizontalAlignment="Left"/>
+
+                            <CheckBox Content="Overwrite existing settings" 
+                                     IsChecked="{Binding OverwriteExisting}" 
+                                     Margin="0,16,0,0"/>
+                            <CheckBox Content="Create backup before import" 
+                                     IsChecked="{Binding CreateBackupBeforeImport}" 
+                                     Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Dialog Actions -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                               HorizontalAlignment="Right" Margin="0,24,0,0">
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                               Command="{Binding CancelImportExportCommand}"
+                               Content="CANCEL" Margin="0,0,8,0"/>
+                        <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                               Command="{Binding ExecuteImportExportCommand}"
+                               Content="{Binding ImportExportButtonText}"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,347 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Reports.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             Background="{DynamicResource MaterialDesignPaper}">
+
+    <UserControl.Resources>
+        <!-- Report Category Card Template -->
+        <DataTemplate x:Key="ReportCategoryTemplate">
+            <materialDesign:Card Margin="8" Padding="20" 
+                               materialDesign:ElevationAssist.Elevation="Dp2"
+                               Background="{DynamicResource MaterialDesignCardBackground}"
+                               Cursor="Hand">
+                <materialDesign:Card.InputBindings>
+                    <MouseBinding MouseAction="LeftClick" 
+                                 Command="{Binding DataContext.NavigateToReportCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                 CommandParameter="{Binding}"/>
+                </materialDesign:Card.InputBindings>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Icon -->
+                    <materialDesign:PackIcon Grid.Row="0" 
+                                           Kind="{Binding IconKind}" 
+                                           Width="64" Height="64"
+                                           Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                           HorizontalAlignment="Center" Margin="0,0,0,16"/>
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="1" 
+                              Text="{Binding Title}" 
+                              Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                              HorizontalAlignment="Center" Margin="0,0,0,8"/>
+
+                    <!-- Description -->
+                    <TextBlock Grid.Row="2" 
+                              Text="{Binding Description}" 
+                              Style="{StaticResource MaterialDesignBody2TextBlock}"
+                              TextWrapping="Wrap" TextAlignment="Center"
+                              Opacity="0.8" Margin="0,0,0,16"/>
+
+                    <!-- Statistics -->
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Border Background="{DynamicResource PrimaryHueLightBrush}" 
+                               CornerRadius="12" Padding="8,4" Margin="0,0,8,0">
+                            <TextBlock Text="{Binding StatisticValue}" 
+                                      Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                      Foreground="White" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="{Binding StatisticLabel}" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  VerticalAlignment="Center" Opacity="0.8"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Hover Effect -->
+                <materialDesign:Card.Style>
+                    <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </materialDesign:Card.Style>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <!-- Quick Action Template -->
+        <DataTemplate x:Key="QuickActionTemplate">
+            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                   Command="{Binding DataContext.ExecuteQuickActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   CommandParameter="{Binding}"
+                   Margin="4" Padding="16,12" Height="80" Width="200">
+                <StackPanel HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="{Binding IconKind}" Width="24" Height="24" 
+                                           Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding Title}" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+
+        <!-- Animation Storyboards -->
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                           From="0" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="SlideInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(TranslateTransform.Y)"
+                           From="30" To="0" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <UserControl.RenderTransform>
+        <TranslateTransform/>
+    </UserControl.RenderTransform>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" Margin="16,16,16,8" Padding="24" 
+                            materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <materialDesign:PackIcon Kind="ChartBox" Width="32" Height="32" 
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                               VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Text="Reports & Analytics" 
+                                  Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                  Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Comprehensive reporting and analytics for invoice management" 
+                              Style="{StaticResource MaterialDesignBody1TextBlock}"
+                              Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- Header Actions -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding RefreshDashboardCommand}"
+                            Margin="0,0,8,0" Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" VerticalAlignment="Center"/>
+                            <TextBlock Text="Refresh" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding ScheduleReportCommand}"
+                            Margin="0,0,8,0" Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Schedule" VerticalAlignment="Center"/>
+                            <TextBlock Text="Schedule" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Command="{Binding CustomReportCommand}"
+                            Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center"/>
+                            <TextBlock Text="Custom Report" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Quick Stats Overview -->
+        <materialDesign:Card Grid.Row="1" Margin="16,0,16,8" Padding="16"
+                            materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Revenue -->
+                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="TrendingUp" Width="32" Height="32" 
+                                           Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding TotalRevenue, StringFormat=C}" 
+                              Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                              HorizontalAlignment="Center"/>
+                    <TextBlock Text="Total Revenue" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                    <TextBlock Text="{Binding RevenueGrowth, StringFormat='{0:+0.0%;-0.0%;0%} this month'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Margin="0,4,0,0"
+                              Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                </StackPanel>
+
+                <!-- Total Invoices -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="FileDocument" Width="32" Height="32" 
+                                           Foreground="{DynamicResource SecondaryHueMidBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding TotalInvoices}" 
+                              Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                              HorizontalAlignment="Center"/>
+                    <TextBlock Text="Total Invoices" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                    <TextBlock Text="{Binding InvoiceGrowth, StringFormat='{0:+0;-0;0} this month'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Margin="0,4,0,0"
+                              Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                </StackPanel>
+
+                <!-- Active Companies -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Domain" Width="32" Height="32" 
+                                           Foreground="{DynamicResource MaterialDesignValidationErrorBrush}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding ActiveCompanies}" 
+                              Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                              HorizontalAlignment="Center"/>
+                    <TextBlock Text="Active Companies" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                    <TextBlock Text="{Binding CompanyGrowth, StringFormat='{0:+0;-0;0} new clients'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Margin="0,4,0,0"
+                              Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"/>
+                </StackPanel>
+
+                <!-- TKA Workers -->
+                <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Account" Width="32" Height="32" 
+                                           Foreground="{DynamicResource MaterialDesignDarkForeground}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding TotalTkaWorkers}" 
+                              Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                              HorizontalAlignment="Center"/>
+                    <TextBlock Text="TKA Workers" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                    <TextBlock Text="{Binding TkaUtilization, StringFormat='{0:P1} utilization'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Margin="0,4,0,0"
+                              Foreground="{DynamicResource MaterialDesignDarkForeground}"/>
+                </StackPanel>
+
+                <!-- Payment Rate -->
+                <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="CheckCircle" Width="32" Height="32" 
+                                           Foreground="{DynamicResource MaterialDesignSelection}" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding PaymentRate, StringFormat=P1}" 
+                              Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                              HorizontalAlignment="Center"/>
+                    <TextBlock Text="Payment Rate" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Opacity="0.8"/>
+                    <TextBlock Text="{Binding PaymentImprovement, StringFormat='{0:+0.0%;-0.0%;0%} improvement'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Center" Margin="0,4,0,0"
+                              Foreground="{DynamicResource MaterialDesignSelection}"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Quick Actions -->
+        <materialDesign:Card Grid.Row="2" Margin="16,0,16,8" Padding="16"
+                            materialDesign:ElevationAssist.Elevation="Dp1">
+            <Expander Header="Quick Actions" IsExpanded="False">
+                <ItemsControl ItemsSource="{Binding QuickActions}" 
+                             ItemTemplate="{StaticResource QuickActionTemplate}"
+                             Margin="0,16,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Expander>
+        </materialDesign:Card>
+
+        <!-- Report Categories -->
+        <ScrollViewer Grid.Row="3" Margin="16,0,16,16" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Section Header -->
+                <TextBlock Grid.Row="0" Text="Report Categories" 
+                          Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                          Margin="8,0,0,16" Opacity="0.8"/>
+
+                <!-- Report Categories Grid -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding ReportCategories}"
+                             ItemTemplate="{StaticResource ReportCategoryTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <!-- Apply slide-in animation to items -->
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="RenderTransform">
+                                <Setter.Value>
+                                    <TranslateTransform/>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard Storyboard="{StaticResource SlideInAnimation}"/>
+                                </EventTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="4" Background="#80000000" 
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                            Value="0" IsIndeterminate="True" Width="60" Height="60"/>
+                <TextBlock Text="Loading reports..." 
+                          Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                          Foreground="White" Margin="0,16,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

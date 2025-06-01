@@ -1,0 +1,568 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- Invoice Print Template -->
+    <DataTemplate x:Key="InvoicePrintTemplate">
+        <Grid Background="White" Margin="48">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>  <!-- Header -->
+                <RowDefinition Height="Auto"/>  <!-- Invoice Details -->
+                <RowDefinition Height="Auto"/>  <!-- Company Info -->
+                <RowDefinition Height="*"/>     <!-- Invoice Lines -->
+                <RowDefinition Height="Auto"/>  <!-- Totals -->
+                <RowDefinition Height="Auto"/>  <!-- Amount in Words -->
+                <RowDefinition Height="Auto"/>  <!-- Footer -->
+            </Grid.RowDefinitions>
+            
+            <!-- Header Section -->
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Company Header -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="PT. FORTUNA SADA NIOGA"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
+                    <TextBlock Text="Spirit of Services"
+                               FontSize="14"
+                               FontStyle="Italic"
+                               Foreground="#666666"
+                               Margin="0,4,0,0"/>
+                    <TextBlock Text="INVOICE"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="Black"
+                               Margin="0,16,0,0"/>
+                </StackPanel>
+                
+                <!-- Office Info -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock Text="Kantor:"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
+                    <TextBlock Text="{Binding OfficeAddress}"
+                               FontSize="11"
+                               Foreground="Black"
+                               TextAlignment="Right"
+                               TextWrapping="Wrap"
+                               MaxWidth="200"/>
+                    <TextBlock Text="{Binding OfficePhone}"
+                               FontSize="11"
+                               Foreground="Black"
+                               TextAlignment="Right"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Invoice Details -->
+            <Grid Grid.Row="1" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="No:"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
+                    <TextBlock Text="{Binding InvoiceNumber}"
+                               FontSize="12"
+                               Foreground="Black"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Tanggal:"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
+                    <TextBlock FontSize="12" Foreground="Black">
+                        <Run Text="{Binding InvoicePlace}"/><Run Text=", "/><Run Text="{Binding InvoiceDate, StringFormat=dd MMMM yyyy}"/>
+                    </TextBlock>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="3" HorizontalAlignment="Right">
+                    <TextBlock Text="Halaman:"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
+                    <TextBlock Text="{Binding PageInfo}"
+                               FontSize="12"
+                               Foreground="Black"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Company Information -->
+            <StackPanel Grid.Row="2" Margin="0,0,0,24">
+                <TextBlock Text="Kepada:"
+                           FontSize="12"
+                           FontWeight="Bold"
+                           Foreground="Black"
+                           Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding Company.CompanyName}"
+                           FontSize="12"
+                           FontWeight="Bold"
+                           Foreground="Black"/>
+                <TextBlock Text="{Binding Company.Address}"
+                           FontSize="11"
+                           Foreground="Black"
+                           TextWrapping="Wrap"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+            
+            <!-- Invoice Table -->
+            <Border Grid.Row="3" 
+                    BorderBrush="Black" 
+                    BorderThickness="1"
+                    Margin="0,0,0,16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>  <!-- Header -->
+                        <RowDefinition Height="*"/>     <!-- Data -->
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Table Header -->
+                    <Grid Grid.Row="0" 
+                          Background="#F5F5F5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>   <!-- No -->
+                            <ColumnDefinition Width="80"/>   <!-- Tanggal -->
+                            <ColumnDefinition Width="80"/>   <!-- No. PO -->
+                            <ColumnDefinition Width="140"/>  <!-- Expatriat -->
+                            <ColumnDefinition Width="*"/>    <!-- Keterangan -->
+                            <ColumnDefinition Width="100"/>  <!-- Harga -->
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8,12">
+                            <TextBlock Text="No." FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Column="1" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8,12">
+                            <TextBlock Text="Tanggal" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Column="2" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8,12">
+                            <TextBlock Text="No. PO" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Column="3" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8,12">
+                            <TextBlock Text="Expatriat" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Column="4" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8,12">
+                            <TextBlock Text="Keterangan" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </Border>
+                        <Border Grid.Column="5" BorderBrush="Black" BorderThickness="0,0,0,1" Padding="8,12">
+                            <TextBlock Text="Harga (Rp)" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Table Data -->
+                    <ItemsControl Grid.Row="1" 
+                                  ItemsSource="{Binding InvoiceLines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid MinHeight="42">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>   <!-- No -->
+                                        <ColumnDefinition Width="80"/>   <!-- Tanggal -->
+                                        <ColumnDefinition Width="80"/>   <!-- No. PO -->
+                                        <ColumnDefinition Width="140"/>  <!-- Expatriat -->
+                                        <ColumnDefinition Width="*"/>    <!-- Keterangan -->
+                                        <ColumnDefinition Width="100"/>  <!-- Harga -->
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Border Grid.Column="0" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8">
+                                        <TextBlock Text="{Binding Baris}" 
+                                                   FontSize="10" 
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Column="1" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8">
+                                        <TextBlock Text="{Binding InvoiceDate, StringFormat=dd/MM/yyyy}" 
+                                                   FontSize="10" 
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Column="2" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8">
+                                        <TextBlock Text="{Binding PoNumber}" 
+                                                   FontSize="10" 
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Column="3" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8">
+                                        <TextBlock Text="{Binding TkaWorker.Nama}" 
+                                                   FontSize="10" 
+                                                   VerticalAlignment="Center"
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+                                    <Border Grid.Column="4" BorderBrush="Black" BorderThickness="0,0,1,1" Padding="8">
+                                        <TextBlock Text="{Binding JobDescription}" 
+                                                   FontSize="10" 
+                                                   VerticalAlignment="Center"
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+                                    <Border Grid.Column="5" BorderBrush="Black" BorderThickness="0,0,0,1" Padding="8">
+                                        <TextBlock Text="{Binding LineTotal, StringFormat=N0}" 
+                                                   FontSize="10" 
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+            
+            <!-- Totals Section -->
+            <Grid Grid.Row="4" Margin="0,0,0,16">
+                <StackPanel HorizontalAlignment="Right" Width="300">
+                    <!-- Subtotal -->
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="DPP:" FontSize="12" FontWeight="Bold"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Subtotal, StringFormat=Rp {0:N0}}" FontSize="12" FontWeight="Bold"/>
+                    </Grid>
+                    
+                    <!-- VAT -->
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" FontSize="12" FontWeight="Bold">
+                            <Run Text="PPN "/>
+                            <Run Text="{Binding VatPercentage, StringFormat={}{0}%}"/>
+                            <Run Text=":"/>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1" Text="{Binding VatAmount, StringFormat=Rp {0:N0}}" FontSize="12" FontWeight="Bold"/>
+                    </Grid>
+                    
+                    <!-- Total -->
+                    <Border BorderBrush="Black" BorderThickness="0,1,0,0" Margin="0,8,0,4">
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="TOTAL:" FontSize="14" FontWeight="Bold"/>
+                            <TextBlock Grid.Column="1" Text="{Binding TotalAmount, StringFormat=Rp {0:N0}}" FontSize="14" FontWeight="Bold"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Amount in Words -->
+            <StackPanel Grid.Row="5" Margin="0,0,0,24">
+                <TextBlock Text="Terbilang:"
+                           FontSize="12"
+                           FontWeight="Bold"
+                           Foreground="Black"
+                           Margin="0,0,0,4"/>
+                <TextBlock FontSize="12"
+                           Foreground="Black"
+                           TextWrapping="Wrap">
+                    <Run Text="{Binding AmountInWords}"/>
+                    <Run Text=" Rupiah"/>
+                </TextBlock>
+            </StackPanel>
+            
+            <!-- Footer Section -->
+            <Grid Grid.Row="6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Terms -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Pembayaran maksimal 30 hari setelah tanggal invoice"
+                               FontSize="10"
+                               Foreground="Black"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+                
+                <!-- Company Name -->
+                <TextBlock Grid.Column="1"
+                           Text="PT. FORTUNA SADA NIOGA"
+                           FontSize="12"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"/>
+                
+                <!-- Signature -->
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding SignatoryName}"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               Margin="0,80,0,0"/>
+                    <Line X1="0" Y1="0" X2="120" Y2="0" 
+                          Stroke="Black" 
+                          StrokeThickness="1"
+                          Margin="0,4,0,0"/>
+                    <TextBlock Text="Direktur"
+                               FontSize="10"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Bank Information (Show only on last page) -->
+            <Grid Grid.Row="6" 
+                  Margin="0,32,0,0"
+                  Visibility="{Binding IsLastPage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <Separator Margin="0,0,0,16"/>
+                    <TextBlock Text="Informasi Rekening Bank:"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"/>
+                    <ItemsControl ItemsSource="{Binding BankAccounts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <TextBlock Grid.Column="0" 
+                                               Text="{Binding BankName}" 
+                                               FontSize="11" 
+                                               FontWeight="Bold"
+                                               MinWidth="80"/>
+                                    <TextBlock Grid.Column="1" 
+                                               Text=": " 
+                                               FontSize="11"/>
+                                    <TextBlock Grid.Column="2" 
+                                               Text="{Binding AccountNumber}" 
+                                               FontSize="11"
+                                               Margin="8,0"/>
+                                    <TextBlock Grid.Column="3" 
+                                               Text="{Binding AccountName}" 
+                                               FontSize="11"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+
+    <!-- Invoice Preview Template -->
+    <DataTemplate x:Key="InvoicePreviewTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp4"
+                             Background="White"
+                             Margin="16">
+            <Grid Margin="32">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- Header -->
+                    <RowDefinition Height="Auto"/>  <!-- Invoice Info -->
+                    <RowDefinition Height="*"/>     <!-- Content -->
+                    <RowDefinition Height="Auto"/>  <!-- Actions -->
+                </Grid.RowDefinitions>
+                
+                <!-- Header -->
+                <Grid Grid.Row="0" Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Invoice Preview"
+                                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding InvoiceNumber}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                        <materialDesign:Chip Content="{Binding Status}"
+                                             Background="{Binding StatusColor}"
+                                             Foreground="White"
+                                             Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding InvoiceDate, StringFormat=dd MMMM yyyy}"
+                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                   HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Invoice Info -->
+                <Grid Grid.Row="1" Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Company Info -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Bill To:"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Company.CompanyName}"
+                                   Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                   FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Company.Address}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,4,0,0"/>
+                        <TextBlock Text="{Binding Company.Npwp}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                    
+                    <!-- Summary -->
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:" Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,16,4"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Subtotal, StringFormat=Rp {0:N0}}" Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,4"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="PPN:" Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,16,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding VatAmount, StringFormat=Rp {0:N0}}" Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,4"/>
+                            
+                            <Separator Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Total:" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Margin="0,0,16,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TotalAmount, StringFormat=Rp {0:N0}}" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Invoice Lines -->
+                <DataGrid Grid.Row="2"
+                          ItemsSource="{Binding InvoiceLines}"
+                          Style="{StaticResource ModernDataGrid}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="No." Binding="{Binding Baris}" Width="60"/>
+                        <DataGridTextColumn Header="TKA Worker" Binding="{Binding TkaWorker.Nama}" Width="150"/>
+                        <DataGridTextColumn Header="Job Description" Binding="{Binding JobDescription}" Width="*"/>
+                        <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="60"/>
+                        <DataGridTextColumn Header="Unit Price" Binding="{Binding UnitPrice, StringFormat=Rp {0:N0}}" Width="120"/>
+                        <DataGridTextColumn Header="Total" Binding="{Binding LineTotal, StringFormat=Rp {0:N0}}" Width="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- Action Buttons -->
+                <StackPanel Grid.Row="3"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,24,0,0">
+                    <Button Content="EDIT"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Command="{Binding EditCommand}"
+                            Margin="0,0,8,0"
+                            IsEnabled="{Binding CanEdit}"/>
+                    <Button Content="PRINT"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding PrintCommand}"
+                            Margin="0,0,8,0"/>
+                    <Button Content="EXPORT PDF"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Command="{Binding ExportPdfCommand}"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </DataTemplate>
+
+    <!-- Invoice Line Edit Template -->
+    <DataTemplate x:Key="InvoiceLineEditTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{DynamicResource MaterialDesignPaper}"
+                             Margin="4">
+            <Grid Margin="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"/>   <!-- Baris -->
+                    <ColumnDefinition Width="200"/>  <!-- TKA -->
+                    <ColumnDefinition Width="*"/>    <!-- Job -->
+                    <ColumnDefinition Width="80"/>   <!-- Qty -->
+                    <ColumnDefinition Width="120"/>  <!-- Price -->
+                    <ColumnDefinition Width="120"/>  <!-- Total -->
+                    <ColumnDefinition Width="Auto"/> <!-- Actions -->
+                </Grid.ColumnDefinitions>
+                
+                <!-- Baris -->
+                <TextBox Grid.Column="0"
+                         Text="{Binding Baris}"
+                         Style="{StaticResource CompactTextBox}"
+                         HorizontalContentAlignment="Center"/>
+                
+                <!-- TKA Selection -->
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding TkaWorkers}"
+                          SelectedItem="{Binding SelectedTkaWorker}"
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ModernComboBox}"
+                          materialDesign:HintAssist.Hint="Select TKA"/>
+                
+                <!-- Job Description -->
+                <TextBox Grid.Column="2"
+                         Text="{Binding JobDescription}"
+                         Style="{StaticResource CompactTextBox}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"/>
+                
+                <!-- Quantity -->
+                <TextBox Grid.Column="3"
+                         Text="{Binding Quantity}"
+                         Style="{StaticResource NumericTextBox}"
+                         HorizontalContentAlignment="Center"/>
+                
+                <!-- Unit Price -->
+                <TextBox Grid.Column="4"
+                         Text="{Binding UnitPrice, StringFormat=N0}"
+                         Style="{StaticResource CurrencyTextBox}"/>
+                
+                <!-- Line Total -->
+                <TextBlock Grid.Column="5"
+                           Text="{Binding LineTotal, StringFormat=Rp {0:N0}}"
+                           Style="{StaticResource MaterialDesignBody2TextBlock}"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           FontWeight="Bold"/>
+                
+                <!-- Actions -->
+                <StackPanel Grid.Column="6"
+                            Orientation="Horizontal">
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Remove Line"
+                            Command="{Binding RemoveLineCommand}"
+                            Width="32" Height="32">
+                        <materialDesign:PackIcon Kind="Close" Width="16" Height="16" 
+                                                 Foreground="{DynamicResource ValidationErrorBrush}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,552 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Companies.CompanyListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:controls="clr-namespace:InvoiceApp.WPF.Controls">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
+        <!-- Company Card Template -->
+        <DataTemplate x:Key="CompanyCardTemplate">
+            <materialDesign:Card Margin="8" 
+                                 Padding="16"
+                                 materialDesign:ElevationAssist.Elevation="Dp2"
+                                 Cursor="Hand">
+                <behaviors:Interaction.Triggers>
+                    <behaviors:EventTrigger EventName="MouseLeftButtonUp">
+                        <behaviors:InvokeCommandAction Command="{Binding DataContext.ViewCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                     CommandParameter="{Binding}"/>
+                    </behaviors:EventTrigger>
+                </behaviors:Interaction.Triggers>
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource PrimaryHueMidBrush}"
+                                CornerRadius="20"
+                                Width="40" Height="40"
+                                Margin="0,0,12,0">
+                            <TextBlock Text="{Binding CompanyName, Converter={StaticResource InitialsConverter}}"
+                                       Foreground="White"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding CompanyName}"
+                                       Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Npwp, StringFormat='NPWP: {0}'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <Button Command="{Binding DataContext.EditCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource MaterialDesignIconButton}"
+                                    ToolTip="Edit Company"
+                                    Width="24" Height="24">
+                                <materialDesign:PackIcon Kind="Edit" Width="12" Height="12"/>
+                            </Button>
+                            <Button Command="{Binding DataContext.DeleteCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource MaterialDesignIconButton}"
+                                    ToolTip="Delete Company"
+                                    Width="24" Height="24">
+                                <materialDesign:PackIcon Kind="Delete" Width="12" Height="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Company Info -->
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding Address}"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               TextWrapping="Wrap"
+                               MaxHeight="40"
+                               Margin="0,0,0,8"/>
+
+                    <!-- Contact Info -->
+                    <StackPanel Grid.Row="2" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal" 
+                                    Visibility="{Binding Email, Converter={StaticResource StringToVisibilityConverter}}">
+                            <materialDesign:PackIcon Kind="Email" 
+                                                   Width="12" Height="12"
+                                                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                   VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Email}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Margin="4,0,0,0"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal" 
+                                    Visibility="{Binding Phone, Converter={StaticResource StringToVisibilityConverter}}">
+                            <materialDesign:PackIcon Kind="Phone" 
+                                                   Width="12" Height="12"
+                                                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                   VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Phone}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Margin="4,0,0,0"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Statistics -->
+                    <Grid Grid.Row="3" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding InvoiceCount}"
+                                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Invoices"
+                                       Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding TkaWorkerCount}"
+                                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="TKA Workers"
+                                       Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding JobDescriptionCount}"
+                                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Jobs"
+                                       Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Actions -->
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="VIEW"
+                                Command="{Binding DataContext.ViewCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Margin="0,0,4,0"/>
+                        <Button Content="CREATE INVOICE"
+                                Command="{Binding DataContext.CreateInvoiceForCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <!-- List View Template -->
+        <DataTemplate x:Key="CompanyListTemplate">
+            <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                    BorderBrush="{DynamicResource MaterialDesignDivider}"
+                    BorderThickness="0,0,0,1"
+                    Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Company Avatar -->
+                    <Border Grid.Column="0"
+                            Background="{DynamicResource PrimaryHueMidBrush}"
+                            CornerRadius="16"
+                            Width="32" Height="32"
+                            Margin="0,0,12,0">
+                        <TextBlock Text="{Binding CompanyName, Converter={StaticResource InitialsConverter}}"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Company Details -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CompanyName}"
+                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                   FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Npwp, StringFormat='NPWP: {0}'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock Text=" • "
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock Text="{Binding Idtku, StringFormat='IDTKU: {0}'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Statistics -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="16,0">
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{Binding InvoiceCount}"
+                                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Invoices"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                        
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{Binding TkaWorkerCount}"
+                                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="TKA"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                        
+                        <StackPanel>
+                            <TextBlock Text="{Binding JobDescriptionCount}"
+                                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Jobs"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Status -->
+                    <Border Grid.Column="3"
+                            Background="{Binding IsActive, Converter={StaticResource BoolToColorConverter}}"
+                            CornerRadius="10"
+                            Padding="8,4"
+                            Margin="16,0">
+                        <TextBlock Text="{Binding IsActive, Converter={StaticResource BoolToStatusConverter}}"
+                                   Foreground="White"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Actions -->
+                    <StackPanel Grid.Column="4" Orientation="Horizontal">
+                        <Button Command="{Binding DataContext.ViewCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="View Details">
+                            <materialDesign:PackIcon Kind="Eye" Width="16" Height="16"/>
+                        </Button>
+                        <Button Command="{Binding DataContext.EditCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Edit">
+                            <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                        </Button>
+                        <Button Command="{Binding DataContext.CreateInvoiceForCompanyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Create Invoice">
+                            <materialDesign:PackIcon Kind="Plus" Width="16" Height="16"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" 
+                             Margin="0,0,0,16" 
+                             Padding="20"
+                             materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Company Management"
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding TotalCompanies, StringFormat='{}{0} companies'}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        <TextBlock Text=" • "
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        <TextBlock Text="{Binding ActiveCompanies, StringFormat='{}{0} active'}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="IMPORT"
+                            Command="{Binding ImportCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Import" Width="16" Height="16"/>
+                                <TextBlock Text="IMPORT" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                    
+                    <Button Content="EXPORT"
+                            Command="{Binding ExportCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Export" Width="16" Height="16"/>
+                                <TextBlock Text="EXPORT" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                    
+                    <Button Content="ADD COMPANY"
+                            Command="{Binding AddCompanyCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" Width="16" Height="16"/>
+                                <TextBlock Text="ADD COMPANY" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Search and Filters -->
+        <materialDesign:Card Grid.Row="1" 
+                             Margin="0,0,0,16" 
+                             Padding="16"
+                             materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search -->
+                <TextBox Grid.Column="0"
+                         Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                         materialDesign:HintAssist.Hint="Search companies..."
+                         materialDesign:HintAssist.IsFloating="True"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,16,0">
+                    <TextBox.Resources>
+                        <Style TargetType="materialDesign:PackIcon">
+                            <Setter Property="Kind" Value="Magnify"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+
+                <!-- Status Filter -->
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding StatusOptions}"
+                          SelectedItem="{Binding SelectedStatus}"
+                          materialDesign:HintAssist.Hint="Status"
+                          materialDesign:HintAssist.IsFloating="True"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Width="120"
+                          Margin="0,0,16,0"/>
+
+                <!-- View Mode Toggle -->
+                <ToggleButton Grid.Column="2"
+                              IsChecked="{Binding IsCardView}"
+                              Style="{StaticResource MaterialDesignActionToggleButton}"
+                              ToolTip="Toggle View Mode"
+                              Margin="0,0,8,0">
+                    <ToggleButton.Content>
+                        <materialDesign:PackIcon Kind="{Binding IsCardView, Converter={StaticResource BoolToViewIconConverter}}" 
+                                               Width="20" Height="20"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+                <!-- Refresh Button -->
+                <Button Grid.Column="3"
+                        Command="{Binding RefreshCommand}"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="Refresh">
+                    <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"/>
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Content -->
+        <materialDesign:Card Grid.Row="2" 
+                             Padding="0"
+                             materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <!-- Loading Indicator -->
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                 Width="48" Height="48"
+                                 IsIndeterminate="True"/>
+                    <TextBlock Text="Loading companies..."
+                               Margin="0,16,0,0"
+                               HorizontalAlignment="Center"
+                               Style="{StaticResource MaterialDesignBody1TextBlock}"/>
+                </StackPanel>
+
+                <!-- Card View -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding IsCardView, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ItemsControl ItemsSource="{Binding CompaniesView}"
+                                  ItemTemplate="{StaticResource CompanyCardTemplate}"
+                                  Margin="8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" 
+                                           ItemWidth="300" 
+                                           ItemHeight="240"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- List View -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding IsCardView, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <ItemsControl ItemsSource="{Binding CompaniesView}"
+                                  ItemTemplate="{StaticResource CompanyListTemplate}"/>
+                </ScrollViewer>
+
+                <!-- Empty State -->
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding HasCompanies, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                    <materialDesign:PackIcon Kind="Domain"
+                                           Width="64" Height="64"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                           HorizontalAlignment="Center"/>
+                    <TextBlock Text="No companies found"
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                               HorizontalAlignment="Center"
+                               Margin="0,16,0,8"/>
+                    <TextBlock Text="Try adjusting your search or add a new company"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                               HorizontalAlignment="Center"/>
+                    <Button Content="ADD COMPANY"
+                            Command="{Binding AddCompanyCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="0,16,0,0"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Footer -->
+        <materialDesign:Card Grid.Row="3" 
+                             Margin="0,16,0,0" 
+                             Padding="16"
+                             materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Summary -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="{Binding TotalCompanies, StringFormat='Showing {0} companies'}"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                    <TextBlock Text=" • "
+                               VerticalAlignment="Center"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                    <TextBlock Text="{Binding FilteredCount, StringFormat='{0} filtered'}"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Visibility="{Binding IsFiltered, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <!-- View Options -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Items per page:"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                    <ComboBox ItemsSource="{Binding PageSizeOptions}"
+                              SelectedItem="{Binding PageSize}"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              Width="80"
+                              Margin="0,0,16,0"/>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding PreviousPageCommand}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                IsEnabled="{Binding CanGoPreviousPage}">
+                            <materialDesign:PackIcon Kind="ChevronLeft" Width="16" Height="16"/>
+                        </Button>
+                        <TextBlock Text="{Binding CurrentPage, StringFormat='Page {0}'}"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                        <Button Command="{Binding NextPageCommand}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                IsEnabled="{Binding CanGoNextPage}">
+                            <materialDesign:PackIcon Kind="ChevronRight" Width="16" Height="16"/>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

@@ -1,0 +1,186 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Shared.ConfirmationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <!-- Animation Storyboards -->
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                           From="0" To="1" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="ScaleInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(ScaleTransform.ScaleX)"
+                           From="0.8" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(ScaleTransform.ScaleY)"
+                           From="0.8" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Confirmation Type to Icon Converter -->
+        <Style x:Key="ConfirmationIconStyle" TargetType="materialDesign:PackIcon">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ConfirmationType}" Value="Warning">
+                    <Setter Property="Kind" Value="Alert"/>
+                    <Setter Property="Foreground" Value="#FF9800"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ConfirmationType}" Value="Error">
+                    <Setter Property="Kind" Value="AlertCircle"/>
+                    <Setter Property="Foreground" Value="#F44336"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ConfirmationType}" Value="Info">
+                    <Setter Property="Kind" Value="Information"/>
+                    <Setter Property="Foreground" Value="#2196F3"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ConfirmationType}" Value="Success">
+                    <Setter Property="Kind" Value="CheckCircle"/>
+                    <Setter Property="Foreground" Value="#4CAF50"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ConfirmationType}" Value="Question">
+                    <Setter Property="Kind" Value="HelpCircle"/>
+                    <Setter Property="Foreground" Value="#9C27B0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <!-- Overlay Background -->
+    <Grid Background="#80000000">
+        <materialDesign:Card MaxWidth="450" MaxHeight="400" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Padding="32" materialDesign:ElevationAssist.Elevation="Dp8"
+                           Background="{DynamicResource MaterialDesignPaper}">
+            
+            <materialDesign:Card.RenderTransform>
+                <ScaleTransform/>
+            </materialDesign:Card.RenderTransform>
+
+            <materialDesign:Card.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource ScaleInAnimation}"/>
+                </EventTrigger>
+            </materialDesign:Card.Triggers>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Icon -->
+                <materialDesign:PackIcon Grid.Row="0" Style="{StaticResource ConfirmationIconStyle}"/>
+
+                <!-- Title -->
+                <TextBlock Grid.Row="1" 
+                          Text="{Binding Title}" 
+                          Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                          HorizontalAlignment="Center" 
+                          TextAlignment="Center"
+                          Margin="0,0,0,16"/>
+
+                <!-- Message Content -->
+                <ScrollViewer Grid.Row="2" 
+                             VerticalScrollBarVisibility="Auto" 
+                             MaxHeight="200" 
+                             Margin="0,0,0,24">
+                    <StackPanel>
+                        <!-- Main Message -->
+                        <TextBlock Text="{Binding Message}" 
+                                  Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                  TextAlignment="Center" 
+                                  TextWrapping="Wrap"
+                                  Margin="0,0,0,16"/>
+
+                        <!-- Detailed Information -->
+                        <TextBlock Text="{Binding Details}" 
+                                  Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                  TextAlignment="Center" 
+                                  TextWrapping="Wrap" 
+                                  Opacity="0.8"
+                                  Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                        <!-- Additional Content (if any) -->
+                        <ContentPresenter Content="{Binding AdditionalContent}" 
+                                         HorizontalAlignment="Center"
+                                         Margin="0,16,0,0"
+                                         Visibility="{Binding HasAdditionalContent, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Row="3" 
+                           Orientation="Horizontal" 
+                           HorizontalAlignment="Center">
+                    
+                    <!-- Cancel Button (if needed) -->
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                           Command="{Binding CancelCommand}"
+                           Content="{Binding CancelButtonText}"
+                           Margin="0,0,12,0" Padding="20,8"
+                           Visibility="{Binding ShowCancelButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                    <!-- Secondary Action Button (if needed) -->
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                           Command="{Binding SecondaryCommand}"
+                           Content="{Binding SecondaryButtonText}"
+                           Margin="0,0,12,0" Padding="20,8"
+                           Visibility="{Binding ShowSecondaryButton, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                    <!-- Primary Action Button -->
+                    <Button Command="{Binding ConfirmCommand}"
+                           Content="{Binding ConfirmButtonText}"
+                           Padding="20,8">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ConfirmationType}" Value="Error">
+                                        <Setter Property="Background" Value="#F44336"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ConfirmationType}" Value="Warning">
+                                        <Setter Property="Background" Value="#FF9800"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ConfirmationType}" Value="Success">
+                                        <Setter Property="Background" Value="#4CAF50"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Click outside to close (if enabled) -->
+        <Grid.InputBindings>
+            <MouseBinding MouseAction="LeftClick" 
+                         Command="{Binding CancelCommand}"
+                         CommandParameter="ClickOutside"/>
+        </Grid.InputBindings>
+    </Grid>
+</UserControl>

@@ -1,0 +1,319 @@
+InvoiceApp/
+├── InvoiceApp.sln
+├── Application/
+│   ├── bin/
+│   ├── obj/
+│   ├── Commands/
+│   │   ├── CreateInvoiceCommand.cs
+│   │   ├── DeleteInvoiceCommand.cs
+│   │   ├── ImportInvoiceCommand.cs
+│   │   └── UpdateInvoiceCommand.cs
+│   ├── Handlers/
+│   │   ├── InvoiceCommandHandler.cs
+│   │   └── InvoiceQueryHandler.cs
+│   ├── Mappers/
+│   │   ├── AutoMapperProfile.cs
+│   │   ├── CompanyMapper.cs
+│   │   ├── InvoiceMapper.cs
+│   │   └── TkaWorkerMapper.cs
+│   ├── Queries/
+│   │   ├── GetCompaniesQuery.cs
+│   │   ├── GetInvoicesQuery.cs
+│   │   └── GetTkaWorkersQuery.cs
+│   ├── Services/
+│   │   ├── CompanyService.cs
+│   │   ├── DashboardService.cs
+│   │   ├── ImportExportService.cs
+│   │   ├── InvoiceService.cs
+│   │   ├── ReportService.cs
+│   │   ├── SettingsService.cs
+│   │   ├── TkaWorkerService.cs
+│   │   └── UserService.cs
+│   ├── Validators/
+│   │   ├── CompanyValidator.cs
+│   │   ├── ImportDataValidator.cs
+│   │   ├── InvoiceValidator.cs
+│   │   └── TkaWorkerValidator.cs
+│   └── InvoiceApp.Application.csproj
+├── Core/
+│   ├── bin/
+│   ├── obj/
+│   ├── Constants/
+│   │   ├── AppConstants.cs
+│   │   ├── DatabaseConstants.cs
+│   │   ├── PerformanceConstants.cs
+│   │   └── UIConstants.cs
+│   ├── DTOs/
+│   │   ├── BankAccountDto.cs
+│   │   ├── CompanyDto.cs
+│   │   ├── DashboardDto.cs
+│   │   ├── ImportLogDto.cs
+│   │   ├── ImportResultDto.cs
+│   │   ├── InvoiceDto.cs
+│   │   ├── InvoiceFormatDto.cs
+│   │   ├── InvoiceLineDto.cs
+│   │   ├── JobDescriptionDto.cs
+│   │   ├── PerformanceMetricsDto.cs
+│   │   ├── SearchResultDto.cs
+│   │   ├── SettingDto.cs
+│   │   ├── TkaFamilyMemberDto.cs
+│   │   ├── TkaSelectionItem.cs
+│   │   ├── TkaWorkerDto.cs
+│   │   ├── UserDto.cs
+│   │   └── UserPreferenceDto.cs
+│   ├── Entities/
+│   │   ├── BankAccount.cs
+│   │   ├── Company.cs
+│   │   ├── CompanyTkaAssignment.cs
+│   │   ├── ImportLog.cs
+│   │   ├── Invoice.cs
+│   │   ├── InvoiceAuditLog.cs
+│   │   ├── InvoiceLine.cs
+│   │   ├── InvoiceNumberSequence.cs
+│   │   ├── JobDescription.cs
+│   │   ├── Setting.cs
+│   │   ├── TkaFamilyMember.cs
+│   │   ├── TkaWorker.cs
+│   │   ├── User.cs
+│   │   └── UserPreference.cs
+│   ├── Enums/
+│   │   ├── AnimationType.cs
+│   │   ├── FamilyRelationship.cs
+│   │   ├── Gender.cs
+│   │   ├── ImportFileType.cs
+│   │   ├── InvoiceStatus.cs
+│   │   ├── SearchMatchType.cs
+│   │   ├── ThemeMode.cs
+│   │   └── UserRole.cs
+│   ├── Interfaces/
+│   │   ├── Services/
+│   │   │   ├── ICachingService.cs
+│   │   │   ├── ICompanyService.cs
+│   │   │   ├── IDashboardService.cs
+│   │   │   ├── IExcelService.cs
+│   │   │   ├── IImportExportService.cs
+│   │   │   ├── IImportService.cs
+│   │   │   ├── IInvoiceFormatService.cs
+│   │   │   ├── IInvoiceNumberService.cs
+│   │   │   ├── IInvoiceService.cs
+│   │   │   ├── IPdfService.cs
+│   │   │   ├── IPerformanceService.cs
+│   │   │   ├── IPrintService.cs
+│   │   │   ├── IReportService.cs
+│   │   │   ├── ISearchService.cs
+│   │   │   ├── ISettingsService.cs
+│   │   │   ├── ITkaWorkerService.cs
+│   │   │   └── IUserService.cs
+│   │   ├── ICompanyRepository.cs
+│   │   ├── IImportRepository.cs
+│   │   ├── IInvoiceRepository.cs
+│   │   ├── ITkaWorkerRepository.cs
+│   │   ├── IUnitOfWork.cs
+│   │   └── IUserRepository.cs
+│   └── InvoiceApp.Core.csproj
+├── Infrastructure/
+│   ├── bin/
+│   ├── obj/
+│   ├── Data/
+│   │   ├── Configurations/
+│   │   │   ├── CompanyConfiguration.cs
+│   │   │   ├── ImportLogConfiguration.cs
+│   │   │   ├── InvoiceConfiguration.cs
+│   │   │   ├── TkaWorkerConfiguration.cs
+│   │   │   └── UserConfiguration.cs
+│   │   ├── DbContextFactory.cs
+│   │   └── InvoiceDbContext.cs
+│   ├── Migrations/
+│   ├── Repositories/
+│   │   ├── BaseRepository.cs
+│   │   ├── CompanyRepository.cs
+│   │   ├── ImportRepository.cs
+│   │   ├── InvoiceRepository.cs
+│   │   ├── TkaWorkerRepository.cs
+│   │   ├── UnitOfWork.cs
+│   │   └── UserRepository.cs
+│   ├── Seed/
+│   │   ├── DefaultSettings.cs
+│   │   └── SeedData.cs
+│   ├── Services/
+│   │   ├── Caching/
+│   │   │   ├── DistributedCacheService.cs
+│   │   │   └── MemoryCacheService.cs
+│   │   ├── Core/
+│   │   │   ├── BackupService.cs
+│   │   │   ├── ExcelService.cs
+│   │   │   ├── ImportService.cs
+│   │   │   ├── InvoiceFormatService.cs
+│   │   │   ├── InvoiceNumberService.cs
+│   │   │   ├── PdfService.cs
+│   │   │   ├── PrintService.cs
+│   │   │   └── SmartSearchService.cs
+│   │   └── Performance/
+│   │       ├── BackgroundTaskService.cs
+│   │       ├── ConnectionPoolService.cs
+│   │       └── QueryOptimizationService.cs
+│   └── InvoiceApp.Infrastructure.csproj
+└── WPF/
+    ├── bin/
+    ├── obj/
+    ├── Animations/
+    │   ├── FadeAnimations.xaml
+    │   ├── ScaleAnimations.xaml
+    │   └── SlideAnimations.xaml
+    ├── Behaviors/
+    │   ├── AutoCompleteTextBoxBehavior.cs
+    │   ├── FadeInBehavior.cs
+    │   └── ScrollIntoViewBehavior.cs
+    ├── Controls/
+    │   ├── AnimatedCard.xaml
+    │   ├── AnimatedCard.xaml.cs
+    │   ├── DataGridCustom.xaml
+    │   ├── DataGridCustom.xaml.cs
+    │   ├── DatePickerCustom.xaml
+    │   ├── DatePickerCustom.xaml.cs
+    │   ├── FileUploadControl.xaml
+    │   ├── FileUploadControl.xaml.cs
+    │   ├── LoadingSpinner.xaml
+    │   ├── LoadingSpinner.xaml.cs
+    │   ├── ModernButton.xaml
+    │   ├── ModernButton.xaml.cs
+    │   ├── MultiLineTextBox.xaml
+    │   ├── MultiLineTextBox.xaml.cs
+    │   ├── NumericTextBox.xaml
+    │   ├── NumericTextBox.xaml.cs
+    │   ├── SearchableComboBox.xaml
+    │   └── SearchableComboBox.xaml.cs
+    ├── Converters/
+    │   ├── BoolToVisibilityConverter.cs
+    │   ├── CurrencyConverter.cs
+    │   ├── DateFormatConverter.cs
+    │   └── StatusToColorConverter.cs
+    ├── Helpers/
+    │   ├── AnimationHelper.cs
+    │   ├── ExcelHelper.cs
+    │   ├── ImportHelper.cs
+    │   ├── PrintHelper.cs
+    │   ├── RelayCommand.cs
+    │   ├── ThemeHelper.cs
+    │   ├── ValidationHelper.cs
+    │   └── WindowHelper.cs
+    ├── Performance/
+    │   ├── LazyLoadingHelper.cs
+    │   ├── MemoryOptimizer.cs
+    │   └── VirtualizationHelper.cs
+    ├── Resources/
+    │   ├── Fonts/
+    │   ├── Images/
+    │   │   └── icons/
+    │   ├── Styles/
+    │   │   ├── ButtonStyles.xaml
+    │   │   ├── DataGridStyles.xaml
+    │   │   ├── ModernStyles.xaml
+    │   │   ├── TextBoxStyles.xaml
+    │   │   └── WindowStyles.xaml
+    │   └── Templates/
+    │       ├── CardTemplate.xaml
+    │       ├── ImportTemplate.xaml
+    │       ├── InvoiceTemplate.xaml
+    │       └── ReportTemplate.xaml
+    ├── Services/
+    │   ├── DialogService.cs
+    │   ├── NavigationService.cs
+    │   ├── NotificationService.cs
+    │   ├── PerformanceMonitorService.cs
+    │   └── ThemeService.cs
+    ├── Themes/
+    │   ├── Dark/
+    │   │   └── DarkTheme.xaml
+    │   ├── Light/
+    │   │   └── LightTheme.xaml
+    │   └── Modern/
+    │       ├── Brushes.xaml
+    │       ├── Colors.xaml
+    │       └── ModernTheme.xaml
+    ├── ViewModels/
+    │   ├── BaseViewModel.cs
+    │   ├── CompanyDetailViewModel.cs
+    │   ├── CompanyListViewModel.cs
+    │   ├── DashboardViewModel.cs
+    │   ├── InvoiceCreateViewModel.cs
+    │   ├── InvoiceEditViewModel.cs
+    │   ├── InvoiceImportViewModel.cs
+    │   ├── InvoiceListViewModel.cs
+    │   ├── LoginViewModel.cs
+    │   ├── MainViewModel.cs
+    │   ├── ReportsViewModel.cs
+    │   ├── SettingsViewModel.cs
+    │   ├── TkaDetailViewModel.cs
+    │   └── TkaListViewModel.cs
+    ├── Views/
+    │   ├── Authentication/
+    │   │   ├── LoginWindow.xaml
+    │   │   └── LoginWindow.xaml.cs
+    │   ├── Companies/
+    │   │   ├── CompanyCreateView.xaml
+    │   │   ├── CompanyCreateView.xaml.cs
+    │   │   ├── CompanyDetailView.xaml
+    │   │   ├── CompanyDetailView.xaml.cs
+    │   │   ├── CompanyListView.xaml
+    │   │   ├── CompanyListView.xaml.cs
+    │   │   ├── JobDescriptionView.xaml
+    │   │   ├── JobDescriptionView.xaml.cs
+    │   │   ├── TkaAssignmentView.xaml
+    │   │   └── TkaAssignmentView.xaml.cs
+    │   ├── Dashboard/
+    │   │   ├── DashboardView.xaml
+    │   │   └── DashboardView.xaml.cs
+    │   ├── Invoices/
+    │   │   ├── InvoiceCreateView.xaml
+    │   │   ├── InvoiceCreateView.xaml.cs
+    │   │   ├── InvoiceEditView.xaml
+    │   │   ├── InvoiceEditView.xaml.cs
+    │   │   ├── InvoiceImportView.xaml
+    │   │   ├── InvoiceImportView.xaml.cs
+    │   │   ├── InvoiceListView.xaml
+    │   │   ├── InvoiceListView.xaml.cs
+    │   │   ├── InvoicePreviewView.xaml
+    │   │   ├── InvoicePreviewView.xaml.cs
+    │   │   ├── InvoicePrintView.xaml
+    │   │   └── InvoicePrintView.xaml.cs
+    │   ├── Reports/
+    │   │   ├── ExportView.xaml
+    │   │   ├── ExportView.xaml.cs
+    │   │   ├── InvoiceReportView.xaml
+    │   │   ├── InvoiceReportView.xaml.cs
+    │   │   ├── ReportsView.xaml
+    │   │   └── ReportsView.xaml.cs
+    │   ├── Settings/
+    │   │   ├── BankAccountsView.xaml
+    │   │   ├── BankAccountsView.xaml.cs
+    │   │   ├── DatabaseSettingsView.xaml
+    │   │   ├── DatabaseSettingsView.xaml.cs
+    │   │   ├── InvoiceFormatView.xaml
+    │   │   ├── InvoiceFormatView.xaml.cs
+    │   │   ├── SettingsView.xaml
+    │   │   ├── SettingsView.xaml.cs
+    │   │   ├── UserManagementView.xaml
+    │   │   └── UserManagementView.xaml.cs
+    │   ├── Shared/
+    │   │   ├── ConfirmationView.xaml
+    │   │   ├── ConfirmationView.xaml.cs
+    │   │   ├── LoadingView.xaml
+    │   │   ├── LoadingView.xaml.cs
+    │   │   ├── MessageBoxView.xaml
+    │   │   └── MessageBoxView.xaml.cs
+    │   └── TkaWorkers/
+    │       ├── FamilyMemberView.xaml
+    │       ├── FamilyMemberView.xaml.cs
+    │       ├── TkaCreateView.xaml
+    │       ├── TkaCreateView.xaml.cs
+    │       ├── TkaDetailView.xaml
+    │       ├── TkaDetailView.xaml.cs
+    │       ├── TkaListView.xaml
+    │       └── TkaListView.xaml.cs
+    ├── App.xaml
+    ├── App.xaml.cs
+    ├── appsettings.json
+    ├── InvoiceApp.WPF.csproj
+    ├── MainWindow.xaml
+    └── MainWindow.xaml.cs

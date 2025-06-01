@@ -1,0 +1,406 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Slide In From Right Animation -->
+    <Storyboard x:Key="SlideInFromRightAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="100" To="0" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide In From Left Animation -->
+    <Storyboard x:Key="SlideInFromLeftAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="-100" To="0" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide In From Top Animation -->
+    <Storyboard x:Key="SlideInFromTopAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="-50" To="0" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide In From Bottom Animation -->
+    <Storyboard x:Key="SlideInFromBottomAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="50" To="0" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide Out To Right Animation -->
+    <Storyboard x:Key="SlideOutToRightAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="0" To="100" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide Out To Left Animation -->
+    <Storyboard x:Key="SlideOutToLeftAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="0" To="-100" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide Out To Top Animation -->
+    <Storyboard x:Key="SlideOutToTopAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="0" To="-50" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide Out To Bottom Animation -->
+    <Storyboard x:Key="SlideOutToBottomAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="0" To="50" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Page Navigation Slide In Animation -->
+    <Storyboard x:Key="PageSlideInAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="300" To="0" 
+                         Duration="0:0:0.5">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.4">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Page Navigation Slide Out Animation -->
+    <Storyboard x:Key="PageSlideOutAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="0" To="-300" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Drawer Slide In Animation -->
+    <Storyboard x:Key="DrawerSlideInAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="-400" To="0" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Drawer Slide Out Animation -->
+    <Storyboard x:Key="DrawerSlideOutAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="0" To="-400" 
+                         Duration="0:0:0.25">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Modal Slide Up Animation -->
+    <Storyboard x:Key="ModalSlideUpAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="300" To="0" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Modal Slide Down Animation -->
+    <Storyboard x:Key="ModalSlideDownAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="0" To="300" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseIn"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Card Slide In Staggered Animation -->
+    <Storyboard x:Key="CardSlideInStaggeredAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="30" To="0" 
+                         Duration="0:0:0.4"
+                         BeginTime="0:0:0">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3"
+                         BeginTime="0:0:0.1">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Notification Slide In Animation -->
+    <Storyboard x:Key="NotificationSlideInAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="400" To="0" 
+                         Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Notification Slide Out Animation -->
+    <Storyboard x:Key="NotificationSlideOutAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="0" To="400" 
+                         Duration="0:0:0.25">
+            <DoubleAnimation.EasingFunction>
+                <BackEase EasingMode="EaseIn" Amplitude="0.3"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Smooth Slide Up Animation (for lists) -->
+    <Storyboard x:Key="SmoothSlideUpAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="20" To="0" 
+                         Duration="0:0:0.25">
+            <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.2">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Elastic Slide Animation -->
+    <Storyboard x:Key="ElasticSlideAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.X)"
+                         From="150" To="0" 
+                         Duration="0:0:0.8">
+            <DoubleAnimation.EasingFunction>
+                <ElasticEase EasingMode="EaseOut" Oscillations="2" Springiness="8"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Bounce Slide Animation -->
+    <Storyboard x:Key="BounceSlideAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(TranslateTransform.Y)"
+                         From="100" To="0" 
+                         Duration="0:0:0.6">
+            <DoubleAnimation.EasingFunction>
+                <BounceEase EasingMode="EaseOut" Bounces="2" Bounciness="2"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Slide with Scale Animation -->
+    <Storyboard x:Key="SlideScaleAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(CompositeTransform.TranslateY)"
+                         From="40" To="0" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(CompositeTransform.ScaleX)"
+                         From="0.8" To="1" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(CompositeTransform.ScaleY)"
+                         From="0.8" To="1" 
+                         Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" 
+                         Duration="0:0:0.3">
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- Styles with Slide Animations -->
+    <Style x:Key="SlideInFromRightElement" TargetType="FrameworkElement">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource SlideInFromRightAnimation}"/>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SlideInFromLeftElement" TargetType="FrameworkElement">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource SlideInFromLeftAnimation}"/>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SlideInFromTopElement" TargetType="FrameworkElement">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource SlideInFromTopAnimation}"/>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SlideInFromBottomElement" TargetType="FrameworkElement">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource SlideInFromBottomAnimation}"/>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SmoothSlideUpElement" TargetType="FrameworkElement">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource SmoothSlideUpAnimation}"/>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="CardSlideElement" TargetType="FrameworkElement">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="0" Y="0"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard Storyboard="{StaticResource CardSlideInStaggeredAnimation}"/>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

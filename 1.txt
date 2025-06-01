@@ -1,0 +1,1504 @@
+# COMPLETE INVOICE MANAGEMENT SYSTEM - PROJECT KNOWLEDGE
+
+## PROJECT OVERVIEW
+Aplikasi Invoice Management untuk desktop (WPF) dan mobile (Flutter) dengan shared PostgreSQL database via WiFi network. Sistem memungkinkan pembuatan invoice dengan multiple TKA workers, export PDF/Excel, import invoice, dan real-time synchronization.
+
+**Aturan jumlah invoice:** 18.000,49 → 18.000 | 18.000,50 → 18.001  
+**PPN:** Bisa di custom di aplikasi, default 11%
+
+## TECHNOLOGY STACK
+
+### Core Technologies:
+- **Desktop:** WPF + .NET 8 + Entity Framework Core + Npgsql + Material Design
+- **Mobile:** Flutter + Provider + PostgreSQL Driver  
+- **Database:** PostgreSQL 15+ dengan pgAdmin
+- **Real-time:** SignalR untuk data synchronization
+- **PDF:** iTextSharp 7
+- **Excel:** EPPlus  
+- **Search:** Smart search algorithm + PostgreSQL full-text search
+- **Architecture:** Clean Architecture dengan Repository Pattern
+- **UI Framework:** Material Design + ModernWPF + CommunityToolkit.MVVM
+- **Performance:** Memory Caching + Connection Pooling + Virtual Scrolling
+- **Animations:** WPF Behaviors + Smooth Transitions + Modern UX
+
+### Key NuGet Packages (C#):
+```xml
+<!-- Core Packages -->
+<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
+<PackageReference Include="iText7" Version="8.0.2" />
+<PackageReference Include="EPPlus" Version="7.0.0" />
+<PackageReference Include="Serilog" Version="3.1.1" />
+<PackageReference Include="FluentValidation" Version="11.8.0" />
+
+<!-- Modern UI & Performance Packages -->
+<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+<PackageReference Include="ModernWpfUI" Version="0.9.6" />
+<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
+<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0" />
+<PackageReference Include="MediatR" Version="12.2.0" />
+<PackageReference Include="AutoMapper" Version="12.0.1" />
+```
+
+### Key Flutter Packages:
+```yaml
+dependencies:
+  provider: ^6.1.1
+  postgres: ^2.6.2
+  pdf: ^3.10.7
+  printing: ^5.11.0
+  shared_preferences: ^2.2.2
+  file_picker: ^6.1.1
+  excel: ^4.0.2
+```
+
+## DATABASE SCHEMA (POSTGRESQL)
+
+### Core Tables:
+
+```sql
+-- Table: users
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    user_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) CHECK (role IN ('admin', 'viewer')) NOT NULL DEFAULT 'viewer',
+    full_name VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    last_login TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: companies
+CREATE TABLE IF NOT EXISTS companies (
+    id SERIAL PRIMARY KEY,
+    company_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    company_name VARCHAR(200) NOT NULL,
+    npwp VARCHAR(20) NOT NULL,
+    idtku VARCHAR(20) NOT NULL,
+    address TEXT NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    contact_person VARCHAR(100),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: tka_workers
+CREATE TABLE IF NOT EXISTS tka_workers (
+    id SERIAL PRIMARY KEY,
+    tka_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    nama VARCHAR(100) NOT NULL,
+    passport VARCHAR(20) NOT NULL UNIQUE,
+    divisi VARCHAR(100),
+    jenis_kelamin VARCHAR(20) CHECK (jenis_kelamin IN ('Laki-laki', 'Perempuan')) NOT NULL DEFAULT 'Laki-laki',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: company_tka_assignments
+CREATE TABLE IF NOT EXISTS company_tka_assignments (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER NOT NULL,
+    tka_id INTEGER NOT NULL,
+    assignment_date DATE DEFAULT CURRENT_DATE,
+    end_date DATE NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (tka_id) REFERENCES tka_workers(id) ON DELETE CASCADE,
+    UNIQUE (company_id, tka_id, assignment_date)
+);
+
+-- Table: tka_family_members
+CREATE TABLE IF NOT EXISTS tka_family_members (
+    id SERIAL PRIMARY KEY,
+    family_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    tka_id INTEGER NOT NULL,
+    nama VARCHAR(100) NOT NULL,
+    passport VARCHAR(20) NOT NULL,
+    jenis_kelamin VARCHAR(20) CHECK (jenis_kelamin IN ('Laki-laki', 'Perempuan')) NOT NULL DEFAULT 'Laki-laki',
+    relationship VARCHAR(20) CHECK (relationship IN ('spouse', 'parent', 'child')) NOT NULL DEFAULT 'spouse',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tka_id) REFERENCES tka_workers(id) ON DELETE CASCADE
+);
+
+-- Table: job_descriptions
+CREATE TABLE IF NOT EXISTS job_descriptions (
+    id SERIAL PRIMARY KEY,
+    job_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    company_id INTEGER NOT NULL,
+    job_name VARCHAR(200) NOT NULL,
+    job_description TEXT NOT NULL,
+    price DECIMAL(15,2) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    CHECK (price >= 0)
+);
+
+-- Table: invoices
+CREATE TABLE IF NOT EXISTS invoices (
+    id SERIAL PRIMARY KEY,
+    invoice_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    invoice_number VARCHAR(50) NOT NULL UNIQUE,
+    company_id INTEGER NOT NULL,
+    invoice_date DATE NOT NULL,
+    due_date DATE,
+    subtotal DECIMAL(15,2) NOT NULL DEFAULT 0,
+    vat_percentage DECIMAL(5,2) NOT NULL DEFAULT 11.00,
+    vat_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
+    total_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
+    status VARCHAR(20) CHECK (status IN ('draft', 'finalized', 'paid', 'cancelled')) DEFAULT 'draft',
+    notes TEXT,
+    bank_account_id INTEGER,
+    printed_count INTEGER DEFAULT 0,
+    last_printed_at TIMESTAMP,
+    imported_from VARCHAR(100) NULL,
+    import_batch_id VARCHAR(50) NULL,
+    created_by INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (bank_account_id) REFERENCES bank_accounts(id) ON DELETE SET NULL,
+    CHECK (subtotal >= 0 AND vat_amount >= 0 AND total_amount >= 0)
+);
+
+-- Table: invoice_lines
+CREATE TABLE IF NOT EXISTS invoice_lines (
+    id SERIAL PRIMARY KEY,
+    line_uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    invoice_id INTEGER NOT NULL,
+    baris INTEGER NOT NULL,
+    line_order INTEGER NOT NULL,
+    tka_id INTEGER NOT NULL,
+    job_description_id INTEGER NOT NULL,
+    custom_job_name VARCHAR(200),
+    custom_job_description TEXT,
+    custom_price DECIMAL(15,2),
+    quantity INTEGER DEFAULT 1,
+    unit_price DECIMAL(15,2) NOT NULL,
+    line_total DECIMAL(15,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    FOREIGN KEY (tka_id) REFERENCES tka_workers(id) ON DELETE RESTRICT,
+    FOREIGN KEY (job_description_id) REFERENCES job_descriptions(id) ON DELETE RESTRICT,
+    CHECK (unit_price >= 0 AND line_total >= 0 AND quantity > 0)
+);
+```
+
+## PROJECT STRUCTURE
+
+```
+InvoiceManagement/
+├── Desktop/                              WPF Application
+│   ├── InvoiceApp.sln
+│   ├── Core/                            Business Logic
+│   │   ├── Entities/                    Database Models
+│   │   │   ├── User.cs
+│   │   │   ├── Company.cs
+│   │   │   ├── TkaWorker.cs
+│   │   │   ├── CompanyTkaAssignment.cs
+│   │   │   ├── TkaFamilyMember.cs
+│   │   │   ├── Invoice.cs
+│   │   │   ├── InvoiceLine.cs
+│   │   │   ├── JobDescription.cs
+│   │   │   ├── BankAccount.cs
+│   │   │   ├── ImportLog.cs
+│   │   │   ├── Setting.cs
+│   │   │   └── UserPreference.cs
+│   │   ├── Interfaces/                  Repository Interfaces
+│   │   │   ├── IUserRepository.cs
+│   │   │   ├── ICompanyRepository.cs
+│   │   │   ├── ITkaWorkerRepository.cs
+│   │   │   ├── IInvoiceRepository.cs
+│   │   │   ├── IImportRepository.cs
+│   │   │   ├── IUnitOfWork.cs
+│   │   │   └── Services/
+│   │   │       ├── IInvoiceService.cs
+│   │   │       ├── IPdfService.cs
+│   │   │       ├── IExcelService.cs
+│   │   │       ├── IPrintService.cs
+│   │   │       ├── ISearchService.cs
+│   │   │       ├── IImportService.cs
+│   │   │       └── IInvoiceFormatService.cs
+│   │   ├── DTOs/
+│   │   │   ├── InvoiceDto.cs
+│   │   │   ├── CompanyDto.cs
+│   │   │   ├── TkaWorkerDto.cs
+│   │   │   ├── TkaSelectionItem.cs
+│   │   │   ├── SearchResultDto.cs
+│   │   │   ├── ImportResultDto.cs
+│   │   │   ├── InvoiceLineDto.cs
+│   │   │   └── InvoiceFormatDto.cs
+│   │   ├── Enums/
+│   │   │   ├── UserRole.cs
+│   │   │   ├── InvoiceStatus.cs
+│   │   │   ├── Gender.cs
+│   │   │   ├── FamilyRelationship.cs
+│   │   │   ├── SearchMatchType.cs
+│   │   │   └── ImportFileType.cs
+│   │   └── Constants/
+│   │       ├── AppConstants.cs
+│   │       └── DatabaseConstants.cs
+│   │
+│   ├── Infrastructure/                  Data Access Layer
+│   │   ├── Data/
+│   │   │   ├── InvoiceDbContext.cs
+│   │   │   ├── DbContextFactory.cs
+│   │   │   └── Configurations/
+│   │   │       ├── UserConfiguration.cs
+│   │   │       ├── CompanyConfiguration.cs
+│   │   │       ├── InvoiceConfiguration.cs
+│   │   │       ├── TkaWorkerConfiguration.cs
+│   │   │       └── ImportLogConfiguration.cs
+│   │   ├── Repositories/
+│   │   │   ├── BaseRepository.cs
+│   │   │   ├── UserRepository.cs
+│   │   │   ├── CompanyRepository.cs
+│   │   │   ├── InvoiceRepository.cs
+│   │   │   ├── TkaWorkerRepository.cs
+│   │   │   ├── ImportRepository.cs
+│   │   │   └── UnitOfWork.cs
+│   │   ├── Services/
+│   │   │   ├── PdfService.cs
+│   │   │   ├── ExcelService.cs
+│   │   │   ├── PrintService.cs
+│   │   │   ├── InvoiceNumberService.cs
+│   │   │   ├── SmartSearchService.cs
+│   │   │   ├── ImportService.cs
+│   │   │   ├── InvoiceFormatService.cs
+│   │   │   ├── BackupService.cs
+│   │   │   ├── Core/                    Performance & Modern UI Services
+│   │   │   ├── Caching/
+│   │   │   │   ├── MemoryCacheService.cs
+│   │   │   │   └── DistributedCacheService.cs
+│   │   │   └── Performance/
+│   │   │       ├── ConnectionPoolService.cs
+│   │   │       ├── QueryOptimizationService.cs
+│   │   │       └── BackgroundTaskService.cs
+│   │   ├── Migrations/
+│   │   └── Seed/
+│   │       ├── SeedData.cs
+│   │       └── DefaultSettings.cs
+│   │
+│   ├── Application/                     Application Services
+│   │   ├── Services/
+│   │   │   ├── InvoiceService.cs
+│   │   │   ├── CompanyService.cs
+│   │   │   ├── TkaWorkerService.cs
+│   │   │   ├── UserService.cs
+│   │   │   ├── SettingsService.cs
+│   │   │   ├── ReportService.cs
+│   │   │   └── ImportExportService.cs
+│   │   ├── Validators/
+│   │   │   ├── InvoiceValidator.cs
+│   │   │   ├── CompanyValidator.cs
+│   │   │   ├── TkaWorkerValidator.cs
+│   │   │   └── ImportDataValidator.cs
+│   │   ├── Mappers/
+│   │   │   ├── InvoiceMapper.cs
+│   │   │   ├── CompanyMapper.cs
+│   │   │   └── TkaWorkerMapper.cs
+│   │   └── Commands/
+│   │       ├── CreateInvoiceCommand.cs
+│   │       ├── UpdateInvoiceCommand.cs
+│   │       ├── DeleteInvoiceCommand.cs
+│   │       └── ImportInvoiceCommand.cs
+│   │
+│   └── WPF/                            Presentation Layer
+│       ├── App.xaml
+│       ├── App.xaml.cs
+│       ├── MainWindow.xaml
+│       ├── MainWindow.xaml.cs
+│       ├── Views/
+│       │   ├── Authentication/
+│       │   │   ├── LoginWindow.xaml
+│       │   │   └── LoginWindow.xaml.cs
+│       │   ├── Dashboard/
+│       │   │   ├── DashboardView.xaml
+│       │   │   └── DashboardView.xaml.cs
+│       │   ├── Companies/
+│       │   │   ├── CompanyListView.xaml
+│       │   │   ├── CompanyDetailView.xaml
+│       │   │   ├── CompanyCreateView.xaml
+│       │   │   ├── JobDescriptionView.xaml
+│       │   │   └── TkaAssignmentView.xaml
+│       │   ├── TkaWorkers/
+│       │   │   ├── TkaListView.xaml
+│       │   │   ├── TkaDetailView.xaml
+│       │   │   ├── TkaCreateView.xaml
+│       │   │   └── FamilyMemberView.xaml
+│       │   ├── Invoices/
+│       │   │   ├── InvoiceListView.xaml
+│       │   │   ├── InvoiceCreateView.xaml
+│       │   │   ├── InvoiceEditView.xaml
+│       │   │   ├── InvoicePreviewView.xaml
+│       │   │   ├── InvoicePrintView.xaml
+│       │   │   └── InvoiceImportView.xaml
+│       │   ├── Reports/
+│       │   │   ├── ReportsView.xaml
+│       │   │   ├── InvoiceReportView.xaml
+│       │   │   └── ExportView.xaml
+│       │   └── Settings/
+│       │       ├── SettingsView.xaml
+│       │       ├── DatabaseSettingsView.xaml
+│       │       ├── BankAccountsView.xaml
+│       │       ├── InvoiceFormatView.xaml
+│       │       └── UserManagementView.xaml
+│       ├── ViewModels/
+│       │   ├── BaseViewModel.cs
+│       │   ├── MainViewModel.cs
+│       │   ├── LoginViewModel.cs
+│       │   ├── DashboardViewModel.cs
+│       │   ├── CompanyListViewModel.cs
+│       │   ├── CompanyDetailViewModel.cs
+│       │   ├── TkaListViewModel.cs
+│       │   ├── TkaDetailViewModel.cs
+│       │   ├── InvoiceListViewModel.cs
+│       │   ├── InvoiceCreateViewModel.cs
+│       │   ├── InvoiceEditViewModel.cs
+│       │   ├── InvoiceImportViewModel.cs
+│       │   ├── ReportsViewModel.cs
+│       │   └── SettingsViewModel.cs
+│       ├── Controls/
+│       │   ├── SearchableComboBox.xaml
+│       │   ├── MultiLineTextBox.xaml
+│       │   ├── NumericTextBox.xaml
+│       │   ├── DatePickerCustom.xaml
+│       │   ├── DataGridCustom.xaml
+│       │   ├── FileUploadControl.xaml
+│       │   └── LoadingSpinner.xaml
+│       ├── Converters/
+│       │   ├── BoolToVisibilityConverter.cs
+│       │   ├── StatusToColorConverter.cs
+│       │   ├── CurrencyConverter.cs
+│       │   └── DateFormatConverter.cs
+│       ├── Helpers/
+│       │   ├── RelayCommand.cs
+│       │   ├── WindowHelper.cs
+│       │   ├── PrintHelper.cs
+│       │   ├── ExcelHelper.cs
+│       │   ├── ValidationHelper.cs
+│       │   └── ImportHelper.cs
+│       └── Resources/
+│           ├── Styles/
+│           │   ├── ButtonStyles.xaml
+│           │   ├── TextBoxStyles.xaml
+│           │   ├── DataGridStyles.xaml
+│           │   └── WindowStyles.xaml
+│           ├── Templates/
+│           │   ├── InvoiceTemplate.xaml
+│           │   ├── ReportTemplate.xaml
+│           │   └── ImportTemplate.xaml
+│           └── Images/
+│               ├── logo.png
+│               └── icons/
+│
+└── Mobile/                              Flutter Application
+    ├── lib/
+    │   ├── main.dart
+    │   ├── app.dart
+    │   ├── core/
+    │   │   ├── constants/
+    │   │   │   ├── app_constants.dart
+    │   │   │   ├── api_constants.dart
+    │   │   │   └── theme_constants.dart
+    │   │   ├── utils/
+    │   │   │   ├── date_utils.dart
+    │   │   │   ├── currency_utils.dart
+    │   │   │   ├── validation_utils.dart
+    │   │   │   ├── search_utils.dart
+    │   │   │   └── network_utils.dart
+    │   │   ├── errors/
+    │   │   │   ├── exceptions.dart
+    │   │   │   └── failures.dart
+    │   │   └── network/
+    │   │       ├── network_info.dart
+    │   │       └── dio_client.dart
+    │   ├── data/
+    │   │   ├── models/
+    │   │   │   ├── user_model.dart
+    │   │   │   ├── company_model.dart
+    │   │   │   ├── tka_worker_model.dart
+    │   │   │   ├── invoice_model.dart
+    │   │   │   ├── invoice_line_model.dart
+    │   │   │   ├── search_result_model.dart
+    │   │   │   └── import_result_model.dart
+    │   │   ├── repositories/
+    │   │   │   ├── user_repository_impl.dart
+    │   │   │   ├── company_repository_impl.dart
+    │   │   │   ├── invoice_repository_impl.dart
+    │   │   │   ├── tka_repository_impl.dart
+    │   │   │   └── import_repository_impl.dart
+    │   │   ├── datasources/
+    │   │   │   ├── local/
+    │   │   │   │   ├── app_database.dart
+    │   │   │   │   ├── user_local_datasource.dart
+    │   │   │   │   ├── company_local_datasource.dart
+    │   │   │   │   └── settings_local_datasource.dart
+    │   │   │   └── remote/
+    │   │   │       ├── user_remote_datasource.dart
+    │   │   │       ├── company_remote_datasource.dart
+    │   │   │       ├── invoice_remote_datasource.dart
+    │   │   │       ├── tka_remote_datasource.dart
+    │   │   │       └── import_remote_datasource.dart
+    │   │   └── services/
+    │   │       ├── database_service.dart
+    │   │       ├── sync_service.dart
+    │   │       ├── pdf_service.dart
+    │   │       ├── search_service.dart
+    │   │       └── import_service.dart
+    │   ├── domain/
+    │   │   ├── entities/
+    │   │   │   ├── user.dart
+    │   │   │   ├── company.dart
+    │   │   │   ├── tka_worker.dart
+    │   │   │   ├── invoice.dart
+    │   │   │   ├── invoice_line.dart
+    │   │   │   └── search_result.dart
+    │   │   ├── repositories/
+    │   │   │   ├── user_repository.dart
+    │   │   │   ├── company_repository.dart
+    │   │   │   ├── invoice_repository.dart
+    │   │   │   ├── tka_repository.dart
+    │   │   │   └── import_repository.dart
+    │   │   └── usecases/
+    │   │       ├── auth/
+    │   │       │   ├── login_usecase.dart
+    │   │       │   └── logout_usecase.dart
+    │   │       ├── companies/
+    │   │       │   ├── get_companies_usecase.dart
+    │   │       │   ├── create_company_usecase.dart
+    │   │       │   ├── update_company_usecase.dart
+    │   │       │   └── search_companies_usecase.dart
+    │   │       ├── invoices/
+    │   │       │   ├── get_invoices_usecase.dart
+    │   │       │   ├── create_invoice_usecase.dart
+    │   │       │   ├── update_invoice_usecase.dart
+    │   │       │   ├── delete_invoice_usecase.dart
+    │   │       │   └── import_invoices_usecase.dart
+    │   │       └── tka/
+    │   │           ├── get_tka_workers_usecase.dart
+    │   │           ├── create_tka_worker_usecase.dart
+    │   │           ├── update_tka_worker_usecase.dart
+    │   │           └── search_tka_by_company_usecase.dart
+    │   └── presentation/
+    │       ├── providers/
+    │       │   ├── auth_provider.dart
+    │       │   ├── company_provider.dart
+    │       │   ├── invoice_provider.dart
+    │       │   ├── tka_provider.dart
+    │       │   ├── search_provider.dart
+    │       │   └── settings_provider.dart
+    │       ├── screens/
+    │       │   ├── splash/
+    │       │   │   └── splash_screen.dart
+    │       │   ├── auth/
+    │       │   │   ├── login_screen.dart
+    │       │   │   └── settings_connection_screen.dart
+    │       │   ├── home/
+    │       │   │   ├── home_screen.dart
+    │       │   │   └── dashboard_screen.dart
+    │       │   ├── companies/
+    │       │   │   ├── company_list_screen.dart
+    │       │   │   ├── company_detail_screen.dart
+    │       │   │   ├── company_form_screen.dart
+    │       │   │   ├── job_descriptions_screen.dart
+    │       │   │   └── tka_assignment_screen.dart
+    │       │   ├── tka/
+    │       │   │   ├── tka_list_screen.dart
+    │       │   │   ├── tka_detail_screen.dart
+    │       │   │   ├── tka_form_screen.dart
+    │       │   │   └── family_members_screen.dart
+    │       │   ├── invoices/
+    │       │   │   ├── invoice_list_screen.dart
+    │       │   │   ├── invoice_create_screen.dart
+    │       │   │   ├── invoice_edit_screen.dart
+    │       │   │   ├── invoice_preview_screen.dart
+    │       │   │   ├── invoice_lines_screen.dart
+    │       │   │   └── invoice_import_screen.dart
+    │       │   ├── reports/
+    │       │   │   ├── reports_screen.dart
+    │       │   │   └── export_screen.dart
+    │       │   └── settings/
+    │       │       ├── settings_screen.dart
+    │       │       ├── database_settings_screen.dart
+    │       │       └── user_preferences_screen.dart
+    │       ├── widgets/
+    │       │   ├── common/
+    │       │   │   ├── app_bar_custom.dart
+    │       │   │   ├── loading_widget.dart
+    │       │   │   ├── error_widget.dart
+    │       │   │   ├── empty_state_widget.dart
+    │       │   │   └── custom_button.dart
+    │       │   ├── forms/
+    │       │   │   ├── custom_text_field.dart
+    │       │   │   ├── custom_dropdown.dart
+    │       │   │   ├── custom_date_picker.dart
+    │       │   │   ├── searchable_dropdown.dart
+    │       │   │   └── file_upload_widget.dart
+    │       │   ├── lists/
+    │       │   │   ├── company_list_item.dart
+    │       │   │   ├── tka_list_item.dart
+    │       │   │   ├── invoice_list_item.dart
+    │       │   │   └── job_list_item.dart
+    │       │   └── cards/
+    │       │       ├── dashboard_card.dart
+    │       │       ├── summary_card.dart
+    │       │       └── info_card.dart
+    │       └── theme/
+    │           ├── app_theme.dart
+    │           ├── app_colors.dart
+    │           ├── app_text_styles.dart
+    │           └── app_dimensions.dart
+```
+
+## INVOICE FORMAT CUSTOMIZATION
+
+### 1. Customizable Invoice Elements:
+- **Header Section**: Company name (PT. FORTUNA SADA NIOGA), company tagline ("Spirit of Services")
+- **Invoice Details**: Place before date (default: "Jakarta"), date format
+- **Company Info**: Office address, phone numbers (multiple lines supported)
+- **Table Headers**: Column labels (No, Expatriat, Keterangan, Harga, etc.)
+- **Footer**: Company name in footer, signatory name
+- **Calculations**: DPP, PPN percentage and labels, Total amount
+- **Bank Information**: Bank details (shown only on last page)
+
+### 2. Invoice Layout Structure (based on existing VB.NET template):
+```
+Header: [Company Name] + "INVOICE"
+        [Company Tagline]
+
+Details: No: [Auto-generated]     Kantor: [Office Info]
+         Tanggal: [Place], [Date]  [Office Address]
+         Halaman: [Page/Total]     Telp: [Phone Numbers]
+
+To: [Company Name]
+    [Company Address]
+
+Table:
+┌─────┬─────────┬─────────┬─────────────┬─────────────┬─────────┐
+│ No. │ Tanggal │ No. PO  │ Expatriat   │ Keterangan  │ Harga   │
+├─────┼─────────┼─────────┼─────────────┼─────────────┼─────────┤
+│  1  │ [Date]  │ [PO]    │ [TKA Name]  │ [Job Desc]  │ [Amount]│
+│     │         │         │             │ [Multi-line]│         │
+└─────┴─────────┴─────────┴─────────────┴─────────────┴─────────┘
+
+                                          Sub Total: [Amount]
+                                          PPN:       [VAT]
+                                          Total:     [Final]
+
+Terbilang: [Amount in words] Rupiah
+
+Footer: [Terms] | [Company Name] | [Signatory Name]
+        [Bank Info - Last page only]
+```
+
+### 3. Multi-line Job Description Support:
+- Job descriptions can span multiple lines within same cell
+- Users can press Enter to add line breaks in description
+- Display preserves formatting in both screen and print output
+- Custom job descriptions can be edited during invoice creation
+
+### 4. Print Customization:
+- **Print Preview**: Full preview before printing with layout validation
+- **Page Selection**: Choose specific pages to print (default: all pages)
+- **Margins**: Configurable margins saved per user preference
+- **Bank Info Placement**: Automatically appears only on last page
+- **Page Breaks**: Smart page breaks for multi-page invoices
+- **Signature Area**: Reserved space for manual signature on last page
+
+### 5. Legacy VB.NET Template Reference:
+```vb.net
+' Key layout measurements from existing system:
+- Header height: Variable based on content
+- Column widths: No(70), Tanggal(70), PO(70), Expatriat(140), Keterangan(300), Harga(110)
+- Row height: 32px standard, 42px for headers
+- Page margins: Configurable
+- Font sizes: Header(20), Details(10), Table(8)
+```
+
+## TKA-FAMILY RELATIONSHIP & WORKFLOW
+
+### 1. TKA and Family Member Management:
+- **TKA Worker Fields**: Nama, Passport, Divisi, Jenis Kelamin (Laki-laki/Perempuan)
+- **Family Member Fields**: Nama, Passport, Jenis Kelamin, Relationship (spouse/parent/child)
+- **Pricing**: Same price for both TKA workers and their family members
+- **Assignment**: Family members inherit company assignments from main TKA worker
+
+### 2. Company-Job-TKA Relationships:
+- Each company has unique NPWP and IDTKU (same value, different purpose)
+- Companies have multiple job descriptions with different prices
+- Same job description can have different prices for different companies
+- TKA workers must be assigned to companies before appearing in invoice creation
+- Job descriptions have sort order (configurable numbering) in company setup
+
+### 3. Invoice Creation Workflow (Enhanced):
+```
+Step 1: Select Company
+├── Auto-load company details (NPWP, address, etc.)
+├── Load assigned TKA workers for this company
+└── Load company-specific job descriptions (sorted by order)
+
+Step 2: Add Invoice Lines
+├── Click "Tambah" button → Opens new line dialog
+├── Select TKA/Family Member (dropdown with search)
+│   ├── Shows TKA workers assigned to selected company
+│   ├── Click button next to dropdown → Shows full TKA list
+│   ├── Family members listed under main TKA worker
+│   └── Format: "Nama (Type - Detail - Passport)"
+├── Select Job Description (checkbox list, auto-sorted)
+│   ├── Multiple jobs can be selected
+│   ├── Custom job description can be added/edited
+│   ├── Multi-line support with Enter key
+│   └── Custom pricing can be modified
+├── Baris Assignment:
+│   ├── Auto-increment by default (1, 2, 3...)
+│   ├── Can be manually overridden
+│   └── Multiple lines can share same baris number
+└── Price/Total Calculation:
+    ├── Unit price from job description or custom
+    ├── Quantity (default: 1)
+    ├── Line total = unit price × quantity
+    └── Auto-calculate DPP, PPN, Grand Total
+
+Step 3: Invoice Finalization
+├── Edit invoice date (default: current date)
+├── Add notes/comments
+├── Review totals and "Terbilang" amount
+├── Save as Draft or Finalize
+└── Print/Export options become available
+```
+
+### 4. User Interface Specifications:
+- **TKA Selection**: Text field with dropdown button showing filtered list
+- **Family Integration**: Family members appear under main TKA with clear hierarchy
+- **Job Description**: Checkbox list with sort order, editable descriptions
+- **Multi-line Input**: Description fields support Enter key for line breaks
+- **Real-time Calculation**: Totals update immediately when prices/quantities change
+- **Search Functionality**: Smart search across TKA names, passports, divisions
+
+### 5. Invoice Line Management:
+- **Baris Grouping**: Lines with same baris number are visually grouped
+- **Sort Order**: Lines ordered by baris number, then by line order within baris
+- **Edit Capability**: All fields editable before finalizing invoice
+- **Delete Lines**: Individual lines can be removed
+- **Copy Lines**: Duplicate lines for similar entries
+
+### 6. Print and Export Features:
+- **Page Selection**: Choose specific pages (default: all pages)
+- **Bank Info**: Only appears on last page automatically
+- **Signature Area**: Reserved space on last page
+- **Print Preview**: Full WYSIWYG preview with exact formatting
+- **Margin Settings**: User-configurable, persistent per user
+- **Page Breaks**: Smart breaks between baris groups when possible
+
+## SMART SEARCH IMPLEMENTATION
+
+### 1. TKA Filtered by Company Logic:
+
+```csharp
+// Query to get TKA workers assigned to specific company
+public async Task<List<TkaWorkerDto>> GetTkaByCompanyAsync(int companyId, string searchTerm = "")
+{
+    var query = from t in _context.TkaWorkers
+                join a in _context.CompanyTkaAssignments 
+                    on t.Id equals a.TkaId
+                where a.CompanyId == companyId 
+                    && a.IsActive 
+                    && t.IsActive
+                    && (a.EndDate == null || a.EndDate > DateTime.Now)
+                select new { TkaWorker = t, Assignment = a };
+
+    if (!string.IsNullOrWhiteSpace(searchTerm))
+    {
+        var searchResults = await _searchService.SearchTkaWorkers(
+            query.Select(x => x.TkaWorker).ToList(), 
+            searchTerm);
+        
+        return searchResults.Select(r => _mapper.Map<TkaWorkerDto>(r.Item)).ToList();
+    }
+
+    return await query.Select(x => _mapper.Map<TkaWorkerDto>(x.TkaWorker)).ToListAsync();
+}
+
+// Include family members in search
+public async Task<List<TkaSelectionItem>> GetTkaWithFamilyByCompanyAsync(int companyId, string searchTerm = "")
+{
+    var result = new List<TkaSelectionItem>();
+    
+    // Get TKA workers assigned to company
+    var tkaWorkers = await GetTkaByCompanyAsync(companyId, searchTerm);
+    
+    foreach (var tka in tkaWorkers)
+    {
+        // Add main TKA
+        result.Add(new TkaSelectionItem
+        {
+            Id = tka.Id,
+            DisplayName = $"{tka.Nama} (TKA - {tka.Divisi} - {tka.Passport})",
+            TkaMainName = tka.Nama,
+            Nama = tka.Nama,
+            Passport = tka.Passport,
+            Divisi = tka.Divisi,
+            Relationship = "TKA",
+            IsMainTka = true
+        });
+        
+        // Add family members
+        var familyMembers = await _context.TkaFamilyMembers
+            .Where(f => f.TkaId == tka.Id && f.IsActive)
+            .ToListAsync();
+            
+        foreach (var family in familyMembers)
+        {
+            result.Add(new TkaSelectionItem
+            {
+                Id = family.Id + 100000, // Offset to avoid ID collision
+                DisplayName = $"{family.Nama} ({family.Relationship} of {tka.Nama} - {family.Passport})",
+                TkaMainName = tka.Nama,
+                Nama = family.Nama,
+                Passport = family.Passport,
+                Divisi = tka.Divisi,
+                Relationship = family.Relationship,
+                IsMainTka = false
+            });
+        }
+    }
+    
+    return result.OrderBy(x => x.TkaMainName).ThenBy(x => x.IsMainTka ? 0 : 1).ToList();
+}
+```
+
+### 2. Smart Search Service Implementation:
+
+```csharp
+public class SmartSearchService
+{
+    public List<SearchResult<T>> Search<T>(
+        List<T> items, 
+        string searchTerm, 
+        Func<T, string> textExtractor,
+        Func<T, string[]> additionalFields = null)
+    {
+        var results = new List<SearchResult<T>>();
+        var normalizedSearch = NormalizeText(searchTerm);
+        var searchWords = normalizedSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var item in items)
+        {
+            var itemText = NormalizeText(textExtractor(item));
+            var itemWords = itemText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            
+            var matchResult = AnalyzeMatch(searchWords, itemWords, itemText, normalizedSearch);
+            
+            if (matchResult.HasMatch)
+            {
+                results.Add(new SearchResult<T>
+                {
+                    Item = item,
+                    SearchRank = matchResult.Rank,
+                    MatchedText = matchResult.MatchedText,
+                    MatchType = matchResult.MatchType
+                });
+            }
+            
+            // Search in additional fields (passport, divisi, etc)
+            if (additionalFields != null)
+            {
+                foreach (var field in additionalFields(item))
+                {
+                    var fieldMatch = AnalyzeMatch(searchWords, 
+                        NormalizeText(field).Split(' '), field, normalizedSearch);
+                    
+                    if (fieldMatch.HasMatch && fieldMatch.Rank < matchResult.Rank)
+                    {
+                        results.Last().SearchRank = fieldMatch.Rank;
+                        results.Last().MatchType = fieldMatch.MatchType;
+                    }
+                }
+            }
+        }
+
+        return results.OrderBy(r => r.SearchRank).ThenBy(r => textExtractor(r.Item)).ToList();
+    }
+
+    private MatchResult AnalyzeMatch(string[] searchWords, string[] itemWords, 
+        string fullText, string fullSearch)
+    {
+        // 1. Exact full match
+        if (fullText == fullSearch)
+            return new MatchResult(true, 1, SearchMatchType.ExactFullMatch, fullText);
+
+        // 2. Exact word match (any word in search matches any word in item)
+        foreach (var searchWord in searchWords)
+        {
+            if (itemWords.Any(w => w == searchWord))
+                return new MatchResult(true, 2, SearchMatchType.ExactWordMatch, searchWord);
+        }
+
+        // 3. Starts with match
+        if (fullText.StartsWith(fullSearch))
+            return new MatchResult(true, 3, SearchMatchType.StartsWith, fullSearch);
+
+        // 4. All search words found in item (any order)
+        var allWordsFound = searchWords.All(sw => 
+            itemWords.Any(iw => iw.Contains(sw)) || fullText.Contains(sw));
+        
+        if (allWordsFound)
+            return new MatchResult(true, 5, SearchMatchType.MultiWordMatch, fullSearch);
+
+        // 5. Contains match (substring)
+        if (fullText.Contains(fullSearch))
+            return new MatchResult(true, 4, SearchMatchType.Contains, fullSearch);
+
+        // 6. Partial word matches with fuzzy tolerance
+        var partialMatches = 0;
+        var matchedWords = new List<string>();
+        
+        foreach (var searchWord in searchWords)
+        {
+            foreach (var itemWord in itemWords)
+            {
+                if (itemWord.Contains(searchWord) || 
+                    LevenshteinDistance(searchWord, itemWord) <= 2)
+                {
+                    partialMatches++;
+                    matchedWords.Add(itemWord);
+                    break;
+                }
+            }
+        }
+
+        if (partialMatches >= searchWords.Length * 0.6) // 60% of words match
+        {
+            var matchType = matchedWords.Any(w => LevenshteinDistance(fullSearch, w) <= 2) 
+                ? SearchMatchType.FuzzyMatch 
+                : SearchMatchType.PartialMatch;
+            
+            return new MatchResult(true, matchType == SearchMatchType.FuzzyMatch ? 6 : 7, 
+                matchType, string.Join(" ", matchedWords));
+        }
+
+        return new MatchResult(false, 999, SearchMatchType.PartialMatch, "");
+    }
+
+    private string NormalizeText(string text)
+    {
+        return text?.ToLowerInvariant()
+            .Replace(".", "")
+            .Replace(",", "")
+            .Replace("-", " ")
+            .Trim() ?? "";
+    }
+
+    private int LevenshteinDistance(string a, string b)
+    {
+        // Standard Levenshtein distance algorithm for fuzzy matching
+        if (string.IsNullOrEmpty(a)) return b?.Length ?? 0;
+        if (string.IsNullOrEmpty(b)) return a.Length;
+
+        var matrix = new int[a.Length + 1, b.Length + 1];
+
+        for (int i = 0; i <= a.Length; i++) matrix[i, 0] = i;
+        for (int j = 0; j <= b.Length; j++) matrix[0, j] = j;
+
+        for (int i = 1; i <= a.Length; i++)
+        {
+            for (int j = 1; j <= b.Length; j++)
+            {
+                var cost = a[i - 1] == b[j - 1] ? 0 : 1;
+                matrix[i, j] = Math.Min(
+                    Math.Min(matrix[i - 1, j] + 1, matrix[i, j - 1] + 1),
+                    matrix[i - 1, j - 1] + cost);
+            }
+        }
+
+        return matrix[a.Length, b.Length];
+    }
+}
+```
+
+## IMPORT INVOICE FUNCTIONALITY
+
+### 1. Supported Import Formats:
+- ✅ Excel Files (.xlsx, .xls) - Standard format with templates
+- ✅ CSV Files - Comma-separated values
+- ✅ JSON Files - For system-to-system integration  
+- ✅ Template-based Import - Predefined Excel templates
+
+### 2. Excel Import Template Structure:
+```
+Sheet 1: Invoice Headers
+- invoice_number, company_name, company_npwp, invoice_date, due_date, notes
+
+Sheet 2: Invoice Lines  
+- invoice_number, baris, tka_name, tka_passport, job_name, custom_job_name, 
+  custom_description, custom_price, quantity, line_total
+```
+
+### 3. Import Service Implementation:
+
+```csharp
+public class ImportService : IImportService
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly ILogger<ImportService> _logger;
+    private readonly FluentValidation.IValidator<InvoiceDto> _invoiceValidator;
+
+    public async Task<ImportResult> ImportInvoicesFromExcelAsync(
+        string filePath, 
+        int userId, 
+        ImportOptions options = null)
+    {
+        var importBatchId = Guid.NewGuid().ToString();
+        var result = new ImportResult
+        {
+            ImportBatchId = importBatchId,
+            FileName = Path.GetFileName(filePath),
+            FileType = ImportFileType.Excel
+        };
+
+        try
+        {
+            using var package = new ExcelPackage(new FileInfo(filePath));
+            
+            // Validate Excel structure
+            if (!ValidateExcelStructure(package, out var structureErrors))
+            {
+                result.Errors.AddRange(structureErrors);
+                return result;
+            }
+
+            var headerSheet = package.Workbook.Worksheets["Headers"] ?? package.Workbook.Worksheets[0];
+            var linesSheet = package.Workbook.Worksheets["Lines"] ?? package.Workbook.Worksheets[1];
+
+            // Parse invoice headers
+            var invoiceHeaders = ParseInvoiceHeaders(headerSheet);
+            var invoiceLines = ParseInvoiceLines(linesSheet);
+
+            result.TotalRecords = invoiceHeaders.Count;
+
+            foreach (var header in invoiceHeaders)
+            {
+                try
+                {
+                    // Validate header data
+                    var validationResult = await _invoiceValidator.ValidateAsync(header);
+                    if (!validationResult.IsValid)
+                    {
+                        result.FailedRecords++;
+                        result.Errors.Add(new ImportError
+                        {
+                            RowNumber = header.RowNumber,
+                            Field = "General",
+                            Message = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage))
+                        });
+                        continue;
+                    }
+
+                    // Find or create company
+                    var company = await FindOrCreateCompanyAsync(header);
+                    
+                    // Create invoice
+                    var invoice = new Invoice
+                    {
+                        InvoiceNumber = header.InvoiceNumber,
+                        CompanyId = company.Id,
+                        InvoiceDate = header.InvoiceDate,
+                        DueDate = header.DueDate,
+                        Notes = header.Notes,
+                        ImportedFrom = result.FileName,
+                        ImportBatchId = importBatchId,
+                        CreatedBy = userId,
+                        Status = InvoiceStatus.Draft
+                    };
+
+                    // Add invoice lines
+                    var relatedLines = invoiceLines.Where(l => l.InvoiceNumber == header.InvoiceNumber);
+                    await AddInvoiceLinesAsync(invoice, relatedLines, result);
+
+                    // Calculate totals
+                    CalculateInvoiceTotals(invoice);
+
+                    await _unitOfWork.InvoiceRepository.AddAsync(invoice);
+                    result.SuccessRecords++;
+                }
+                catch (Exception ex)
+                {
+                    result.FailedRecords++;
+                    result.Errors.Add(new ImportError
+                    {
+                        RowNumber = header.RowNumber,
+                        Field = "General",
+                        Message = ex.Message
+                    });
+                    _logger.LogError(ex, "Error importing invoice {InvoiceNumber}", header.InvoiceNumber);
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // Log import activity
+            await LogImportActivityAsync(result, userId);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during import process");
+            result.Errors.Add(new ImportError
+            {
+                Field = "File",
+                Message = $"Import failed: {ex.Message}"
+            });
+            return result;
+        }
+    }
+}
+```
+
+## KEY BUSINESS RULES & FEATURES
+
+### 1. Invoice Creation Workflow:
+1. Select Company → Auto-load job descriptions and assigned TKA workers
+2. Add Invoice Lines → Search TKA (filtered by company) + Select Job + Custom pricing
+3. Baris Grouping → Multiple TKA workers can be grouped in same baris
+4. Real-time Calculation → Auto-calculate subtotal, VAT, total
+5. Draft Auto-save → Save every 30 seconds
+6. Finalize Invoice → Lock editing, enable printing/export
+
+### 2. TKA-Company Assignment Rules:
+- TKA workers must be assigned to companies before appearing in invoice creation
+- Assignment includes start date, optional end date, and notes
+- Inactive assignments don't show in TKA selection
+- Family members automatically inherit company assignments from main TKA
+
+### 3. Smart Search Features:
+- Flexible word order → "ajah andi" finds "Andi Ajah Pratama"
+- Typo tolerance → "ajh" finds "ajah" using Levenshtein distance
+- Multi-field search → Search across name, passport, division
+- Company filtering → TKA search filtered by selected company
+- Real-time filtering → Results update as user types (300ms delay)
+
+### 4. Import Capabilities:
+- Excel/CSV Import with validation and error reporting
+- Duplicate detection → Skip or merge duplicate invoices
+- Auto-create missing data → Companies, TKA workers, job descriptions
+- Batch processing → Import multiple invoices with single batch ID
+- Error logging → Detailed error reports with row numbers and field info
+- Preview mode → Validate data before actual import
+
+### 5. Export Formats:
+- PDF → Individual invoice or batch export with filtering
+- Excel → Tax invoice format (2 sheets: headers + lines)
+- CSV → For external system integration
+- Print → Selective page printing with bank info on last page only
+
+### 6. Security & Audit:
+- Role-based access → Admin can create/edit, Viewer can only view
+- Audit logging → Track all invoice changes with old/new values
+- User preferences → Persistent filter/sort settings per user
+- Password security → BCrypt hashing with salt
+
+### 7. Performance Optimization:
+- Database indexing → Full-text search indexes for Indonesian language
+- Connection pooling → Efficient PostgreSQL connections
+- Caching strategy → Cache frequent searches and user preferences
+- Lazy loading → Load related data only when needed
+- Pagination → Handle large datasets efficiently
+
+### 8. Real-time Synchronization:
+- SignalR integration → Real-time updates between desktop and mobile
+- Conflict resolution → Timestamp-based merging for concurrent edits
+- Offline capability → Mobile app caches data for offline viewing
+- Network resilience → Automatic reconnection and sync when network restored
+
+## MOBILE APP SPECIFIC FEATURES
+
+### 1. Responsive Design:
+- Adaptive layouts → Optimized for various screen sizes
+- Touch-friendly controls → Large tap targets, swipe gestures
+- Offline-first → Core functionality works without internet
+- Fast loading → Optimized queries and image compression
+
+### 2. Search Implementation:
+```dart
+class SearchService {
+  Future<List<SearchResult<T>>> search<T>({
+    required List<T> items,
+    required String searchTerm,
+    required String Function(T) textExtractor,
+    List<String> Function(T)? additionalFields,
+  }) async {
+    if (searchTerm.length < 2) return [];
+    
+    final results = <SearchResult<T>>[];
+    final normalizedSearch = _normalizeText(searchTerm);
+    final searchWords = normalizedSearch.split(' ');
+    
+    for (final item in items) {
+      final itemText = _normalizeText(textExtractor(item));
+      final matchResult = _analyzeMatch(searchWords, itemText, item);
+      
+      if (matchResult.hasMatch) {
+        results.add(matchResult);
+      }
+    }
+    
+    results.sort((a, b) => a.rank.compareTo(b.rank));
+    return results;
+  }
+  
+  String _normalizeText(String text) {
+    return text.toLowerCase()
+        .replaceAll(RegExp(r'[.,\-]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+}
+```
+
+### 3. Sync Status Indicators:
+```dart
+class SyncStatusWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SyncProvider>(
+      builder: (context, syncProvider, child) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: _getSyncColor(syncProvider.status),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_getSyncIcon(syncProvider.status), size: 16),
+              SizedBox(width: 4),
+              Text(_getSyncText(syncProvider.status)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
+## PERFORMANCE OPTIMIZATION & MODERN UI
+
+### 1. Performance Features (Zero Loading Experience):
+
+#### **Memory & Caching Strategy:**
+```csharp
+// High-speed memory caching for instant data access
+public class MemoryCacheService : ICachingService
+{
+    private readonly IMemoryCache _cache;
+    private readonly TimeSpan _defaultExpiration = TimeSpan.FromMinutes(30);
+
+    public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> getItem, TimeSpan? expiration = null)
+    {
+        if (_cache.TryGetValue(key, out T cachedItem))
+            return cachedItem;
+
+        var item = await getItem();
+        _cache.Set(key, item, expiration ?? _defaultExpiration);
+        return item;
+    }
+
+    // Cache company data for instant search
+    public async Task<List<CompanyDto>> GetCachedCompaniesAsync()
+    {
+        return await GetOrSetAsync("companies_all", 
+            () => _companyService.GetAllAsync(),
+            TimeSpan.FromMinutes(60));
+    }
+}
+```
+
+#### **Connection Pooling for Database Speed:**
+```csharp
+public class ConnectionPoolService
+{
+    private readonly string _connectionString;
+    private readonly NpgsqlDataSourceBuilder _dataSourceBuilder;
+
+    public ConnectionPoolService(IConfiguration config)
+    {
+        _connectionString = config.GetConnectionString("DefaultConnection");
+        _dataSourceBuilder = new NpgsqlDataSourceBuilder(_connectionString)
+            .ConfigureDataSource(builder =>
+            {
+                builder.ConnectionPooling = true;
+                builder.MaxPoolSize = 100;
+                builder.MinPoolSize = 10;
+                builder.ConnectionIdleLifetime = TimeSpan.FromMinutes(15);
+            });
+    }
+}
+```
+
+#### **Virtual Scrolling for Large Datasets:**
+```xml
+<!-- High-performance DataGrid with virtualization -->
+<DataGrid VirtualizingPanel.IsVirtualizing="True"
+          VirtualizingPanel.VirtualizationMode="Recycling"
+          VirtualizingPanel.IsContainerVirtualizable="True"
+          ScrollViewer.CanContentScroll="True"
+          EnableRowVirtualization="True"
+          EnableColumnVirtualization="True">
+</DataGrid>
+```
+
+#### **Background Task Processing:**
+```csharp
+public class BackgroundTaskService : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            // Pre-load frequently accessed data
+            await PreloadCacheAsync();
+            
+            // Optimize database connections
+            await OptimizeConnectionsAsync();
+            
+            // Clean up memory
+            GC.Collect(2, GCCollectionMode.Optimized);
+            
+            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+        }
+    }
+}
+```
+
+### 2. Modern UI Features:
+
+#### **Material Design Components:**
+```xml
+<!-- Modern Material Design buttons -->
+<Button Style="{StaticResource MaterialDesignRaisedButton}"
+        materialDesign:ButtonAssist.CornerRadius="8"
+        materialDesign:ElevationAssist.Elevation="Dp2">
+    <StackPanel Orientation="Horizontal">
+        <materialDesign:PackIcon Kind="Plus" />
+        <TextBlock Text="Add Invoice" Margin="8,0,0,0"/>
+    </StackPanel>
+</Button>
+
+<!-- Modern Cards with elevation -->
+<materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp4"
+                     Margin="8" Padding="16">
+    <Grid>
+        <!-- Card content -->
+    </Grid>
+</materialDesign:Card>
+```
+
+#### **Smooth Animations System:**
+```xml
+<!-- Fade-in animations for smooth transitions -->
+<UserControl.Resources>
+    <Storyboard x:Key="FadeInAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+</UserControl.Resources>
+
+<!-- Slide animations for smooth navigation -->
+<Storyboard x:Key="SlideInAnimation">
+    <DoubleAnimation Storyboard.TargetProperty="(TranslateTransform.X)"
+                     From="50" To="0" Duration="0:0:0.4">
+        <DoubleAnimation.EasingFunction>
+            <QuadraticEase EasingMode="EaseOut"/>
+        </DoubleAnimation.EasingFunction>
+    </DoubleAnimation>
+</Storyboard>
+```
+
+#### **Dark/Light Theme Support:**
+```csharp
+public class ThemeService : IThemeService
+{
+    public void ApplyTheme(ThemeMode mode)
+    {
+        var theme = mode switch
+        {
+            ThemeMode.Dark => new ResourceDictionary { Source = new Uri("Themes/Dark/DarkTheme.xaml", UriKind.Relative) },
+            ThemeMode.Light => new ResourceDictionary { Source = new Uri("Themes/Light/LightTheme.xaml", UriKind.Relative) },
+            _ => new ResourceDictionary { Source = new Uri("Themes/Modern/ModernTheme.xaml", UriKind.Relative) }
+        };
+        
+        Application.Current.Resources.MergedDictionaries.Clear();
+        Application.Current.Resources.MergedDictionaries.Add(theme);
+    }
+}
+```
+
+#### **Modern Card Layout:**
+```xml
+<UserControl.Resources>
+    <DataTemplate x:Key="ModernCardTemplate">
+        <materialDesign:Card Margin="8" 
+                             materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{DynamicResource MaterialDesignCardBackground}">
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Header with icon -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                    <materialDesign:PackIcon Kind="{Binding IconKind}" 
+                                             Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                             Width="24" Height="24"/>
+                    <TextBlock Text="{Binding Title}" 
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+                
+                <!-- Content -->
+                <TextBlock Grid.Row="1" 
+                           Text="{Binding Description}"
+                           Style="{StaticResource MaterialDesignBody2TextBlock}"
+                           TextWrapping="Wrap"/>
+                
+                <!-- Actions -->
+                <StackPanel Grid.Row="2" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right"
+                            Margin="0,16,0,0">
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            Content="EDIT" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Content="VIEW"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </DataTemplate>
+</UserControl.Resources>
+```
+
+### 3. Performance Configuration:
+```json
+{
+  "Performance": {
+    "EnableCaching": true,
+    "CacheExpirationMinutes": 30,
+    "EnableVirtualization": true,
+    "LazyLoadingEnabled": true,
+    "ConnectionPoolSize": 100,
+    "QueryTimeout": 30,
+    "BackgroundTaskInterval": 5
+  },
+  "UI": {
+    "Theme": "Modern",
+    "AnimationsEnabled": true,
+    "TransitionDuration": 300,
+    "EnableMaterialDesign": true,
+    "CardElevation": 2
+  }
+}
+```
+
+### 4. Zero Loading Implementation:
+- **Instant Search**: All data pre-cached in memory
+- **Smooth Navigation**: Page transitions with animations
+- **Background Processing**: Heavy operations run in background
+- **Smart Preloading**: Anticipate user actions and preload data
+- **Optimized Rendering**: Virtual scrolling for large lists
+- **Memory Management**: Efficient cleanup and garbage collection
+
+### 5. Modern UX Patterns:
+- **Card-based Layout**: Information presented in modern cards
+- **Contextual Actions**: Actions appear based on context
+- **Progressive Disclosure**: Show relevant information progressively
+- **Micro-interactions**: Subtle animations for user feedback
+- **Responsive Design**: Adapts to different screen sizes
+- **Consistent Spacing**: Material Design spacing guidelines
+
+## REQUIREMENTS SUMMARY
+
+### Original Requirements:
+I want to create a desktop and mobile (Flutter) invoice application in C# (EXE) using PostgreSQL, where both desktop and mobile versions access the same database via the same WiFi network.
+
+**Settings configurable through either app:**
+* VAT calculation percentage
+* Invoice format
+* Bank name options for the invoice (editable)
+* Database connection settings
+
+**Database tables for invoice generation:**
+* Company data table containing NPWP, name, address, and IDTKU
+* Inside company data, pricing and job description information
+* TKA (foreign worker) data, including their family members
+* Each data can be edited and sort and filter save to local setting, so when logout the filter still same
+
+**Invoice creation workflow:**
+1. Search/select the company name
+2. Search/select the TKA name
+3. Select the job
+4. Save the invoice
+5. Then can print the invoice or add another on the same number invoice
+
+**System support:**
+* Exporting invoices to PDF (individually or filtered batch)
+* Printing to available printers
+* Exporting to Excel in a tax invoice format
+* A user-friendly interface
+
+**Key specifications:**
+- TKA fields: nama, passport, divisi, jenis kelamin
+- Family fields: nama, passport, jenis kelamin, spouse/parent/child
+- IDTKU is like NPWP (1 company 1 IDTKU and 1 NPWP)
+- Each company have different job description and prices
+- Store invoice history by company name, date, etc
+- 1 invoice can have multiple TKA
+- Bank information, signature and spelled out amount only for the last page
+- Baris mean group lines (multiple job descriptions can share same baris)
+- Auto generate invoice numbers but can be manually set
+- Bank predefined list that users can edit
+- VAT globally applied
+- Role-based access: admin and viewer
+- Filter/sort settings user specific
+- Database hosted on one of the desktop machines
+- Mobile app works when on same WiFi and database is on
+- Allow price and job description changes after invoice created but before saved
+- Invoice description can use Enter for multi-line display
+
+**Performance & UI Requirements:**
+- **Aplikasi harus cepat tanpa loading** - Zero loading delays with instant responses
+- **UI modern** - Contemporary design with Material Design components
+- Smooth animations and transitions
+- Dark/Light theme support
+- Card-based layouts
+- Responsive and intuitive interface
+- Memory caching for instant data access
+- Background processing for heavy operations
+- Virtual scrolling for large datasets
+- Connection pooling for database speed
+
+**Pengetahuan ini untuk memastikan setiap chat lanjutan jika terpotong akan tetap konsisten.**

@@ -1,0 +1,356 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- Modern Card Style -->
+    <Style x:Key="ModernCard" TargetType="materialDesign:Card">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2"/>
+        <Setter Property="Margin" Value="8"/>
+        <Setter Property="Padding" Value="16"/>
+        <Setter Property="materialDesign:ClipToBounds.ClipToBounds" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="materialDesign:Card">
+                    <materialDesign:Card Background="{TemplateBinding Background}"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         materialDesign:ElevationAssist.Elevation="{TemplateBinding materialDesign:ElevationAssist.Elevation}"
+                                         Margin="{TemplateBinding Margin}"
+                                         CornerRadius="12">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                    </materialDesign:Card>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Elevated Card Style -->
+    <Style x:Key="ElevatedCard" TargetType="materialDesign:Card" BasedOn="{StaticResource ModernCard}">
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp8"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Modern ComboBox Style -->
+    <Style x:Key="ModernComboBox" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="True"/>
+        <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True"/>
+        <Setter Property="materialDesign:TextFieldAssist.HasFilledTextField" Value="False"/>
+        <Setter Property="materialDesign:TextFieldAssist.HasOutlinedTextField" Value="True"/>
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="Margin" Value="0,8"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <!-- Modern CheckBox Style -->
+    <Style x:Key="ModernCheckBox" TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+        <Setter Property="materialDesign:CheckBoxAssist.CheckBoxSize" Value="20"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Modern RadioButton Style -->
+    <Style x:Key="ModernRadioButton" TargetType="RadioButton" BasedOn="{StaticResource MaterialDesignRadioButton}">
+        <Setter Property="materialDesign:RadioButtonAssist.RadioButtonSize" Value="20"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Modern Slider Style -->
+    <Style x:Key="ModernSlider" TargetType="Slider" BasedOn="{StaticResource MaterialDesignSlider}">
+        <Setter Property="materialDesign:SliderAssist.OnlyShowFocusVisualWhileDragging" Value="True"/>
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="Margin" Value="16,8"/>
+    </Style>
+
+    <!-- Modern ProgressBar Style -->
+    <Style x:Key="ModernProgressBar" TargetType="ProgressBar" BasedOn="{StaticResource MaterialDesignLinearProgressBar}">
+        <Setter Property="Height" Value="6"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="3"
+                            ClipToBounds="True">
+                        <Rectangle x:Name="PART_Track"/>
+                        <Grid x:Name="PART_Indicator"
+                              ClipToBounds="True"
+                              HorizontalAlignment="Left">
+                            <Rectangle x:Name="Indicator"
+                                       Fill="{TemplateBinding Foreground}"
+                                       RadiusX="3" RadiusY="3"/>
+                            <Rectangle x:Name="Animation"
+                                       Fill="{TemplateBinding Foreground}"
+                                       RadiusX="3" RadiusY="3"
+                                       RenderTransformOrigin="0.5,0.5">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform ScaleX="0"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsIndeterminate" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetName="Animation"
+                                                         Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                         From="0" To="1" Duration="0:0:1"/>
+                                        <DoubleAnimation Storyboard.TargetName="Animation"
+                                                         Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                         From="1" To="0" Duration="0:0:1"
+                                                         BeginTime="0:0:1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modern TabControl Style -->
+    <Style x:Key="ModernTabControl" TargetType="TabControl" BasedOn="{StaticResource MaterialDesignTabControl}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="materialDesign:ColorZoneAssist.Mode" Value="PrimaryMid"/>
+        <Setter Property="TabStripPlacement" Value="Top"/>
+    </Style>
+
+    <!-- Modern TabItem Style -->
+    <Style x:Key="ModernTabItem" TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Padding" Value="24,12"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <!-- Modern GroupBox Style -->
+    <Style x:Key="ModernGroupBox" TargetType="GroupBox" BasedOn="{StaticResource MaterialDesignGroupBox}">
+        <Setter Property="materialDesign:ColorZoneAssist.Mode" Value="Standard"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+        <Setter Property="Margin" Value="8"/>
+        <Setter Property="Padding" Value="16"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GroupBox">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp1"
+                                         Background="{TemplateBinding Background}"
+                                         Margin="{TemplateBinding Margin}"
+                                         CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Border Grid.Row="0"
+                                    Background="{DynamicResource MaterialDesignCardBackground}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,12">
+                                <ContentPresenter ContentSource="Header"
+                                                  TextBlock.FontWeight="Medium"
+                                                  TextBlock.FontSize="16"/>
+                            </Border>
+                            
+                            <ContentPresenter Grid.Row="1"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Grid>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modern Expander Style -->
+    <Style x:Key="ModernExpander" TargetType="Expander" BasedOn="{StaticResource MaterialDesignExpander}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+        <Setter Property="Margin" Value="0,4"/>
+        <Setter Property="materialDesign:ExpanderAssist.VerticalHeaderPadding" Value="16"/>
+        <Setter Property="materialDesign:ExpanderAssist.HorizontalHeaderPadding" Value="16"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Expander">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp1"
+                                         Background="{TemplateBinding Background}"
+                                         Margin="{TemplateBinding Margin}"
+                                         CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition x:Name="ContentRow" Height="0"/>
+                            </Grid.RowDefinitions>
+                            
+                            <ToggleButton x:Name="HeaderSite"
+                                          Grid.Row="0"
+                                          Style="{DynamicResource MaterialDesignExpanderToggleButton}"
+                                          IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Content="{TemplateBinding Header}"
+                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                          Padding="{TemplateBinding materialDesign:ExpanderAssist.HorizontalHeaderPadding}"/>
+                            
+                            <Border x:Name="ExpandSite"
+                                    Grid.Row="1"
+                                    Visibility="Collapsed"
+                                    Padding="16">
+                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"/>
+                            </Border>
+                        </Grid>
+                    </materialDesign:Card>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ContentRow" Property="Height" Value="Auto"/>
+                            <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modern Separator Style -->
+    <Style x:Key="ModernSeparator" TargetType="Separator" BasedOn="{StaticResource MaterialDesignSeparator}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}"/>
+        <Setter Property="Height" Value="1"/>
+        <Setter Property="Margin" Value="0,8"/>
+    </Style>
+
+    <!-- Modern Menu Style -->
+    <Style x:Key="ModernMenu" TargetType="Menu" BasedOn="{StaticResource MaterialDesignMenu}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- Modern MenuItem Style -->
+    <Style x:Key="ModernMenuItem" TargetType="MenuItem" BasedOn="{StaticResource MaterialDesignMenuItem}">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <!-- Modern ContextMenu Style -->
+    <Style x:Key="ModernContextMenu" TargetType="ContextMenu" BasedOn="{StaticResource MaterialDesignContextMenu}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+        <Setter Property="Padding" Value="0,8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="{TemplateBinding materialDesign:ElevationAssist.Elevation}"
+                                         Background="{TemplateBinding Background}"
+                                         CornerRadius="8">
+                        <ScrollViewer Style="{DynamicResource MaterialDesignScrollViewer}">
+                            <ItemsPresenter Margin="{TemplateBinding Padding}"/>
+                        </ScrollViewer>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modern Chip Style -->
+    <Style x:Key="ModernChip" TargetType="materialDesign:Chip" BasedOn="{StaticResource MaterialDesignChip}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1"/>
+        <Setter Property="Margin" Value="4,2"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Success Chip Style -->
+    <Style x:Key="SuccessChip" TargetType="materialDesign:Chip" BasedOn="{StaticResource ModernChip}">
+        <Setter Property="Background" Value="#E8F5E8"/>
+        <Setter Property="Foreground" Value="#2E7D32"/>
+    </Style>
+
+    <!-- Warning Chip Style -->
+    <Style x:Key="WarningChip" TargetType="materialDesign:Chip" BasedOn="{StaticResource ModernChip}">
+        <Setter Property="Background" Value="#FFF3E0"/>
+        <Setter Property="Foreground" Value="#F57C00"/>
+    </Style>
+
+    <!-- Error Chip Style -->
+    <Style x:Key="ErrorChip" TargetType="materialDesign:Chip" BasedOn="{StaticResource ModernChip}">
+        <Setter Property="Background" Value="#FFEBEE"/>
+        <Setter Property="Foreground" Value="#C62828"/>
+    </Style>
+
+    <!-- Modern Badge Style -->
+    <Style x:Key="ModernBadge" TargetType="materialDesign:Badged">
+        <Setter Property="BadgeBackground" Value="{DynamicResource SecondaryHueMidBrush}"/>
+        <Setter Property="BadgeForeground" Value="{DynamicResource SecondaryHueMidForegroundBrush}"/>
+        <Setter Property="materialDesign:BadgeAssist.BadgeSize" Value="20"/>
+    </Style>
+
+    <!-- Modern Snackbar Style -->
+    <Style x:Key="ModernSnackbar" TargetType="materialDesign:Snackbar" BasedOn="{StaticResource MaterialDesignSnackbar}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignBackground}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp6"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Margin" Value="16"/>
+    </Style>
+
+    <!-- Modern ToolTip Style -->
+    <Style x:Key="ModernToolTip" TargetType="ToolTip" BasedOn="{StaticResource MaterialDesignToolTip}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignBackground}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="{TemplateBinding materialDesign:ElevationAssist.Elevation}"
+                                         Background="{TemplateBinding Background}"
+                                         CornerRadius="4">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

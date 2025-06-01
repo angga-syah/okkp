@@ -1,0 +1,322 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Invoices.InvoicePreviewView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:controls="clr-namespace:InvoiceApp.WPF.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1400">
+
+    <UserControl.Resources>
+        <!-- Modern toolbar style -->
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Height" Value="36"/>
+        </Style>
+
+        <!-- Page navigation style -->
+        <Style x:Key="PageButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+
+        <!-- Zoom level indicator -->
+        <Style x:Key="ZoomIndicatorStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource MaterialDesignBody}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" Margin="16,16,16,8" Padding="20,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Invoice Preview" 
+                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
+                    <TextBlock Text="{Binding InvoiceNumber, StringFormat='Invoice: {0}'}" 
+                               Style="{StaticResource MaterialDesignBody2TextBlock}"
+                               Foreground="{StaticResource MaterialDesignBodyLight}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" 
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding CloseCommand}"
+                        ToolTip="Close Preview">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24"/>
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Toolbar -->
+        <materialDesign:Card Grid.Row="1" Margin="16,0,16,8" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Print & Export Actions -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Command="{Binding PrintCommand}"
+                            materialDesign:ButtonAssist.CornerRadius="4">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Printer" Width="18" Height="18"/>
+                            <TextBlock Text="Print" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Command="{Binding ExportPdfCommand}"
+                            materialDesign:ButtonAssist.CornerRadius="4">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FilePdfBox" Width="18" Height="18"/>
+                            <TextBlock Text="Export PDF" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Command="{Binding EmailCommand}"
+                            materialDesign:ButtonAssist.CornerRadius="4">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Email" Width="18" Height="18"/>
+                            <TextBlock Text="Email" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="8,4"/>
+
+                    <!-- Page Selection -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                        <TextBlock Text="Pages:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <CheckBox Content="All" IsChecked="{Binding PrintAllPages}" 
+                                  Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,12,0"/>
+                        <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBox Text="{Binding PrintFromPage}" Width="50" 
+                                 Style="{StaticResource MaterialDesignTextBox}" Margin="0,0,8,0"/>
+                        <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBox Text="{Binding PrintToPage}" Width="50" 
+                                 Style="{StaticResource MaterialDesignTextBox}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Zoom Controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                    <Button Style="{StaticResource PageButtonStyle}"
+                            Command="{Binding ZoomOutCommand}"
+                            ToolTip="Zoom Out">
+                        <materialDesign:PackIcon Kind="Minus"/>
+                    </Button>
+
+                    <TextBlock Text="{Binding ZoomLevel, StringFormat='{0}%'}" 
+                               Style="{StaticResource ZoomIndicatorStyle}"
+                               MinWidth="50" TextAlignment="Center"/>
+
+                    <Button Style="{StaticResource PageButtonStyle}"
+                            Command="{Binding ZoomInCommand}"
+                            ToolTip="Zoom In">
+                        <materialDesign:PackIcon Kind="Plus"/>
+                    </Button>
+
+                    <Button Style="{StaticResource ToolbarButtonStyle}"
+                            Command="{Binding FitToWidthCommand}"
+                            ToolTip="Fit to Width">
+                        <materialDesign:PackIcon Kind="FitToPage"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Page Navigation -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource PageButtonStyle}"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding CanGoPreviousPage}"
+                            ToolTip="Previous Page">
+                        <materialDesign:PackIcon Kind="ChevronLeft"/>
+                    </Button>
+
+                    <TextBlock Text="{Binding CurrentPageDisplay}" 
+                               VerticalAlignment="Center" 
+                               MinWidth="80" TextAlignment="Center"
+                               Margin="8,0"/>
+
+                    <Button Style="{StaticResource PageButtonStyle}"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding CanGoNextPage}"
+                            ToolTip="Next Page">
+                        <materialDesign:PackIcon Kind="ChevronRight"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Preview Area -->
+        <materialDesign:Card Grid.Row="2" Margin="16,0,16,8" Padding="0">
+            <Grid>
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#F5F5F5" Offset="0"/>
+                        <GradientStop Color="#EEEEEE" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <!-- PDF Viewer Container -->
+                <ScrollViewer x:Name="PreviewScrollViewer"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              ZoomMode="Enabled"
+                              Zoom="{Binding ZoomFactor, Mode=TwoWay}"
+                              Background="Transparent">
+
+                    <Border Background="White" 
+                            BorderBrush="#CCCCCC" 
+                            BorderThickness="1"
+                            Margin="32"
+                            Effect="{StaticResource MaterialDesignShadowDepth3}">
+                        
+                        <!-- Invoice Content Renderer -->
+                        <ContentPresenter Content="{Binding InvoicePreviewContent}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Top"/>
+                    </Border>
+                </ScrollViewer>
+
+                <!-- Loading Overlay -->
+                <Grid Background="White" Opacity="0.9"
+                      Visibility="{Binding IsGeneratingPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <controls:LoadingSpinner Width="48" Height="48"/>
+                        <TextBlock Text="{Binding PreviewLoadingMessage}" 
+                                   Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,16,0,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Preview Options Panel -->
+                <materialDesign:Card HorizontalAlignment="Right" 
+                                     VerticalAlignment="Top"
+                                     Margin="16"
+                                     Padding="12"
+                                     Width="200"
+                                     Visibility="{Binding ShowPreviewOptions, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    
+                    <StackPanel>
+                        <TextBlock Text="Preview Options" 
+                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                   Margin="0,0,0,12"/>
+
+                        <CheckBox Content="Show Bank Info" 
+                                  IsChecked="{Binding ShowBankInfo}"
+                                  Style="{StaticResource MaterialDesignCheckBox}"
+                                  Margin="0,0,0,8"/>
+
+                        <CheckBox Content="Show Signature Line" 
+                                  IsChecked="{Binding ShowSignatureLine}"
+                                  Style="{StaticResource MaterialDesignCheckBox}"
+                                  Margin="0,0,0,8"/>
+
+                        <CheckBox Content="Show Page Numbers" 
+                                  IsChecked="{Binding ShowPageNumbers}"
+                                  Style="{StaticResource MaterialDesignCheckBox}"
+                                  Margin="0,0,0,8"/>
+
+                        <Separator Margin="0,8"/>
+
+                        <TextBlock Text="Page Format" 
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Margin="0,8,0,4"/>
+                        
+                        <ComboBox ItemsSource="{Binding PageFormats}"
+                                  SelectedItem="{Binding SelectedPageFormat}"
+                                  Style="{StaticResource MaterialDesignComboBox}"
+                                  materialDesign:HintAssist.Hint="Paper Size"/>
+
+                        <TextBlock Text="Orientation" 
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Margin="0,8,0,4"/>
+                        
+                        <ComboBox ItemsSource="{Binding Orientations}"
+                                  SelectedItem="{Binding SelectedOrientation}"
+                                  Style="{StaticResource MaterialDesignComboBox}"
+                                  materialDesign:HintAssist.Hint="Page Orientation"/>
+
+                        <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                                Command="{Binding RefreshPreviewCommand}"
+                                Margin="0,16,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16"/>
+                                <TextBlock Text="Refresh" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Toggle Options Button -->
+                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="24"
+                        Command="{Binding ToggleOptionsCommand}"
+                        ToolTip="Preview Options">
+                    <materialDesign:PackIcon Kind="Settings"/>
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Status Bar -->
+        <materialDesign:Card Grid.Row="3" Margin="16,0,16,16" Padding="16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Information" 
+                                             Width="16" Height="16"
+                                             Foreground="{StaticResource MaterialDesignBodyLight}"
+                                             VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding StatusMessage}" 
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Foreground="{StaticResource MaterialDesignBodyLight}"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="{Binding InvoiceTotal, StringFormat='Total: {0:C}'}" 
+                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+                    
+                    <TextBlock Text="{Binding LastModified, StringFormat='Modified: {0:g}'}" 
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Foreground="{StaticResource MaterialDesignBodyLight}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

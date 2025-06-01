@@ -1,0 +1,584 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Companies.CompanyDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:controls="clr-namespace:InvoiceApp.WPF.Controls">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
+        <!-- Tab Style -->
+        <Style x:Key="ModernTabItemStyle" TargetType="TabItem" BasedOn="{StaticResource MaterialDesignTabItem}">
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
+        <!-- Section Card Style -->
+        <Style x:Key="SectionCardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" 
+                             Margin="0,0,0,16" 
+                             Padding="20"
+                             materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Company Avatar and Basic Info -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Border Background="{DynamicResource PrimaryHueMidBrush}"
+                            CornerRadius="30"
+                            Width="60" Height="60"
+                            Margin="0,0,16,0">
+                        <TextBlock Text="{Binding Company.CompanyName, Converter={StaticResource InitialsConverter}}"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   FontSize="18"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Company.CompanyName}"
+                                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                   FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Company.Npwp, StringFormat='NPWP: {0}'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock Text=" • "
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock Text="{Binding Company.Idtku, StringFormat='IDTKU: {0}'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Quick Stats -->
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <StackPanel Margin="0,0,24,0" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Company.InvoiceCount}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Invoices"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Margin="0,0,24,0" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding TkaAssignments.Count}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="TKA Workers"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+                    
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding JobDescriptions.Count}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Job Types"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="EDIT"
+                            Command="{Binding EditCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,0,8,0"
+                            Visibility="{Binding CanEdit, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                                <TextBlock Text="EDIT" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                    
+                    <Button Content="CREATE INVOICE"
+                            Command="{Binding CreateInvoiceCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            IsEnabled="{Binding CanCreateInvoice}">
+                        <Button.Content>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" Width="16" Height="16"/>
+                                <TextBlock Text="CREATE INVOICE" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Main Content Tabs -->
+        <TabControl Grid.Row="1" 
+                    Style="{StaticResource MaterialDesignTabControl}"
+                    materialDesign:ColorZoneAssist.Mode="PrimaryMid">
+            
+            <!-- Company Details Tab -->
+            <TabItem Header="Company Details" Style="{StaticResource ModernTabItemStyle}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left Panel - Company Information -->
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            
+                            <!-- Basic Information -->
+                            <materialDesign:Card Style="{StaticResource SectionCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Basic Information"
+                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,16"/>
+                                    
+                                    <Grid IsEnabled="{Binding IsEditing}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Company Name -->
+                                        <TextBox Grid.Row="0" Grid.ColumnSpan="2"
+                                                 Text="{Binding Company.CompanyName, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Company Name"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 Margin="0,0,0,16"/>
+
+                                        <!-- NPWP -->
+                                        <TextBox Grid.Row="1" Grid.Column="0"
+                                                 Text="{Binding Company.Npwp, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="NPWP"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 Margin="0,0,8,16"/>
+
+                                        <!-- IDTKU -->
+                                        <TextBox Grid.Row="1" Grid.Column="1"
+                                                 Text="{Binding Company.Idtku, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="IDTKU"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 Margin="8,0,0,16"/>
+
+                                        <!-- Status -->
+                                        <CheckBox Grid.Row="2" Grid.ColumnSpan="2"
+                                                  Content="Active Company"
+                                                  IsChecked="{Binding Company.IsActive}"
+                                                  Style="{StaticResource MaterialDesignCheckBox}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Contact Information -->
+                            <materialDesign:Card Style="{StaticResource SectionCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Contact Information"
+                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,16"/>
+                                    
+                                    <Grid IsEnabled="{Binding IsEditing}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Email -->
+                                        <TextBox Grid.Row="0" Grid.Column="0"
+                                                 Text="{Binding Company.Email, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Email"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 Margin="0,0,8,16"/>
+
+                                        <!-- Phone -->
+                                        <TextBox Grid.Row="0" Grid.Column="1"
+                                                 Text="{Binding Company.Phone, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Phone"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 Margin="8,0,0,16"/>
+
+                                        <!-- Contact Person -->
+                                        <TextBox Grid.Row="1" Grid.ColumnSpan="2"
+                                                 Text="{Binding Company.ContactPerson, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Contact Person"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 Margin="0,0,0,16"/>
+
+                                        <!-- Address -->
+                                        <TextBox Grid.Row="2" Grid.ColumnSpan="2"
+                                                 Text="{Binding Company.Address, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Address"
+                                                 materialDesign:HintAssist.IsFloating="True"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 TextWrapping="Wrap"
+                                                 AcceptsReturn="True"
+                                                 Height="80"/>
+                                    </Grid>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Edit Actions -->
+                            <materialDesign:Card Style="{StaticResource SectionCardStyle}"
+                                                 Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="CANCEL"
+                                            Command="{Binding CancelCommand}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Margin="0,0,8,0"/>
+                                    <Button Content="SAVE CHANGES"
+                                            Command="{Binding SaveCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </StackPanel>
+
+                        <!-- Right Panel - Activity & Summary -->
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            
+                            <!-- Recent Activity -->
+                            <materialDesign:Card Style="{StaticResource SectionCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Recent Activity"
+                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,16"/>
+                                    
+                                    <ListBox ItemsSource="{Binding RecentActivity}"
+                                             Style="{StaticResource MaterialDesignListBox}"
+                                             MaxHeight="200">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0,4">
+                                                    <TextBlock Text="{Binding Description}"
+                                                               Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                                               TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding Date, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"
+                                                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                               Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Quick Actions -->
+                            <materialDesign:Card Style="{StaticResource SectionCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Quick Actions"
+                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,16"/>
+                                    
+                                    <StackPanel>
+                                        <Button Content="Create Invoice"
+                                                Command="{Binding CreateInvoiceCommand}"
+                                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Margin="0,0,0,8">
+                                            <Button.Content>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Plus" Width="16" Height="16"/>
+                                                    <TextBlock Text="Create Invoice" Margin="8,0,0,0"/>
+                                                </StackPanel>
+                                            </Button.Content>
+                                        </Button>
+                                        
+                                        <Button Content="Add Job Description"
+                                                Command="{Binding AddJobDescriptionCommand}"
+                                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                HorizontalAlignment="Stretch"
+                                                Margin="0,0,0,8">
+                                            <Button.Content>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Briefcase" Width="16" Height="16"/>
+                                                    <TextBlock Text="Add Job Description" Margin="8,0,0,0"/>
+                                                </StackPanel>
+                                            </Button.Content>
+                                        </Button>
+                                        
+                                        <Button Content="Assign TKA Worker"
+                                                Command="{Binding AddTkaAssignmentCommand}"
+                                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                HorizontalAlignment="Stretch">
+                                            <Button.Content>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16"/>
+                                                    <TextBlock Text="Assign TKA Worker" Margin="8,0,0,0"/>
+                                                </StackPanel>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Job Descriptions Tab -->
+            <TabItem Header="Job Descriptions" Style="{StaticResource ModernTabItemStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Job Descriptions Header -->
+                    <Grid Grid.Row="0" Margin="16,16,16,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Job Descriptions"
+                                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding JobDescriptions.Count, StringFormat='{}{0} job descriptions configured'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="ADD JOB"
+                                Command="{Binding AddJobDescriptionCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Plus" Width="16" Height="16"/>
+                                    <TextBlock Text="ADD JOB" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+
+                    <!-- Job Descriptions List -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding JobDescriptions}"
+                              SelectedItem="{Binding SelectedJobDescription}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              Margin="16,0,16,16">
+                        
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Order" 
+                                              Binding="{Binding SortOrder}" 
+                                              Width="60"/>
+                            <DataGridTextColumn Header="Job Name" 
+                                              Binding="{Binding JobName}" 
+                                              Width="200"/>
+                            <DataGridTextColumn Header="Description" 
+                                              Binding="{Binding JobDescription}" 
+                                              Width="*"/>
+                            <DataGridTextColumn Header="Price" 
+                                              Binding="{Binding Price, StringFormat=C}" 
+                                              Width="100"/>
+                            <DataGridCheckBoxColumn Header="Active" 
+                                                  Binding="{Binding IsActive}" 
+                                                  Width="60"/>
+                            <DataGridTemplateColumn Header="Actions" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Command="{Binding DataContext.EditJobDescriptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="Edit">
+                                                <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.MoveJobUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="Move Up">
+                                                <materialDesign:PackIcon Kind="ArrowUp" Width="16" Height="16"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.MoveJobDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="Move Down">
+                                                <materialDesign:PackIcon Kind="ArrowDown" Width="16" Height="16"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.DeleteJobDescriptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="Delete">
+                                                <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- TKA Assignments Tab -->
+            <TabItem Header="TKA Workers" Style="{StaticResource ModernTabItemStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- TKA Assignments Header -->
+                    <Grid Grid.Row="0" Margin="16,16,16,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Assigned TKA Workers"
+                                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding TkaAssignments.Count, StringFormat='{}{0} TKA workers assigned'}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="ASSIGN TKA"
+                                Command="{Binding AddTkaAssignmentCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16"/>
+                                    <TextBlock Text="ASSIGN TKA" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+
+                    <!-- TKA Assignments List -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding TkaAssignments}"
+                              SelectedItem="{Binding SelectedTkaAssignment}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              Margin="16,0,16,16">
+                        
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TKA Name" 
+                                              Binding="{Binding TkaWorkerName}" 
+                                              Width="150"/>
+                            <DataGridTextColumn Header="Passport" 
+                                              Binding="{Binding TkaPassport}" 
+                                              Width="120"/>
+                            <DataGridTextColumn Header="Division" 
+                                              Binding="{Binding TkaDivisi}" 
+                                              Width="120"/>
+                            <DataGridTextColumn Header="Assignment Date" 
+                                              Binding="{Binding AssignmentDate, StringFormat=dd/MM/yyyy}" 
+                                              Width="120"/>
+                            <DataGridTextColumn Header="End Date" 
+                                              Binding="{Binding EndDate, StringFormat=dd/MM/yyyy}" 
+                                              Width="100"/>
+                            <DataGridCheckBoxColumn Header="Active" 
+                                                  Binding="{Binding IsActive}" 
+                                                  Width="60"/>
+                            <DataGridTemplateColumn Header="Actions" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Command="{Binding DataContext.ViewTkaDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="View Details">
+                                                <materialDesign:PackIcon Kind="Eye" Width="16" Height="16"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.EditTkaAssignmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="Edit Assignment">
+                                                <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                                            </Button>
+                                            <Button Command="{Binding DataContext.RemoveTkaAssignmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignIconButton}"
+                                                    ToolTip="Remove Assignment">
+                                                <materialDesign:PackIcon Kind="AccountMinus" Width="16" Height="16"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="2"
+              Background="#AA000000"
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                             Width="48" Height="48"
+                             IsIndeterminate="True"/>
+                <TextBlock Text="Loading company details..."
+                           Margin="0,16,0,0"
+                           HorizontalAlignment="Center"
+                           Foreground="White"
+                           Style="{StaticResource MaterialDesignBody1TextBlock}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

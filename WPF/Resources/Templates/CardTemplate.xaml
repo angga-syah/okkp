@@ -1,0 +1,587 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- Dashboard Summary Card Template -->
+    <DataTemplate x:Key="DashboardSummaryCardTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{DynamicResource MaterialDesignPaper}"
+                             Margin="8"
+                             Width="280" Height="120">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Icon Section -->
+                <Border Grid.Column="0"
+                        Background="{Binding IconColor}"
+                        Width="60"
+                        CornerRadius="12,0,0,12">
+                    <materialDesign:PackIcon Kind="{Binding Icon}"
+                                             Width="32" Height="32"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             Foreground="White"/>
+                </Border>
+                
+                <!-- Content Section -->
+                <StackPanel Grid.Column="1"
+                            Margin="16,12">
+                    <TextBlock Text="{Binding Title}"
+                               Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                               Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding Value}"
+                               Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                               FontWeight="Bold"
+                               Margin="0,0,0,4"/>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="{Binding TrendIcon}"
+                                                 Width="12" Height="12"
+                                                 Foreground="{Binding TrendColor}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,4,0"/>
+                        <TextBlock Text="{Binding TrendText}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{Binding TrendColor}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <materialDesign:Card.Style>
+                <Style TargetType="materialDesign:Card">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Card.Style>
+        </materialDesign:Card>
+    </DataTemplate>
+
+    <!-- Company Card Template -->
+    <DataTemplate x:Key="CompanyCardTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{DynamicResource MaterialDesignPaper}"
+                             Margin="8"
+                             Cursor="Hand">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Header -->
+                <Border Grid.Row="0"
+                        Background="{DynamicResource PrimaryHueLightBrush}"
+                        CornerRadius="12,12,0,0"
+                        Padding="16,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding CompanyName}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        
+                        <materialDesign:Chip Grid.Column="1"
+                                             Content="{Binding ActiveTkaCount}"
+                                             Background="{DynamicResource SecondaryHueMidBrush}"
+                                             Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                                             FontSize="12"
+                                             Margin="8,0,0,0"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Content -->
+                <StackPanel Grid.Row="1"
+                            Margin="16">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <materialDesign:PackIcon Kind="CardAccountDetails"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding Npwp}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <materialDesign:PackIcon Kind="MapMarker"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Top"
+                                                 Margin="0,2,8,0"/>
+                        <TextBlock Text="{Binding Address}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   TextWrapping="Wrap"
+                                   MaxHeight="60"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Phone"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding Phone}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Actions -->
+                <Border Grid.Row="2"
+                        Background="{DynamicResource MaterialDesignCardBackground}"
+                        CornerRadius="0,0,12,12"
+                        Padding="8">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="View Details"
+                                Command="{Binding ViewDetailsCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Eye" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Edit"
+                                Command="{Binding EditCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Create Invoice"
+                                Command="{Binding CreateInvoiceCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" 
+                                                     Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <materialDesign:Card.Style>
+                <Style TargetType="materialDesign:Card">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Card.Style>
+        </materialDesign:Card>
+    </DataTemplate>
+
+    <!-- TKA Worker Card Template -->
+    <DataTemplate x:Key="TkaWorkerCardTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{DynamicResource MaterialDesignPaper}"
+                             Margin="8"
+                             Width="300">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Header with Avatar -->
+                <Border Grid.Row="0"
+                        Background="{DynamicResource PrimaryHueLightBrush}"
+                        CornerRadius="12,12,0,0"
+                        Padding="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Avatar -->
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource PrimaryHueMidBrush}"
+                                Width="48" Height="48"
+                                CornerRadius="24"
+                                Margin="0,0,12,0">
+                            <TextBlock Text="{Binding InitialName}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+                        </Border>
+                        
+                        <!-- Name and Division -->
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Nama}"
+                                       Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                       Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Divisi}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                       Opacity="0.8"/>
+                        </StackPanel>
+                        
+                        <!-- Status -->
+                        <materialDesign:Chip Grid.Column="2"
+                                             Content="{Binding Status}"
+                                             Background="{Binding StatusColor}"
+                                             Foreground="White"
+                                             FontSize="10"
+                                             Padding="8,4"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Content -->
+                <StackPanel Grid.Row="1"
+                            Margin="16">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="Passport"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding Passport}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="Human"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding JenisKelamin}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="AccountGroup"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center">
+                            <Run Text="{Binding FamilyMemberCount}"/>
+                            <Run Text="Family Members"/>
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Building"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding AssignedCompanies}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Actions -->
+                <Border Grid.Row="2"
+                        Background="{DynamicResource MaterialDesignCardBackground}"
+                        CornerRadius="0,0,12,12"
+                        Padding="8">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="View Details"
+                                Command="{Binding ViewDetailsCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Eye" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Edit"
+                                Command="{Binding EditCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Manage Family"
+                                Command="{Binding ManageFamilyCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="AccountMultiple" Width="16" Height="16"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <materialDesign:Card.Style>
+                <Style TargetType="materialDesign:Card">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Card.Style>
+        </materialDesign:Card>
+    </DataTemplate>
+
+    <!-- Invoice Summary Card Template -->
+    <DataTemplate x:Key="InvoiceSummaryCardTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{DynamicResource MaterialDesignPaper}"
+                             Margin="8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Header -->
+                <Border Grid.Row="0"
+                        Background="{Binding StatusColor}"
+                        CornerRadius="12,12,0,0"
+                        Padding="16,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding InvoiceNumber}"
+                                       Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                       Foreground="White"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="{Binding CompanyName}"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="White"
+                                       Opacity="0.9"/>
+                        </StackPanel>
+                        
+                        <materialDesign:Chip Grid.Column="1"
+                                             Content="{Binding Status}"
+                                             Background="White"
+                                             Foreground="{Binding StatusColor}"
+                                             FontSize="12"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Content -->
+                <StackPanel Grid.Row="1"
+                            Margin="16">
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Invoice Date"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock Text="{Binding InvoiceDate, StringFormat={}{0:dd/MM/yyyy}}"
+                                       Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Due Date"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock Text="{Binding DueDate, StringFormat={}{0:dd/MM/yyyy}}"
+                                       Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="Total Amount"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        <TextBlock Text="{Binding TotalAmount, StringFormat=Rp {0:N0}}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AccountGroup"
+                                                 Width="16" Height="16"
+                                                 Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                 VerticalAlignment="Center"
+                                                 Margin="0,0,8,0"/>
+                        <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   VerticalAlignment="Center">
+                            <Run Text="{Binding TkaCount}"/>
+                            <Run Text="TKA Workers"/>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Actions -->
+                <Border Grid.Row="2"
+                        Background="{DynamicResource MaterialDesignCardBackground}"
+                        CornerRadius="0,0,12,12"
+                        Padding="8">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Preview"
+                                Command="{Binding PreviewCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Eye" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Edit"
+                                Command="{Binding EditCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0"
+                                IsEnabled="{Binding CanEdit}">
+                            <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Print"
+                                Command="{Binding PrintCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Printer" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Export PDF"
+                                Command="{Binding ExportPdfCommand}"
+                                Width="32" Height="32"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="FilePdf" Width="16" Height="16"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <materialDesign:Card.Style>
+                <Style TargetType="materialDesign:Card">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Card.Style>
+        </materialDesign:Card>
+    </DataTemplate>
+
+    <!-- Quick Action Card Template -->
+    <DataTemplate x:Key="QuickActionCardTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp2"
+                             Background="{Binding BackgroundColor}"
+                             Margin="8"
+                             Width="200" Height="120"
+                             Cursor="Hand">
+            <materialDesign:Ripple>
+                <Grid>
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="{Binding Icon}"
+                                                 Width="48" Height="48"
+                                                 HorizontalAlignment="Center"
+                                                 Foreground="{Binding IconColor}"
+                                                 Margin="0,0,0,12"/>
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{Binding TextColor}"
+                                   TextAlignment="Center"/>
+                        <TextBlock Text="{Binding Description}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{Binding TextColor}"
+                                   Opacity="0.7"
+                                   TextAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Ripple>
+            <materialDesign:Card.Style>
+                <Style TargetType="materialDesign:Card">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Card.Style>
+        </materialDesign:Card>
+    </DataTemplate>
+
+    <!-- Notification Card Template -->
+    <DataTemplate x:Key="NotificationCardTemplate">
+        <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp1"
+                             Background="{DynamicResource MaterialDesignPaper}"
+                             Margin="8,4">
+            <Border CornerRadius="8"
+                    BorderThickness="0,0,0,3"
+                    BorderBrush="{Binding PriorityColor}">
+                <Grid Margin="16,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Icon -->
+                    <materialDesign:PackIcon Grid.Column="0"
+                                             Kind="{Binding Icon}"
+                                             Width="24" Height="24"
+                                             Foreground="{Binding PriorityColor}"
+                                             VerticalAlignment="Top"
+                                             Margin="0,0,12,0"/>
+                    
+                    <!-- Content -->
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}"
+                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Message}"
+                                   Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Timestamp, StringFormat={}{0:dd/MM/yyyy HH:mm}}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+                    
+                    <!-- Actions -->
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal">
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Mark as Read"
+                                Command="{Binding MarkAsReadCommand}"
+                                Width="24" Height="24"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Check" Width="14" Height="14"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="Dismiss"
+                                Command="{Binding DismissCommand}"
+                                Width="24" Height="24"
+                                Margin="4,0">
+                            <materialDesign:PackIcon Kind="Close" Width="14" Height="14"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </materialDesign:Card>
+    </DataTemplate>
+
+</ResourceDictionary>

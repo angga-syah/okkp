@@ -1,0 +1,238 @@
+<UserControl x:Class="InvoiceApp.WPF.Controls.FileUploadControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="400">
+
+    <UserControl.Resources>
+        
+        <!-- Drop Zone Style -->
+        <Style x:Key="DropZoneStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinHeight" Value="120"/>
+            
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
+                </Trigger>
+                
+                <DataTrigger Binding="{Binding IsDragOver, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}"/>
+                    <Setter Property="BorderThickness" Value="3"/>
+                </DataTrigger>
+                
+                <DataTrigger Binding="{Binding HasFile, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SecondaryHueMidBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- File Info Card Style -->
+        <Style x:Key="FileInfoCardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Margin" Value="0,8,0,0"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2"/>
+        </Style>
+
+        <!-- Progress Bar Style -->
+        <Style x:Key="UploadProgressStyle" TargetType="ProgressBar" BasedOn="{StaticResource MaterialDesignLinearProgressBar}">
+            <Setter Property="Height" Value="4"/>
+            <Setter Property="Margin" Value="0,8,0,0"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                   Margin="0,0,0,8"
+                   Visibility="{Binding ShowTitle, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            
+            <!-- Drop Zone (when no file selected) -->
+            <Border x:Name="DropZone"
+                    Style="{StaticResource DropZoneStyle}"
+                    AllowDrop="True"
+                    Drop="DropZone_Drop"
+                    DragEnter="DropZone_DragEnter"
+                    DragLeave="DropZone_DragLeave"
+                    DragOver="DropZone_DragOver"
+                    MouseLeftButtonUp="DropZone_Click"
+                    Visibility="{Binding HasFile, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    
+                    <!-- Upload Icon -->
+                    <materialDesign:PackIcon Kind="CloudUpload" 
+                                             Width="48" Height="48"
+                                             Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                             HorizontalAlignment="Center"/>
+                    
+                    <!-- Main Text -->
+                    <TextBlock Text="{Binding DropText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Style="{StaticResource MaterialDesignBody1TextBlock}"
+                               HorizontalAlignment="Center"
+                               Margin="0,8,0,4"
+                               TextAlignment="Center"/>
+                    
+                    <!-- Secondary Text -->
+                    <TextBlock Text="{Binding SecondaryText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"/>
+                    
+                    <!-- Browse Button -->
+                    <Button x:Name="BrowseButton"
+                            Content="Browse Files"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,16,0,0"
+                            Click="BrowseButton_Click"
+                            Visibility="{Binding ShowBrowseButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    
+                </StackPanel>
+            </Border>
+
+            <!-- File Information (when file selected) -->
+            <materialDesign:Card x:Name="FileInfoCard"
+                                 Style="{StaticResource FileInfoCardStyle}"
+                                 Visibility="{Binding HasFile, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- File Icon -->
+                    <materialDesign:PackIcon x:Name="FileIcon"
+                                             Grid.Row="0" Grid.Column="0"
+                                             Kind="File"
+                                             Width="32" Height="32"
+                                             VerticalAlignment="Top"
+                                             Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+                    <!-- File Details -->
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock x:Name="FileNameText"
+                                   Text="{Binding FileName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        
+                        <TextBlock x:Name="FileSizeText"
+                                   Text="{Binding FileSizeText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        
+                        <TextBlock x:Name="FileTypeText"
+                                   Text="{Binding FileTypeText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Row="0" Grid.Column="2" 
+                                Orientation="Horizontal" 
+                                VerticalAlignment="Top">
+                        
+                        <!-- Change File Button -->
+                        <Button x:Name="ChangeButton"
+                                Style="{StaticResource MaterialDesignToolButton}"
+                                ToolTip="Change File"
+                                Click="ChangeButton_Click">
+                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
+                        </Button>
+                        
+                        <!-- Remove File Button -->
+                        <Button x:Name="RemoveButton"
+                                Style="{StaticResource MaterialDesignToolButton}"
+                                ToolTip="Remove File"
+                                Click="RemoveButton_Click"
+                                Margin="4,0,0,0">
+                            <materialDesign:PackIcon Kind="Close" Width="16" Height="16"/>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Upload Progress -->
+                    <ProgressBar x:Name="UploadProgress"
+                                 Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                 Style="{StaticResource UploadProgressStyle}"
+                                 Value="{Binding UploadProgress, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                 Visibility="{Binding IsUploading, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <!-- Upload Status -->
+                    <TextBlock x:Name="UploadStatusText"
+                               Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding UploadStatusText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Margin="0,4,0,0"
+                               Visibility="{Binding IsUploading, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <!-- Validation Error -->
+                    <TextBlock x:Name="ValidationErrorText"
+                               Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                               Text="{Binding ValidationError, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Foreground="{DynamicResource ValidationErrorBrush}"
+                               Margin="0,4,0,0"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding HasValidationError, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                </Grid>
+            </materialDesign:Card>
+
+        </Grid>
+
+        <!-- Footer Actions -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,8,0,0"
+                    Visibility="{Binding ShowFooterActions, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            
+            <!-- Cancel Button -->
+            <Button x:Name="CancelButton"
+                    Content="Cancel"
+                    Style="{StaticResource MaterialDesignFlatButton}"
+                    Click="CancelButton_Click"
+                    Visibility="{Binding ShowCancelButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            
+            <!-- Upload Button -->
+            <Button x:Name="UploadButton"
+                    Content="{Binding UploadButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Margin="8,0,0,0"
+                    Click="UploadButton_Click"
+                    IsEnabled="{Binding CanUpload, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Visibility="{Binding ShowUploadButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            
+        </StackPanel>
+
+    </Grid>
+</UserControl>

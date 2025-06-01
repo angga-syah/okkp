@@ -1,0 +1,391 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- Modern Window Style -->
+    <Style x:Key="ModernWindow" TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto"/>
+        <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="12"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="{DynamicResource MaterialDesignShadow}"
+                                              BlurRadius="20"
+                                              ShadowDepth="8"
+                                              Opacity="0.3"/>
+                        </Border.Effect>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Title Bar -->
+                            <Border Grid.Row="0"
+                                    Background="{DynamicResource MaterialDesignCardBackground}"
+                                    CornerRadius="12,12,0,0"
+                                    Height="48"
+                                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Window Icon -->
+                                    <Image Grid.Column="0"
+                                           Source="{TemplateBinding Icon}"
+                                           Width="24" Height="24"
+                                           Margin="16,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                    
+                                    <!-- Window Title -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="{TemplateBinding Title}"
+                                               VerticalAlignment="Center"
+                                               FontWeight="Medium"
+                                               FontSize="16"
+                                               Margin="8,0"/>
+                                    
+                                    <!-- Window Buttons -->
+                                    <StackPanel Grid.Column="2"
+                                                Orientation="Horizontal">
+                                        <Button x:Name="MinimizeButton"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Width="46" Height="32"
+                                                Click="MinimizeButton_Click"
+                                                ToolTip="Minimize">
+                                            <materialDesign:PackIcon Kind="Minus" Width="16" Height="16"/>
+                                        </Button>
+                                        <Button x:Name="MaximizeButton"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Width="46" Height="32"
+                                                Click="MaximizeButton_Click"
+                                                ToolTip="Maximize">
+                                            <materialDesign:PackIcon x:Name="MaximizeIcon" Kind="Fullscreen" Width="16" Height="16"/>
+                                        </Button>
+                                        <Button x:Name="CloseButton"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Width="46" Height="32"
+                                                Click="CloseButton_Click"
+                                                ToolTip="Close">
+                                            <Button.Resources>
+                                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#E81123"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Resources>
+                                            <materialDesign:PackIcon Kind="Close" Width="16" Height="16"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            
+                            <!-- Content Area -->
+                            <ContentPresenter Grid.Row="1"
+                                              Margin="1,0,1,1"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="WindowState" Value="Maximized">
+                            <Setter TargetName="MaximizeIcon" Property="Kind" Value="FullscreenExit"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dialog Window Style -->
+    <Style x:Key="DialogWindow" TargetType="Window" BasedOn="{StaticResource ModernWindow}">
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+        <Setter Property="WindowStartupLocation" Value="CenterOwner"/>
+        <Setter Property="ShowInTaskbar" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp8"
+                                         Background="{TemplateBinding Background}"
+                                         CornerRadius="12"
+                                         Margin="20">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Dialog Header -->
+                            <Border Grid.Row="0"
+                                    Background="{DynamicResource PrimaryHueMidBrush}"
+                                    CornerRadius="12,12,0,0"
+                                    Padding="24,16">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <TextBlock Grid.Column="0"
+                                               Text="{TemplateBinding Title}"
+                                               Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                               FontWeight="Medium"
+                                               FontSize="18"
+                                               VerticalAlignment="Center"/>
+                                    
+                                    <Button Grid.Column="1"
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Width="32" Height="32"
+                                            Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                                            Click="CloseButton_Click">
+                                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                            
+                            <!-- Dialog Content -->
+                            <ContentPresenter Grid.Row="1"
+                                              Margin="24"/>
+                            
+                            <!-- Dialog Footer (Optional) -->
+                            <Border Grid.Row="2"
+                                    Background="{DynamicResource MaterialDesignCardBackground}"
+                                    CornerRadius="0,0,12,12"
+                                    Padding="24,16"
+                                    x:Name="FooterBorder"
+                                    Visibility="Collapsed"/>
+                        </Grid>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Borderless Window Style -->
+    <Style x:Key="BorderlessWindow" TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Splash Screen Window Style -->
+    <Style x:Key="SplashWindow" TargetType="Window" BasedOn="{StaticResource BorderlessWindow}">
+        <Setter Property="WindowStartupLocation" Value="CenterScreen"/>
+        <Setter Property="ShowInTaskbar" Value="False"/>
+        <Setter Property="Topmost" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp12"
+                                         Background="{TemplateBinding Background}"
+                                         CornerRadius="16">
+                        <ContentPresenter/>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Notification Window Style -->
+    <Style x:Key="NotificationWindow" TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignBackground}"/>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="ShowInTaskbar" Value="False"/>
+        <Setter Property="Topmost" Value="True"/>
+        <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp6"
+                                         Background="{TemplateBinding Background}"
+                                         CornerRadius="8"
+                                         Margin="8">
+                        <ContentPresenter Margin="16"/>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Main Application Window Style -->
+    <Style x:Key="MainWindow" TargetType="Window" BasedOn="{StaticResource ModernWindow}">
+        <Setter Property="MinWidth" Value="1024"/>
+        <Setter Property="MinHeight" Value="768"/>
+        <Setter Property="WindowStartupLocation" Value="CenterScreen"/>
+        <Setter Property="Icon" Value="/Resources/Images/app-icon.ico"/>
+    </Style>
+
+    <!-- Login Window Style -->
+    <Style x:Key="LoginWindow" TargetType="Window" BasedOn="{StaticResource DialogWindow}">
+        <Setter Property="MinWidth" Value="400"/>
+        <Setter Property="MinHeight" Value="500"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="WindowStartupLocation" Value="CenterScreen"/>
+        <Setter Property="ShowInTaskbar" Value="True"/>
+    </Style>
+
+    <!-- Settings Window Style -->
+    <Style x:Key="SettingsWindow" TargetType="Window" BasedOn="{StaticResource ModernWindow}">
+        <Setter Property="Width" Value="800"/>
+        <Setter Property="Height" Value="600"/>
+        <Setter Property="MinWidth" Value="600"/>
+        <Setter Property="MinHeight" Value="400"/>
+        <Setter Property="WindowStartupLocation" Value="CenterOwner"/>
+    </Style>
+
+    <!-- Print Preview Window Style -->
+    <Style x:Key="PrintPreviewWindow" TargetType="Window" BasedOn="{StaticResource ModernWindow}">
+        <Setter Property="Width" Value="900"/>
+        <Setter Property="Height" Value="700"/>
+        <Setter Property="MinWidth" Value="700"/>
+        <Setter Property="MinHeight" Value="500"/>
+        <Setter Property="WindowStartupLocation" Value="CenterOwner"/>
+        <Setter Property="Icon" Value="/Resources/Images/print-icon.ico"/>
+    </Style>
+
+    <!-- About Window Style -->
+    <Style x:Key="AboutWindow" TargetType="Window" BasedOn="{StaticResource DialogWindow}">
+        <Setter Property="Width" Value="500"/>
+        <Setter Property="Height" Value="400"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="WindowStartupLocation" Value="CenterOwner"/>
+    </Style>
+
+    <!-- Loading Window Style -->
+    <Style x:Key="LoadingWindow" TargetType="Window" BasedOn="{StaticResource BorderlessWindow}">
+        <Setter Property="WindowStartupLocation" Value="CenterOwner"/>
+        <Setter Property="ShowInTaskbar" Value="False"/>
+        <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp8"
+                                         Background="{TemplateBinding Background}"
+                                         CornerRadius="12"
+                                         Padding="32">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                         IsIndeterminate="True"
+                                         Width="48" Height="48"
+                                         Margin="0,0,0,16"/>
+                            <ContentPresenter HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Full Screen Window Style -->
+    <Style x:Key="FullScreenWindow" TargetType="Window">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="WindowState" Value="Maximized"/>
+        <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="Topmost" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Window">
+                    <Grid Background="{TemplateBinding Background}">
+                        <ContentPresenter/>
+                        
+                        <!-- Exit Full Screen Button -->
+                        <Button HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="16"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniAccentButton}"
+                                Click="ExitFullScreen_Click">
+                            <materialDesign:PackIcon Kind="FullscreenExit"/>
+                        </Button>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Window Chrome Style for Modern Look -->
+    <Style x:Key="ModernWindowChrome" TargetType="Window">
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome CaptionHeight="48"
+                              ResizeBorderThickness="5"
+                              UseAeroCaptionButtons="False"
+                              NonClientFrameEdges="None"
+                              GlassFrameThickness="0"
+                              CornerRadius="12"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Animated Window Entry -->
+    <Style x:Key="AnimatedWindow" TargetType="Window" BasedOn="{StaticResource ModernWindow}">
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         To="1" Duration="0:0:0.3">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                         To="1" Duration="0:0:0.3">
+                            <DoubleAnimation.EasingFunction>
+                                <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                         To="1" Duration="0:0:0.3">
+                            <DoubleAnimation.EasingFunction>
+                                <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

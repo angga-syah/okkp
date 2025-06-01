@@ -1,0 +1,281 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- Light Theme Color Palette -->
+    
+    <!-- Primary Colors -->
+    <Color x:Key="LightPrimaryColor">#1976D2</Color>
+    <Color x:Key="LightPrimaryLightColor">#BBDEFB</Color>
+    <Color x:Key="LightPrimaryDarkColor">#0D47A1</Color>
+    
+    <!-- Secondary Colors -->
+    <Color x:Key="LightSecondaryColor">#03DAC6</Color>
+    <Color x:Key="LightSecondaryLightColor">#B2DFDB</Color>
+    <Color x:Key="LightSecondaryDarkColor">#00796B</Color>
+    
+    <!-- Background Colors -->
+    <Color x:Key="LightBackgroundColor">#FAFAFA</Color>
+    <Color x:Key="LightSurfaceColor">#FFFFFF</Color>
+    <Color x:Key="LightCardColor">#FFFFFF</Color>
+    <Color x:Key="LightPaperColor">#FFFFFF</Color>
+    
+    <!-- Text Colors -->
+    <Color x:Key="LightTextPrimaryColor">#212121</Color>
+    <Color x:Key="LightTextSecondaryColor">#757575</Color>
+    <Color x:Key="LightTextDisabledColor">#BDBDBD</Color>
+    <Color x:Key="LightTextHintColor">#9E9E9E</Color>
+    
+    <!-- Utility Colors -->
+    <Color x:Key="LightDividerColor">#E0E0E0</Color>
+    <Color x:Key="LightSelectionColor">#E3F2FD</Color>
+    <Color x:Key="LightHoverColor">#F5F5F5</Color>
+    <Color x:Key="LightFocusColor">#E1F5FE</Color>
+    
+    <!-- Status Colors -->
+    <Color x:Key="LightSuccessColor">#4CAF50</Color>
+    <Color x:Key="LightWarningColor">#FF9800</Color>
+    <Color x:Key="LightErrorColor">#F44336</Color>
+    <Color x:Key="LightInfoColor">#2196F3</Color>
+    
+    <!-- Convert Colors to Brushes -->
+    
+    <!-- Primary Brushes -->
+    <SolidColorBrush x:Key="LightPrimaryBrush" Color="{StaticResource LightPrimaryColor}"/>
+    <SolidColorBrush x:Key="LightPrimaryLightBrush" Color="{StaticResource LightPrimaryLightColor}"/>
+    <SolidColorBrush x:Key="LightPrimaryDarkBrush" Color="{StaticResource LightPrimaryDarkColor}"/>
+    
+    <!-- Secondary Brushes -->
+    <SolidColorBrush x:Key="LightSecondaryBrush" Color="{StaticResource LightSecondaryColor}"/>
+    <SolidColorBrush x:Key="LightSecondaryLightBrush" Color="{StaticResource LightSecondaryLightColor}"/>
+    <SolidColorBrush x:Key="LightSecondaryDarkBrush" Color="{StaticResource LightSecondaryDarkColor}"/>
+    
+    <!-- Background Brushes -->
+    <SolidColorBrush x:Key="LightBackgroundBrush" Color="{StaticResource LightBackgroundColor}"/>
+    <SolidColorBrush x:Key="LightSurfaceBrush" Color="{StaticResource LightSurfaceColor}"/>
+    <SolidColorBrush x:Key="LightCardBrush" Color="{StaticResource LightCardColor}"/>
+    <SolidColorBrush x:Key="LightPaperBrush" Color="{StaticResource LightPaperColor}"/>
+    
+    <!-- Text Brushes -->
+    <SolidColorBrush x:Key="LightTextPrimaryBrush" Color="{StaticResource LightTextPrimaryColor}"/>
+    <SolidColorBrush x:Key="LightTextSecondaryBrush" Color="{StaticResource LightTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="LightTextDisabledBrush" Color="{StaticResource LightTextDisabledColor}"/>
+    <SolidColorBrush x:Key="LightTextHintBrush" Color="{StaticResource LightTextHintColor}"/>
+    
+    <!-- Utility Brushes -->
+    <SolidColorBrush x:Key="LightDividerBrush" Color="{StaticResource LightDividerColor}"/>
+    <SolidColorBrush x:Key="LightSelectionBrush" Color="{StaticResource LightSelectionColor}"/>
+    <SolidColorBrush x:Key="LightHoverBrush" Color="{StaticResource LightHoverColor}"/>
+    <SolidColorBrush x:Key="LightFocusBrush" Color="{StaticResource LightFocusColor}"/>
+    
+    <!-- Status Brushes -->
+    <SolidColorBrush x:Key="LightSuccessBrush" Color="{StaticResource LightSuccessColor}"/>
+    <SolidColorBrush x:Key="LightWarningBrush" Color="{StaticResource LightWarningColor}"/>
+    <SolidColorBrush x:Key="LightErrorBrush" Color="{StaticResource LightErrorColor}"/>
+    <SolidColorBrush x:Key="LightInfoBrush" Color="{StaticResource LightInfoColor}"/>
+    
+    <!-- Material Design Theme Override -->
+    <ResourceDictionary.MergedDictionaries>
+        <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Blue" SecondaryColor="Teal"/>
+    </ResourceDictionary.MergedDictionaries>
+    
+    <!-- Override Material Design Resources -->
+    
+    <!-- Primary Theme Colors -->
+    <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource LightPrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource LightPrimaryLightColor}"/>
+    <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource LightPrimaryDarkColor}"/>
+    <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF"/>
+    
+    <!-- Secondary Theme Colors -->
+    <SolidColorBrush x:Key="SecondaryHueMidBrush" Color="{StaticResource LightSecondaryColor}"/>
+    <SolidColorBrush x:Key="SecondaryHueLightBrush" Color="{StaticResource LightSecondaryLightColor}"/>
+    <SolidColorBrush x:Key="SecondaryHueDarkBrush" Color="{StaticResource LightSecondaryDarkColor}"/>
+    <SolidColorBrush x:Key="SecondaryHueMidForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="SecondaryHueLightForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="SecondaryHueDarkForegroundBrush" Color="#FFFFFF"/>
+    
+    <!-- Background Colors -->
+    <SolidColorBrush x:Key="MaterialDesignPaper" Color="{StaticResource LightPaperColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBackground" Color="{StaticResource LightBackgroundColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="{StaticResource LightCardColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignToolBarBackground" Color="{StaticResource LightSurfaceColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBody" Color="{StaticResource LightTextPrimaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBodyLight" Color="{StaticResource LightTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignColumnHeader" Color="{StaticResource LightTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCheckBoxOff" Color="{StaticResource LightTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCheckBoxDisabled" Color="{StaticResource LightTextDisabledColor}"/>
+    
+    <!-- Input Controls -->
+    <SolidColorBrush x:Key="MaterialDesignTextFieldBoxBackground" Color="{StaticResource LightHoverColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextFieldBoxHoverBackground" Color="{StaticResource LightSelectionColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextFieldBoxDisabledBackground" Color="{StaticResource LightBackgroundColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextAreaBorder" Color="{StaticResource LightDividerColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextAreaInactiveBorder" Color="{StaticResource LightDividerColor}"/>
+    
+    <!-- Dividers and Borders -->
+    <SolidColorBrush x:Key="MaterialDesignDivider" Color="{StaticResource LightDividerColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignSelection" Color="{StaticResource LightSelectionColor}"/>
+    
+    <!-- Button States -->
+    <SolidColorBrush x:Key="MaterialDesignFlatButtonClick" Color="{StaticResource LightHoverColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignFlatButtonRipple" Color="{StaticResource LightSelectionColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignToolTipBackground" Color="{StaticResource LightCardColor}"/>
+    
+    <!-- Validation Colors -->
+    <SolidColorBrush x:Key="ValidationErrorBrush" Color="{StaticResource LightErrorColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignValidationErrorBrush" Color="{StaticResource LightErrorColor}"/>
+    
+    <!-- Data Grid Colors -->
+    <SolidColorBrush x:Key="MaterialDesignDataGridRowHoverBackground" Color="{StaticResource LightHoverColor}"/>
+    
+    <!-- Shadow Color -->
+    <Color x:Key="MaterialDesignShadow">#000000</Color>
+    
+    <!-- Gradient Brushes for Modern Look -->
+    <LinearGradientBrush x:Key="LightGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource LightBackgroundColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource LightSurfaceColor}" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="LightPrimaryGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource LightPrimaryColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource LightPrimaryDarkColor}" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="LightSecondaryGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource LightSecondaryColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource LightSecondaryDarkColor}" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <!-- Accent Colors for Special Elements -->
+    <SolidColorBrush x:Key="LightAccent1Brush" Color="#E91E63"/>  <!-- Pink -->
+    <SolidColorBrush x:Key="LightAccent2Brush" Color="#9C27B0"/>  <!-- Purple -->
+    <SolidColorBrush x:Key="LightAccent3Brush" Color="#673AB7"/>  <!-- Deep Purple -->
+    <SolidColorBrush x:Key="LightAccent4Brush" Color="#3F51B5"/>  <!-- Indigo -->
+    <SolidColorBrush x:Key="LightAccent5Brush" Color="#00BCD4"/>  <!-- Cyan -->
+    
+    <!-- Chart Colors for Light Theme -->
+    <SolidColorBrush x:Key="LightChart1Brush" Color="#1976D2"/>
+    <SolidColorBrush x:Key="LightChart2Brush" Color="#388E3C"/>
+    <SolidColorBrush x:Key="LightChart3Brush" Color="#F57C00"/>
+    <SolidColorBrush x:Key="LightChart4Brush" Color="#D32F2F"/>
+    <SolidColorBrush x:Key="LightChart5Brush" Color="#7B1FA2"/>
+    <SolidColorBrush x:Key="LightChart6Brush" Color="#0097A7"/>
+    <SolidColorBrush x:Key="LightChart7Brush" Color="#FBC02D"/>
+    <SolidColorBrush x:Key="LightChart8Brush" Color="#5D4037"/>
+    
+    <!-- Invoice Status Colors for Light Theme -->
+    <SolidColorBrush x:Key="LightDraftStatusBrush" Color="#FF9800"/>
+    <SolidColorBrush x:Key="LightFinalizedStatusBrush" Color="#2196F3"/>
+    <SolidColorBrush x:Key="LightPaidStatusBrush" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="LightCancelledStatusBrush" Color="#F44336"/>
+    <SolidColorBrush x:Key="LightOverdueStatusBrush" Color="#E91E63"/>
+    
+    <!-- Modern Glass Effect Brushes -->
+    <LinearGradientBrush x:Key="LightGlassBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#20FFFFFF" Offset="0"/>
+        <GradientStop Color="#05FFFFFF" Offset="0.5"/>
+        <GradientStop Color="#01FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <!-- Elevation Shadow Brushes -->
+    <DropShadowEffect x:Key="LightElevation1" Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.1"/>
+    <DropShadowEffect x:Key="LightElevation2" Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.12"/>
+    <DropShadowEffect x:Key="LightElevation4" Color="#000000" BlurRadius="12" ShadowDepth="4" Opacity="0.14"/>
+    <DropShadowEffect x:Key="LightElevation6" Color="#000000" BlurRadius="16" ShadowDepth="6" Opacity="0.16"/>
+    <DropShadowEffect x:Key="LightElevation8" Color="#000000" BlurRadius="20" ShadowDepth="8" Opacity="0.18"/>
+    
+    <!-- Font Resources -->
+    <FontFamily x:Key="LightThemeFont">Segoe UI, Arial, sans-serif</FontFamily>
+    <FontFamily x:Key="LightThemeMonoFont">Consolas, Monaco, monospace</FontFamily>
+    
+    <!-- Typography Styles for Light Theme -->
+    <Style x:Key="LightHeadline1" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="96"/>
+        <Setter Property="FontWeight" Value="Light"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightHeadline2" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="60"/>
+        <Setter Property="FontWeight" Value="Light"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightHeadline3" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="48"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightHeadline4" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="34"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightHeadline5" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightHeadline6" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightSubtitle1" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightSubtitle2" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightBody1" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightBody2" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightCaption" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextSecondaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="LightOverline" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource LightThemeFont}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource LightTextSecondaryBrush}"/>
+        <Setter Property="TextTransform" Value="Uppercase"/>
+    </Style>
+
+</ResourceDictionary>

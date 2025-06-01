@@ -1,0 +1,459 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Companies.TkaAssignmentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:controls="clr-namespace:InvoiceApp.WPF.Controls"
+             Width="550" Height="500">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
+        <!-- TKA Item Template for ComboBox -->
+        <DataTemplate x:Key="TkaItemTemplate">
+            <Grid Margin="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- TKA Avatar -->
+                <Border Grid.Column="0"
+                        Background="{DynamicResource PrimaryHueMidBrush}"
+                        CornerRadius="16"
+                        Width="32" Height="32"
+                        Margin="0,0,8,0">
+                    <TextBlock Text="{Binding Nama, Converter={StaticResource InitialsConverter}}"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- TKA Details -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Nama}"
+                               Style="{StaticResource MaterialDesignBody2TextBlock}"
+                               FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Passport}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        <TextBlock Text=" • "
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                        <TextBlock Text="{Binding Divisi}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <materialDesign:Card materialDesign:ElevationAssist.Elevation="Dp8"
+                         Background="{DynamicResource MaterialDesignPaper}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" 
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    Padding="20,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding IsEdit, Converter={StaticResource BoolToHeaderConverter}, ConverterParameter='Edit TKA Assignment;Assign TKA Worker'}"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Foreground="White"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding CompanyName, StringFormat='to {0}'}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="White"
+                                   Opacity="0.8"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            Command="{Binding CloseCommand}"
+                            Foreground="White">
+                        <materialDesign:PackIcon Kind="Close" Width="20" Height="20"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1" 
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="20">
+                <StackPanel>
+                    
+                    <!-- TKA Worker Selection -->
+                    <GroupBox Header="TKA Worker Selection"
+                              Style="{StaticResource MaterialDesignGroupBox}"
+                              Margin="0,0,0,16">
+                        <StackPanel Margin="0,8,0,0">
+                            
+                            <!-- Search TKA Workers -->
+                            <TextBox Text="{Binding TkaSearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                                     materialDesign:HintAssist.Hint="Search TKA workers..."
+                                     materialDesign:HintAssist.IsFloating="True"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     Margin="0,0,0,12">
+                                <TextBox.Resources>
+                                    <Style TargetType="materialDesign:PackIcon">
+                                        <Setter Property="Kind" Value="Magnify"/>
+                                    </Style>
+                                </TextBox.Resources>
+                            </TextBox>
+
+                            <!-- TKA Worker ComboBox -->
+                            <ComboBox ItemsSource="{Binding AvailableTkaWorkers}"
+                                      SelectedItem="{Binding Assignment.SelectedTkaWorker}"
+                                      DisplayMemberPath="Nama"
+                                      ItemTemplate="{StaticResource TkaItemTemplate}"
+                                      materialDesign:HintAssist.Hint="Select TKA Worker *"
+                                      materialDesign:HintAssist.IsFloating="True"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      IsEditable="True"
+                                      MaxDropDownHeight="200"
+                                      IsEnabled="{Binding CanSelectTka}"/>
+
+                            <!-- Selected TKA Preview -->
+                            <Border Background="{DynamicResource MaterialDesignDivider}"
+                                    CornerRadius="4"
+                                    Padding="12"
+                                    Margin="0,12,0,0"
+                                    Visibility="{Binding Assignment.SelectedTkaWorker, Converter={StaticResource NullToVisibilityConverter}}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- TKA Avatar -->
+                                    <Border Grid.Column="0"
+                                            Background="{DynamicResource PrimaryHueMidBrush}"
+                                            CornerRadius="20"
+                                            Width="40" Height="40"
+                                            Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding Assignment.SelectedTkaWorker.Nama, Converter={StaticResource InitialsConverter}}"
+                                                   Foreground="White"
+                                                   FontWeight="Bold"
+                                                   FontSize="14"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- TKA Details -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Assignment.SelectedTkaWorker.Nama}"
+                                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                   FontWeight="SemiBold"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Assignment.SelectedTkaWorker.Passport, StringFormat='Passport: {0}'}"
+                                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                            <TextBlock Text=" • "
+                                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                            <TextBlock Text="{Binding Assignment.SelectedTkaWorker.JenisKelamin}"
+                                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Assignment.SelectedTkaWorker.Divisi, StringFormat='Division: {0}'}"
+                                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                   Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                    </StackPanel>
+
+                                    <!-- View TKA Details Button -->
+                                    <Button Grid.Column="2"
+                                            Content="VIEW DETAILS"
+                                            Command="{Binding ViewTkaDetailsCommand}"
+                                            CommandParameter="{Binding Assignment.SelectedTkaWorker}"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Assignment Details -->
+                    <GroupBox Header="Assignment Details"
+                              Style="{StaticResource MaterialDesignGroupBox}"
+                              Margin="0,0,0,16">
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Assignment Date -->
+                            <DatePicker Grid.Row="0" Grid.Column="0"
+                                        SelectedDate="{Binding Assignment.AssignmentDate}"
+                                        materialDesign:HintAssist.Hint="Assignment Date *"
+                                        materialDesign:HintAssist.IsFloating="True"
+                                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                        Margin="0,0,8,16"/>
+
+                            <!-- End Date -->
+                            <DatePicker Grid.Row="0" Grid.Column="1"
+                                        SelectedDate="{Binding Assignment.EndDate}"
+                                        materialDesign:HintAssist.Hint="End Date (Optional)"
+                                        materialDesign:HintAssist.IsFloating="True"
+                                        Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                        Margin="8,0,0,16"/>
+
+                            <!-- Active Status -->
+                            <CheckBox Grid.Row="1" Grid.ColumnSpan="2"
+                                      Content="Active assignment"
+                                      IsChecked="{Binding Assignment.IsActive}"
+                                      Style="{StaticResource MaterialDesignCheckBox}"
+                                      Margin="0,0,0,16"/>
+
+                            <!-- Notes -->
+                            <TextBox Grid.Row="2" Grid.ColumnSpan="2"
+                                     Text="{Binding Assignment.Notes, UpdateSourceTrigger=PropertyChanged}"
+                                     materialDesign:HintAssist.Hint="Assignment Notes (Optional)"
+                                     materialDesign:HintAssist.IsFloating="True"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     Height="80"
+                                     VerticalScrollBarVisibility="Auto"
+                                     MaxLength="500"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- Assignment History (for existing assignments) -->
+                    <GroupBox Header="Assignment History"
+                              Style="{StaticResource MaterialDesignGroupBox}"
+                              Margin="0,0,0,16"
+                              Visibility="{Binding IsEdit, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Margin="0,8,0,0">
+                            <DataGrid ItemsSource="{Binding AssignmentHistory}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      MaxHeight="150"
+                                      Style="{StaticResource MaterialDesignDataGrid}">
+                                
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Date" 
+                                                      Binding="{Binding ChangeDate, StringFormat=dd/MM/yyyy}" 
+                                                      Width="80"/>
+                                    <DataGridTextColumn Header="Action" 
+                                                      Binding="{Binding Action}" 
+                                                      Width="100"/>
+                                    <DataGridTextColumn Header="Details" 
+                                                      Binding="{Binding Details}" 
+                                                      Width="*"/>
+                                    <DataGridTextColumn Header="By" 
+                                                      Binding="{Binding ChangedBy}" 
+                                                      Width="100"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Family Members Info -->
+                    <GroupBox Header="Family Members"
+                              Style="{StaticResource MaterialDesignGroupBox}"
+                              Margin="0,0,0,16"
+                              Visibility="{Binding Assignment.SelectedTkaWorker.HasFamilyMembers, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Margin="0,8,0,0">
+                            <TextBlock Text="This assignment will also include the following family members:"
+                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Margin="0,0,0,8"/>
+                            
+                            <ItemsControl ItemsSource="{Binding Assignment.SelectedTkaWorker.FamilyMembers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <materialDesign:PackIcon Grid.Column="0"
+                                                                   Kind="Account"
+                                                                   Width="16" Height="16"
+                                                                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                                   VerticalAlignment="Center"/>
+
+                                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                <TextBlock Text="{Binding Nama}"
+                                                           Style="{StaticResource MaterialDesignBody2TextBlock}"/>
+                                                <TextBlock Text="{Binding Relationship, StringFormat='{}{0} • {1}', StringFormat2={Binding Passport}}"
+                                                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                           Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                            </StackPanel>
+
+                                            <CheckBox Grid.Column="2"
+                                                      IsChecked="{Binding IsIncludedInAssignment}"
+                                                      ToolTip="Include in assignment"
+                                                      Style="{StaticResource MaterialDesignCheckBox}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- Validation Errors -->
+                    <Border Background="{DynamicResource ValidationErrorColor}"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding HasValidationErrors, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <materialDesign:PackIcon Kind="AlertCircle"
+                                                       Foreground="White"
+                                                       Width="16" Height="16"
+                                                       VerticalAlignment="Center"/>
+                                <TextBlock Text="Please fix the following errors:"
+                                           Foreground="White"
+                                           FontWeight="SemiBold"
+                                           Margin="8,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <ItemsControl ItemsSource="{Binding ValidationErrors}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   Foreground="White"
+                                                   Margin="0,2,0,0"
+                                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Assignment Tips -->
+                    <Border Background="{DynamicResource MaterialDesignDivider}"
+                            CornerRadius="4"
+                            Padding="12">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <materialDesign:PackIcon Kind="Lightbulb"
+                                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                       Width="16" Height="16"
+                                                       VerticalAlignment="Center"/>
+                                <TextBlock Text="Assignment Tips"
+                                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                           FontWeight="SemiBold"
+                                           Margin="8,0,0,0"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <StackPanel>
+                                <TextBlock Text="• Only assign TKA workers when they start working for the company"
+                                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                           Margin="0,2,0,0"/>
+                                <TextBlock Text="• Set end date when assignment period is known"
+                                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                           Margin="0,2,0,0"/>
+                                <TextBlock Text="• Family members will automatically inherit assignment settings"
+                                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                           Margin="0,2,0,0"/>
+                                <TextBlock Text="• Inactive assignments won't appear in invoice creation"
+                                           Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer Actions -->
+            <Border Grid.Row="2" 
+                    Background="{DynamicResource MaterialDesignCardBackground}"
+                    BorderBrush="{DynamicResource MaterialDesignDivider}"
+                    BorderThickness="0,1,0,0"
+                    Padding="20,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Required Fields Notice -->
+                    <StackPanel Grid.Column="0" 
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Information"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                               Width="14" Height="14"
+                                               VerticalAlignment="Center"/>
+                        <TextBlock Text="* Required fields"
+                                   Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                   Margin="4,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                    </StackPanel>
+
+                    <!-- Loading Indicator -->
+                    <StackPanel Grid.Column="1" 
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     Width="16" Height="16"
+                                     IsIndeterminate="True"/>
+                        <TextBlock Text="Saving assignment..."
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"/>
+                    </StackPanel>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="2" 
+                                Orientation="Horizontal">
+                        <Button Content="CANCEL"
+                                Command="{Binding CancelCommand}"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                Margin="0,0,8,0"/>
+                        
+                        <Button Content="SAVE"
+                                Command="{Binding SaveCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Margin="0,0,8,0"
+                                IsEnabled="{Binding CanSave}"/>
+                        
+                        <Button Content="{Binding IsEdit, Converter={StaticResource BoolToTextConverter}, ConverterParameter='UPDATE ASSIGNMENT;SAVE & ASSIGN ANOTHER'}"
+                                Command="{Binding SaveAndContinueCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                IsEnabled="{Binding CanSave}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </materialDesign:Card>
+</UserControl>

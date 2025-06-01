@@ -1,0 +1,411 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.TkaWorkers.FamilyMemberView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             Background="{DynamicResource MaterialDesignPaper}">
+
+    <UserControl.Resources>
+        <!-- Family Member Card Template -->
+        <DataTemplate x:Key="FamilyMemberCardTemplate">
+            <materialDesign:Card Margin="8" Padding="16" 
+                               materialDesign:ElevationAssist.Elevation="Dp2"
+                               Background="{DynamicResource MaterialDesignCardBackground}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Relationship Icon -->
+                    <Border Grid.Column="0" Width="48" Height="48" 
+                           Background="{Binding Relationship, Converter={StaticResource RelationshipToBrushConverter}}"
+                           CornerRadius="24" Margin="0,0,16,0">
+                        <materialDesign:PackIcon Kind="{Binding Relationship, Converter={StaticResource RelationshipToIconConverter}}" 
+                                               Width="24" Height="24" Foreground="White"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Family Member Details -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Nama}" 
+                                  Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                        <TextBlock Text="{Binding Passport}" 
+                                  Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                  Opacity="0.8"/>
+                        
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <!-- Relationship Badge -->
+                            <Border Background="{Binding Relationship, Converter={StaticResource RelationshipToBrushConverter}}" 
+                                   CornerRadius="8" Padding="8,4" Margin="0,0,8,0">
+                                <TextBlock Text="{Binding Relationship, Converter={StaticResource RelationshipToDisplayConverter}}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                          Foreground="White" FontWeight="Bold"/>
+                            </Border>
+
+                            <!-- Gender Badge -->
+                            <Border Background="{Binding JenisKelamin, Converter={StaticResource GenderToBrushConverter}}" 
+                                   CornerRadius="8" Padding="8,4" Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="{Binding JenisKelamin, Converter={StaticResource GenderToIconConverter}}" 
+                                                           Width="12" Height="12" Foreground="White" 
+                                                           VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding JenisKelamin}" 
+                                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                              Foreground="White" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Status Badge -->
+                            <Border Background="{Binding IsActive, Converter={StaticResource StatusToBrushConverter}}" 
+                                   CornerRadius="8" Padding="8,4">
+                                <TextBlock Text="{Binding IsActive, Converter={StaticResource StatusToTextConverter}}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                          Foreground="White" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Created Date -->
+                        <TextBlock Text="{Binding CreatedAt, StringFormat='Added: {0:dd/MM/yyyy}'}" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  Opacity="0.6" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- Actions -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource MaterialDesignToolButton}"
+                               Command="{Binding DataContext.EditFamilyMemberCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               CommandParameter="{Binding}"
+                               ToolTip="Edit Family Member" Margin="4,0">
+                            <materialDesign:PackIcon Kind="Edit"/>
+                        </Button>
+
+                        <Button Style="{StaticResource MaterialDesignToolButton}"
+                               Command="{Binding DataContext.ToggleFamilyMemberStatusCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               CommandParameter="{Binding}"
+                               ToolTip="{Binding IsActive, Converter={StaticResource ActiveTooltipConverter}}" 
+                               Margin="4,0">
+                            <materialDesign:PackIcon Kind="{Binding IsActive, Converter={StaticResource ActiveToIconConverter}}"/>
+                        </Button>
+
+                        <Button Style="{StaticResource MaterialDesignToolButton}"
+                               Command="{Binding DataContext.DeleteFamilyMemberCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               CommandParameter="{Binding}"
+                               ToolTip="Delete Family Member" Margin="4,0"
+                               Foreground="{DynamicResource MaterialDesignValidationErrorBrush}">
+                            <materialDesign:PackIcon Kind="Delete"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+        </DataTemplate>
+
+        <!-- Animation Storyboards -->
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                           From="0" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" Margin="16,16,16,8" Padding="16" 
+                            materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AccountGroup" Width="28" Height="28" 
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                               VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Text="{Binding TkaWorkerName, StringFormat='Family Members - {0}'}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                  Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Manage family members for TKA worker" 
+                              Style="{StaticResource MaterialDesignBody1TextBlock}"
+                              Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- Header Actions -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Command="{Binding RefreshCommand}"
+                            Margin="0,0,8,0" Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" VerticalAlignment="Center"/>
+                            <TextBlock Text="Refresh" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Command="{Binding AddFamilyMemberCommand}"
+                            Padding="16,8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center"/>
+                            <TextBlock Text="Add Family Member" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Content -->
+        <Grid Grid.Row="1" Margin="16,0,16,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Search and Filter Bar -->
+            <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,8"
+                                materialDesign:ElevationAssist.Elevation="Dp1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Search Box -->
+                    <TextBox Grid.Column="0" 
+                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                            materialDesign:HintAssist.Hint="Search family members..."
+                            materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                            materialDesign:TextFieldAssist.LeadingIcon="Magnify"
+                            Margin="0,0,16,0"/>
+
+                    <!-- Relationship Filter -->
+                    <ComboBox Grid.Column="1" 
+                             SelectedItem="{Binding SelectedRelationshipFilter}"
+                             materialDesign:HintAssist.Hint="Relationship"
+                             Width="150" Margin="0,0,16,0">
+                        <ComboBoxItem Content="All"/>
+                        <ComboBoxItem Content="Spouse"/>
+                        <ComboBoxItem Content="Parent"/>
+                        <ComboBoxItem Content="Child"/>
+                    </ComboBox>
+
+                    <!-- Gender Filter -->
+                    <ComboBox Grid.Column="2" 
+                             SelectedItem="{Binding SelectedGenderFilter}"
+                             materialDesign:HintAssist.Hint="Gender"
+                             Width="120" Margin="0,0,16,0">
+                        <ComboBoxItem Content="All"/>
+                        <ComboBoxItem Content="Laki-laki"/>
+                        <ComboBoxItem Content="Perempuan"/>
+                    </ComboBox>
+
+                    <!-- Status Filter -->
+                    <ComboBox Grid.Column="3" 
+                             SelectedItem="{Binding SelectedStatusFilter}"
+                             materialDesign:HintAssist.Hint="Status"
+                             Width="120">
+                        <ComboBoxItem Content="All"/>
+                        <ComboBoxItem Content="Active"/>
+                        <ComboBoxItem Content="Inactive"/>
+                    </ComboBox>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Statistics -->
+            <UniformGrid Grid.Row="1" Rows="1" Columns="4" Margin="0,0,0,16">
+                <materialDesign:Card Margin="4" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+                    <StackPanel HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Heart" Width="24" Height="24" 
+                                               Foreground="#E91E63" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding SpouseCount}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Spouse" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  HorizontalAlignment="Center" Opacity="0.8"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Card Margin="4" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+                    <StackPanel HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="AccountSupervisor" Width="24" Height="24" 
+                                               Foreground="#673AB7" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding ParentCount}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Parents" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  HorizontalAlignment="Center" Opacity="0.8"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Card Margin="4" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+                    <StackPanel HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Baby" Width="24" Height="24" 
+                                               Foreground="#4CAF50" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding ChildCount}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Children" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  HorizontalAlignment="Center" Opacity="0.8"/>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <materialDesign:Card Margin="4" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+                    <StackPanel HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="AccountGroup" Width="24" Height="24" 
+                                               Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding TotalFamilyMembers}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Total Members" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBook}"
+                                  HorizontalAlignment="Center" Opacity="0.8"/>
+                    </StackPanel>
+                </materialDesign:Card>
+            </UniformGrid>
+
+            <!-- Family Members List -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <!-- Family Members -->
+                    <ItemsControl ItemsSource="{Binding FilteredFamilyMembers}"
+                                 ItemTemplate="{StaticResource FamilyMemberCardTemplate}"
+                                 Visibility="{Binding HasFamilyMembers, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+
+                    <!-- Empty State -->
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Visibility="{Binding HasFamilyMembers, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                        <materialDesign:PackIcon Kind="AccountGroup" Width="64" Height="64" 
+                                               Foreground="{DynamicResource MaterialDesignCheckBoxDisabled}"
+                                               Margin="0,0,0,16"/>
+                        <TextBlock Text="No Family Members Found" 
+                                  Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                  HorizontalAlignment="Center" Opacity="0.6"/>
+                        <TextBlock Text="Click 'Add Family Member' to add family members for this TKA worker." 
+                                  Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                  HorizontalAlignment="Center" Opacity="0.6" Margin="0,8,0,16" TextAlignment="Center"/>
+                        <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                               Command="{Binding AddFamilyMemberCommand}"
+                               Padding="24,12">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center"/>
+                                <TextBlock Text="Add First Family Member" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Add/Edit Family Member Dialog -->
+        <Grid Grid.RowSpan="2" Background="#80000000" 
+              Visibility="{Binding ShowFamilyMemberDialog, Converter={StaticResource BoolToVisibilityConverter}}">
+            <materialDesign:Card MaxWidth="450" MaxHeight="500" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Padding="24" materialDesign:ElevationAssist.Elevation="Dp8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Dialog Header -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                        <TextBlock Text="{Binding DialogTitle}" 
+                                  Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
+                        <TextBlock Text="Enter family member information" 
+                                  Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                  Opacity="0.8"/>
+                    </StackPanel>
+
+                    <!-- Dialog Content -->
+                    <StackPanel Grid.Row="1" Spacing="16">
+                        <!-- Personal Information -->
+                        <TextBox Text="{Binding EditingFamilyMember.Nama, UpdateSourceTrigger=PropertyChanged}"
+                                materialDesign:HintAssist.Hint="Full Name *"
+                                materialDesign:ValidationAssist.UsePopup="True"/>
+
+                        <TextBox Text="{Binding EditingFamilyMember.Passport, UpdateSourceTrigger=PropertyChanged}"
+                                materialDesign:HintAssist.Hint="Passport Number *"
+                                materialDesign:ValidationAssist.UsePopup="True"/>
+
+                        <!-- Gender -->
+                        <ComboBox SelectedItem="{Binding EditingFamilyMember.JenisKelamin}"
+                                 materialDesign:HintAssist.Hint="Gender *">
+                            <ComboBoxItem Content="Laki-laki"/>
+                            <ComboBoxItem Content="Perempuan"/>
+                        </ComboBox>
+
+                        <!-- Relationship -->
+                        <ComboBox SelectedItem="{Binding EditingFamilyMember.Relationship}"
+                                 materialDesign:HintAssist.Hint="Relationship *">
+                            <ComboBoxItem Content="spouse"/>
+                            <ComboBoxItem Content="parent"/>
+                            <ComboBoxItem Content="child"/>
+                        </ComboBox>
+
+                        <!-- Status -->
+                        <CheckBox Content="Active Family Member" 
+                                 IsChecked="{Binding EditingFamilyMember.IsActive}"/>
+
+                        <!-- Relationship Description -->
+                        <TextBlock Text="{Binding SelectedRelationshipDescription}" 
+                                  Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                  Opacity="0.8" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Dialog Actions -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                               HorizontalAlignment="Right" Margin="0,24,0,0">
+                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                               Command="{Binding CancelFamilyMemberCommand}"
+                               Content="CANCEL" Margin="0,0,8,0"/>
+                        <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                               Command="{Binding SaveFamilyMemberCommand}"
+                               Content="SAVE"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="2" Background="#80000000" 
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                            Value="0" IsIndeterminate="True" Width="50" Height="50"/>
+                <TextBlock Text="Loading family members..." 
+                          Style="{StaticResource MaterialDesignBody1TextBlock}"
+                          Foreground="White" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

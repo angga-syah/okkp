@@ -1,0 +1,470 @@
+<UserControl x:Class="InvoiceApp.WPF.Views.Settings.DatabaseSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+             Background="{DynamicResource MaterialDesignPaper}">
+
+    <UserControl.Resources>
+        <!-- Connection Status Indicator -->
+        <DataTemplate x:Key="ConnectionStatusTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="12" Height="12" 
+                        Fill="{Binding IsConnected, Converter={StaticResource ConnectionStatusToBrushConverter}}"
+                        Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding StatusText}" 
+                          Style="{StaticResource MaterialDesignBody2TextBlock}"
+                          VerticalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Animation Storyboards -->
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                           From="0" To="1" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="ConnectionTestAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(RotateTransform.Angle)"
+                           From="0" To="360" Duration="0:0:1"
+                           RepeatBehavior="Forever"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard Storyboard="{StaticResource FadeInAnimation}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card Grid.Row="0" Margin="16,16,16,8" Padding="16" 
+                            materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Database Settings" 
+                              Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                              Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    <TextBlock Text="Configure database connection and performance settings" 
+                              Style="{StaticResource MaterialDesignBody1TextBlock}"
+                              Opacity="0.8"/>
+                </StackPanel>
+
+                <!-- Connection Status -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <ContentPresenter Content="{Binding ConnectionStatus}"
+                                     ContentTemplate="{StaticResource ConnectionStatusTemplate}"/>
+                    <TextBlock Text="{Binding LastConnectionTest, StringFormat='Last tested: {0:HH:mm:ss}'}" 
+                              Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                              HorizontalAlignment="Right" Opacity="0.6" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" Margin="16,0,16,16" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16">
+                <!-- Connection Settings -->
+                <materialDesign:Card Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Section Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,24">
+                            <materialDesign:PackIcon Kind="Database" Width="24" Height="24" 
+                                                   Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Text="Connection Configuration" 
+                                      Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                        </StackPanel>
+
+                        <!-- Connection Form -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Server/Host -->
+                            <TextBox Grid.Row="0" Grid.Column="0" 
+                                    Text="{Binding DatabaseSettings.Host, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Server/Host *"
+                                    materialDesign:ValidationAssist.UsePopup="True"
+                                    Margin="0,0,12,16"/>
+
+                            <!-- Port -->
+                            <TextBox Grid.Row="0" Grid.Column="1" 
+                                    Text="{Binding DatabaseSettings.Port, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Port *"
+                                    materialDesign:ValidationAssist.UsePopup="True"
+                                    Margin="12,0,0,16"/>
+
+                            <!-- Database Name -->
+                            <TextBox Grid.Row="1" Grid.Column="0" 
+                                    Text="{Binding DatabaseSettings.DatabaseName, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Database Name *"
+                                    materialDesign:ValidationAssist.UsePopup="True"
+                                    Margin="0,0,12,16"/>
+
+                            <!-- Schema -->
+                            <TextBox Grid.Row="1" Grid.Column="1" 
+                                    Text="{Binding DatabaseSettings.Schema, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Schema (Optional)"
+                                    Margin="12,0,0,16"/>
+
+                            <!-- Username -->
+                            <TextBox Grid.Row="2" Grid.Column="0" 
+                                    Text="{Binding DatabaseSettings.Username, UpdateSourceTrigger=PropertyChanged}"
+                                    materialDesign:HintAssist.Hint="Username *"
+                                    materialDesign:ValidationAssist.UsePopup="True"
+                                    Margin="0,0,12,16"/>
+
+                            <!-- Password -->
+                            <PasswordBox Grid.Row="2" Grid.Column="1" 
+                                        materialDesign:HintAssist.Hint="Password *"
+                                        materialDesign:ValidationAssist.UsePopup="True"
+                                        Margin="12,0,0,16">
+                                <behaviors:Interaction.Behaviors>
+                                    <behaviors:EventTrigger EventName="PasswordChanged">
+                                        <behaviors:InvokeCommandAction Command="{Binding PasswordChangedCommand}" 
+                                                                      CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=PasswordBox}}"/>
+                                    </behaviors:EventTrigger>
+                                </behaviors:Interaction.Behaviors>
+                            </PasswordBox>
+
+                            <!-- Connection Timeout -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,12,16">
+                                <TextBlock Text="Connection Timeout (seconds)" 
+                                          Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                <Slider Value="{Binding DatabaseSettings.ConnectionTimeout}" 
+                                       Minimum="5" Maximum="300" TickFrequency="5" 
+                                       IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding DatabaseSettings.ConnectionTimeout, StringFormat='{0} seconds'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Command Timeout -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="12,0,0,16">
+                                <TextBlock Text="Command Timeout (seconds)" 
+                                          Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                <Slider Value="{Binding DatabaseSettings.CommandTimeout}" 
+                                       Minimum="30" Maximum="600" TickFrequency="30" 
+                                       IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding DatabaseSettings.CommandTimeout, StringFormat='{0} seconds'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- SSL Settings -->
+                            <StackPanel Grid.Row="4" Grid.ColumnSpan="2">
+                                <CheckBox Content="Use SSL Connection" 
+                                         IsChecked="{Binding DatabaseSettings.UseSsl}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Trust Server Certificate" 
+                                         IsChecked="{Binding DatabaseSettings.TrustServerCertificate}"
+                                         IsEnabled="{Binding DatabaseSettings.UseSsl}"
+                                         Margin="0,8"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Test Connection Button -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                   Command="{Binding TestConnectionCommand}"
+                                   Margin="0,0,12,0" Padding="16,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="TestTube" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon.RenderTransform>
+                                            <RotateTransform/>
+                                        </materialDesign:PackIcon.RenderTransform>
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsTesting}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard Storyboard="{StaticResource ConnectionTestAnimation}"/>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <StopStoryboard Storyboard="{StaticResource ConnectionTestAnimation}"/>
+                                                        </DataTrigger.ExitActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+                                    <TextBlock Text="Test Connection" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                                   Command="{Binding SaveSettingsCommand}"
+                                   Padding="16,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ContentSave" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Save Settings" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- Performance Settings -->
+                <materialDesign:Card Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Section Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,24">
+                            <materialDesign:PackIcon Kind="Speedometer" Width="24" Height="24" 
+                                                   Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Text="Performance Settings" 
+                                      Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                        </StackPanel>
+
+                        <!-- Performance Options -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Connection Pool Size -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,16">
+                                <TextBlock Text="Connection Pool Size" 
+                                          Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                <Slider Value="{Binding DatabaseSettings.PoolSize}" 
+                                       Minimum="10" Maximum="200" TickFrequency="10" 
+                                       IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding DatabaseSettings.PoolSize, StringFormat='{0} connections'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Connection Lifetime -->
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="12,0,0,16">
+                                <TextBlock Text="Connection Lifetime (minutes)" 
+                                          Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                <Slider Value="{Binding DatabaseSettings.ConnectionLifetime}" 
+                                       Minimum="5" Maximum="120" TickFrequency="5" 
+                                       IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding DatabaseSettings.ConnectionLifetime, StringFormat='{0} minutes'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Query Cache Size -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,16">
+                                <TextBlock Text="Query Cache Size (MB)" 
+                                          Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                <Slider Value="{Binding DatabaseSettings.QueryCacheSize}" 
+                                       Minimum="10" Maximum="500" TickFrequency="10" 
+                                       IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding DatabaseSettings.QueryCacheSize, StringFormat='{0} MB'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Batch Size -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,16">
+                                <TextBlock Text="Batch Size" 
+                                          Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                <Slider Value="{Binding DatabaseSettings.BatchSize}" 
+                                       Minimum="100" Maximum="5000" TickFrequency="100" 
+                                       IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding DatabaseSettings.BatchSize, StringFormat='{0} records'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Performance Options -->
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+                                <CheckBox Content="Enable Connection Pooling" 
+                                         IsChecked="{Binding DatabaseSettings.EnablePooling}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Enable Query Caching" 
+                                         IsChecked="{Binding DatabaseSettings.EnableCaching}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Enable Prepared Statements" 
+                                         IsChecked="{Binding DatabaseSettings.UsePreparedStatements}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Enable Logging" 
+                                         IsChecked="{Binding DatabaseSettings.EnableLogging}"
+                                         Margin="0,8"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- Backup Settings -->
+                <materialDesign:Card Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Section Header -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,24">
+                            <materialDesign:PackIcon Kind="Backup" Width="24" Height="24" 
+                                                   Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Text="Backup & Maintenance" 
+                                      Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                        </StackPanel>
+
+                        <!-- Backup Options -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Backup Settings -->
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <TextBox Text="{Binding BackupSettings.BackupPath, UpdateSourceTrigger=PropertyChanged}"
+                                        materialDesign:HintAssist.Hint="Backup Directory"
+                                        Margin="0,0,0,16"/>
+                                
+                                <ComboBox SelectedItem="{Binding BackupSettings.BackupFrequency}"
+                                         materialDesign:HintAssist.Hint="Backup Frequency"
+                                         Margin="0,0,0,16">
+                                    <ComboBoxItem Content="Manual Only"/>
+                                    <ComboBoxItem Content="Daily"/>
+                                    <ComboBoxItem Content="Weekly"/>
+                                    <ComboBoxItem Content="Monthly"/>
+                                </ComboBox>
+
+                                <StackPanel>
+                                    <TextBlock Text="Keep Backups (days)" 
+                                              Style="{StaticResource MaterialDesignBody2TextBlock}" Margin="0,0,0,8"/>
+                                    <Slider Value="{Binding BackupSettings.RetentionDays}" 
+                                           Minimum="7" Maximum="365" TickFrequency="7" 
+                                           IsSnapToTickEnabled="True"/>
+                                    <TextBlock Text="{Binding BackupSettings.RetentionDays, StringFormat='{0} days'}" 
+                                              Style="{StaticResource MaterialDesignCaptionTextBlock}" 
+                                              HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Maintenance Options -->
+                            <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                <CheckBox Content="Enable Auto Backup" 
+                                         IsChecked="{Binding BackupSettings.AutoBackupEnabled}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Compress Backups" 
+                                         IsChecked="{Binding BackupSettings.CompressBackups}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Auto Vacuum Database" 
+                                         IsChecked="{Binding BackupSettings.AutoVacuum}"
+                                         Margin="0,8"/>
+                                <CheckBox Content="Auto Update Statistics" 
+                                         IsChecked="{Binding BackupSettings.AutoUpdateStats}"
+                                         Margin="0,8"/>
+
+                                <TextBlock Text="{Binding LastBackupTime, StringFormat='Last backup: {0:dd/MM/yyyy HH:mm}'}" 
+                                          Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                          Margin="0,16,0,0" Opacity="0.8"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Backup Actions -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                   Command="{Binding CreateBackupCommand}"
+                                   Margin="0,0,12,0" Padding="16,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="DatabaseExport" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Create Backup" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                   Command="{Binding RestoreBackupCommand}"
+                                   Margin="0,0,12,0" Padding="16,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="DatabaseImport" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Restore Backup" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                   Command="{Binding OptimizeDatabaseCommand}"
+                                   Padding="16,8">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="DatabaseSync" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Optimize Database" Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- Connection String Preview -->
+                <materialDesign:Card Padding="24" materialDesign:ElevationAssist.Elevation="Dp1">
+                    <StackPanel>
+                        <TextBlock Text="Connection String Preview" 
+                                  Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                  Margin="0,0,0,16"/>
+                        <TextBox Text="{Binding GeneratedConnectionString, Mode=OneWay}"
+                                IsReadOnly="True"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
+                                MaxHeight="100"
+                                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                                Foreground="{DynamicResource MaterialDesignBody}"
+                                FontFamily="Consolas"/>
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="2" Background="#80000000" 
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                            Value="0" IsIndeterminate="True" Width="60" Height="60"/>
+                <TextBlock Text="{Binding LoadingMessage}" 
+                          Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                          Foreground="White" Margin="0,16,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,281 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- Dark Theme Color Palette -->
+    
+    <!-- Primary Colors -->
+    <Color x:Key="DarkPrimaryColor">#1976D2</Color>
+    <Color x:Key="DarkPrimaryLightColor">#42A5F5</Color>
+    <Color x:Key="DarkPrimaryDarkColor">#0D47A1</Color>
+    
+    <!-- Secondary Colors -->
+    <Color x:Key="DarkSecondaryColor">#03DAC6</Color>
+    <Color x:Key="DarkSecondaryLightColor">#66FFF9</Color>
+    <Color x:Key="DarkSecondaryDarkColor">#00A896</Color>
+    
+    <!-- Background Colors -->
+    <Color x:Key="DarkBackgroundColor">#121212</Color>
+    <Color x:Key="DarkSurfaceColor">#1E1E1E</Color>
+    <Color x:Key="DarkCardColor">#2D2D2D</Color>
+    <Color x:Key="DarkPaperColor">#1E1E1E</Color>
+    
+    <!-- Text Colors -->
+    <Color x:Key="DarkTextPrimaryColor">#FFFFFF</Color>
+    <Color x:Key="DarkTextSecondaryColor">#B3FFFFFF</Color>
+    <Color x:Key="DarkTextDisabledColor">#61FFFFFF</Color>
+    <Color x:Key="DarkTextHintColor">#61FFFFFF</Color>
+    
+    <!-- Utility Colors -->
+    <Color x:Key="DarkDividerColor">#1FFFFFFF</Color>
+    <Color x:Key="DarkSelectionColor">#1FFFFFFF</Color>
+    <Color x:Key="DarkHoverColor">#0DFFFFFF</Color>
+    <Color x:Key="DarkFocusColor">#1F1976D2</Color>
+    
+    <!-- Status Colors -->
+    <Color x:Key="DarkSuccessColor">#4CAF50</Color>
+    <Color x:Key="DarkWarningColor">#FF9800</Color>
+    <Color x:Key="DarkErrorColor">#F44336</Color>
+    <Color x:Key="DarkInfoColor">#2196F3</Color>
+    
+    <!-- Convert Colors to Brushes -->
+    
+    <!-- Primary Brushes -->
+    <SolidColorBrush x:Key="DarkPrimaryBrush" Color="{StaticResource DarkPrimaryColor}"/>
+    <SolidColorBrush x:Key="DarkPrimaryLightBrush" Color="{StaticResource DarkPrimaryLightColor}"/>
+    <SolidColorBrush x:Key="DarkPrimaryDarkBrush" Color="{StaticResource DarkPrimaryDarkColor}"/>
+    
+    <!-- Secondary Brushes -->
+    <SolidColorBrush x:Key="DarkSecondaryBrush" Color="{StaticResource DarkSecondaryColor}"/>
+    <SolidColorBrush x:Key="DarkSecondaryLightBrush" Color="{StaticResource DarkSecondaryLightColor}"/>
+    <SolidColorBrush x:Key="DarkSecondaryDarkBrush" Color="{StaticResource DarkSecondaryDarkColor}"/>
+    
+    <!-- Background Brushes -->
+    <SolidColorBrush x:Key="DarkBackgroundBrush" Color="{StaticResource DarkBackgroundColor}"/>
+    <SolidColorBrush x:Key="DarkSurfaceBrush" Color="{StaticResource DarkSurfaceColor}"/>
+    <SolidColorBrush x:Key="DarkCardBrush" Color="{StaticResource DarkCardColor}"/>
+    <SolidColorBrush x:Key="DarkPaperBrush" Color="{StaticResource DarkPaperColor}"/>
+    
+    <!-- Text Brushes -->
+    <SolidColorBrush x:Key="DarkTextPrimaryBrush" Color="{StaticResource DarkTextPrimaryColor}"/>
+    <SolidColorBrush x:Key="DarkTextSecondaryBrush" Color="{StaticResource DarkTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="DarkTextDisabledBrush" Color="{StaticResource DarkTextDisabledColor}"/>
+    <SolidColorBrush x:Key="DarkTextHintBrush" Color="{StaticResource DarkTextHintColor}"/>
+    
+    <!-- Utility Brushes -->
+    <SolidColorBrush x:Key="DarkDividerBrush" Color="{StaticResource DarkDividerColor}"/>
+    <SolidColorBrush x:Key="DarkSelectionBrush" Color="{StaticResource DarkSelectionColor}"/>
+    <SolidColorBrush x:Key="DarkHoverBrush" Color="{StaticResource DarkHoverColor}"/>
+    <SolidColorBrush x:Key="DarkFocusBrush" Color="{StaticResource DarkFocusColor}"/>
+    
+    <!-- Status Brushes -->
+    <SolidColorBrush x:Key="DarkSuccessBrush" Color="{StaticResource DarkSuccessColor}"/>
+    <SolidColorBrush x:Key="DarkWarningBrush" Color="{StaticResource DarkWarningColor}"/>
+    <SolidColorBrush x:Key="DarkErrorBrush" Color="{StaticResource DarkErrorColor}"/>
+    <SolidColorBrush x:Key="DarkInfoBrush" Color="{StaticResource DarkInfoColor}"/>
+    
+    <!-- Material Design Theme Override -->
+    <ResourceDictionary.MergedDictionaries>
+        <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="Blue" SecondaryColor="Teal"/>
+    </ResourceDictionary.MergedDictionaries>
+    
+    <!-- Override Material Design Resources -->
+    
+    <!-- Primary Theme Colors -->
+    <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="{StaticResource DarkPrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryHueLightBrush" Color="{StaticResource DarkPrimaryLightColor}"/>
+    <SolidColorBrush x:Key="PrimaryHueDarkBrush" Color="{StaticResource DarkPrimaryDarkColor}"/>
+    <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="PrimaryHueLightForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="PrimaryHueDarkForegroundBrush" Color="#FFFFFF"/>
+    
+    <!-- Secondary Theme Colors -->
+    <SolidColorBrush x:Key="SecondaryHueMidBrush" Color="{StaticResource DarkSecondaryColor}"/>
+    <SolidColorBrush x:Key="SecondaryHueLightBrush" Color="{StaticResource DarkSecondaryLightColor}"/>
+    <SolidColorBrush x:Key="SecondaryHueDarkBrush" Color="{StaticResource DarkSecondaryDarkColor}"/>
+    <SolidColorBrush x:Key="SecondaryHueMidForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="SecondaryHueLightForegroundBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="SecondaryHueDarkForegroundBrush" Color="#FFFFFF"/>
+    
+    <!-- Background Colors -->
+    <SolidColorBrush x:Key="MaterialDesignPaper" Color="{StaticResource DarkPaperColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBackground" Color="{StaticResource DarkBackgroundColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="{StaticResource DarkCardColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignToolBarBackground" Color="{StaticResource DarkSurfaceColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBody" Color="{StaticResource DarkTextPrimaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignBodyLight" Color="{StaticResource DarkTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignColumnHeader" Color="{StaticResource DarkTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCheckBoxOff" Color="{StaticResource DarkTextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignCheckBoxDisabled" Color="{StaticResource DarkTextDisabledColor}"/>
+    
+    <!-- Input Controls -->
+    <SolidColorBrush x:Key="MaterialDesignTextFieldBoxBackground" Color="{StaticResource DarkSurfaceColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextFieldBoxHoverBackground" Color="{StaticResource DarkCardColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextFieldBoxDisabledBackground" Color="{StaticResource DarkBackgroundColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextAreaBorder" Color="{StaticResource DarkDividerColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignTextAreaInactiveBorder" Color="{StaticResource DarkDividerColor}"/>
+    
+    <!-- Dividers and Borders -->
+    <SolidColorBrush x:Key="MaterialDesignDivider" Color="{StaticResource DarkDividerColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignSelection" Color="{StaticResource DarkSelectionColor}"/>
+    
+    <!-- Button States -->
+    <SolidColorBrush x:Key="MaterialDesignFlatButtonClick" Color="{StaticResource DarkHoverColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignFlatButtonRipple" Color="{StaticResource DarkSelectionColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignToolTipBackground" Color="{StaticResource DarkCardColor}"/>
+    
+    <!-- Validation Colors -->
+    <SolidColorBrush x:Key="ValidationErrorBrush" Color="{StaticResource DarkErrorColor}"/>
+    <SolidColorBrush x:Key="MaterialDesignValidationErrorBrush" Color="{StaticResource DarkErrorColor}"/>
+    
+    <!-- Data Grid Colors -->
+    <SolidColorBrush x:Key="MaterialDesignDataGridRowHoverBackground" Color="{StaticResource DarkHoverColor}"/>
+    
+    <!-- Shadow Color -->
+    <Color x:Key="MaterialDesignShadow">#000000</Color>
+    
+    <!-- Gradient Brushes for Modern Look -->
+    <LinearGradientBrush x:Key="DarkGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource DarkBackgroundColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource DarkSurfaceColor}" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="DarkPrimaryGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource DarkPrimaryColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource DarkPrimaryDarkColor}" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="DarkSecondaryGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource DarkSecondaryColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource DarkSecondaryDarkColor}" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <!-- Accent Colors for Special Elements -->
+    <SolidColorBrush x:Key="DarkAccent1Brush" Color="#E91E63"/>  <!-- Pink -->
+    <SolidColorBrush x:Key="DarkAccent2Brush" Color="#9C27B0"/>  <!-- Purple -->
+    <SolidColorBrush x:Key="DarkAccent3Brush" Color="#673AB7"/>  <!-- Deep Purple -->
+    <SolidColorBrush x:Key="DarkAccent4Brush" Color="#3F51B5"/>  <!-- Indigo -->
+    <SolidColorBrush x:Key="DarkAccent5Brush" Color="#00BCD4"/>  <!-- Cyan -->
+    
+    <!-- Chart Colors for Dark Theme -->
+    <SolidColorBrush x:Key="DarkChart1Brush" Color="#42A5F5"/>
+    <SolidColorBrush x:Key="DarkChart2Brush" Color="#66BB6A"/>
+    <SolidColorBrush x:Key="DarkChart3Brush" Color="#FFA726"/>
+    <SolidColorBrush x:Key="DarkChart4Brush" Color="#EF5350"/>
+    <SolidColorBrush x:Key="DarkChart5Brush" Color="#AB47BC"/>
+    <SolidColorBrush x:Key="DarkChart6Brush" Color="#26C6DA"/>
+    <SolidColorBrush x:Key="DarkChart7Brush" Color="#FFEE58"/>
+    <SolidColorBrush x:Key="DarkChart8Brush" Color="#8D6E63"/>
+    
+    <!-- Invoice Status Colors for Dark Theme -->
+    <SolidColorBrush x:Key="DarkDraftStatusBrush" Color="#FF9800"/>
+    <SolidColorBrush x:Key="DarkFinalizedStatusBrush" Color="#2196F3"/>
+    <SolidColorBrush x:Key="DarkPaidStatusBrush" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="DarkCancelledStatusBrush" Color="#F44336"/>
+    <SolidColorBrush x:Key="DarkOverdueStatusBrush" Color="#E91E63"/>
+    
+    <!-- Modern Glass Effect Brushes -->
+    <LinearGradientBrush x:Key="DarkGlassBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#40FFFFFF" Offset="0"/>
+        <GradientStop Color="#10FFFFFF" Offset="0.5"/>
+        <GradientStop Color="#05FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <!-- Elevation Shadow Brushes -->
+    <DropShadowEffect x:Key="DarkElevation1" Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.3"/>
+    <DropShadowEffect x:Key="DarkElevation2" Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
+    <DropShadowEffect x:Key="DarkElevation4" Color="#000000" BlurRadius="12" ShadowDepth="4" Opacity="0.3"/>
+    <DropShadowEffect x:Key="DarkElevation6" Color="#000000" BlurRadius="16" ShadowDepth="6" Opacity="0.3"/>
+    <DropShadowEffect x:Key="DarkElevation8" Color="#000000" BlurRadius="20" ShadowDepth="8" Opacity="0.3"/>
+    
+    <!-- Font Resources -->
+    <FontFamily x:Key="DarkThemeFont">Segoe UI, Arial, sans-serif</FontFamily>
+    <FontFamily x:Key="DarkThemeMonoFont">Consolas, Monaco, monospace</FontFamily>
+    
+    <!-- Typography Styles for Dark Theme -->
+    <Style x:Key="DarkHeadline1" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="96"/>
+        <Setter Property="FontWeight" Value="Light"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkHeadline2" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="60"/>
+        <Setter Property="FontWeight" Value="Light"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkHeadline3" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="48"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkHeadline4" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="34"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkHeadline5" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkHeadline6" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkSubtitle1" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkSubtitle2" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkBody1" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkBody2" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextPrimaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkCaption" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextSecondaryBrush}"/>
+    </Style>
+    
+    <Style x:Key="DarkOverline" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource DarkThemeFont}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Foreground" Value="{StaticResource DarkTextSecondaryBrush}"/>
+        <Setter Property="TextTransform" Value="Uppercase"/>
+    </Style>
+
+</ResourceDictionary>

@@ -1,0 +1,266 @@
+<!-- E:\kp\4 invoice\WPF\Controls\LoadingSpinner.xaml -->
+<UserControl x:Class="InvoiceApp.WPF.Controls.LoadingSpinner"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <UserControl.Resources>
+        <!-- Rotation Animation -->
+        <Storyboard x:Key="RotationAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="RotatingElement"
+                           Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                           From="0" To="360" Duration="0:0:1">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- Pulse Animation -->
+        <Storyboard x:Key="PulseAnimation" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PulsingElement"
+                                         Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Dots Animation -->
+        <Storyboard x:Key="DotsAnimation" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Dot1"
+                                         Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="0.3"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Dot2"
+                                         Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="0.3"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Dot3"
+                                         Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="0.3"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Ripple Animation -->
+        <Storyboard x:Key="RippleAnimation" RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RippleRing1"
+                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RippleRing1"
+                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RippleRing1"
+                                         Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RippleRing2"
+                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RippleRing2"
+                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="RippleRing2"
+                                         Storyboard.TargetProperty="Opacity">
+                <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="1"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:1.5" Value="0.3"/>
+                <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <!-- Progress Ring Animation -->
+        <Storyboard x:Key="ProgressRingAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="ProgressRing"
+                           Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                           From="0" To="360" Duration="0:0:2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Spinner Type: Rotation (Default) -->
+        <Grid x:Name="RotationSpinner"
+              Visibility="{Binding SpinnerType, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Rotation}">
+            
+            <materialDesign:PackIcon x:Name="RotatingElement"
+                                   Kind="{Binding IconKind, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   Foreground="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                <materialDesign:PackIcon.RenderTransform>
+                    <RotateTransform CenterX="0.5" CenterY="0.5"/>
+                </materialDesign:PackIcon.RenderTransform>
+            </materialDesign:PackIcon>
+        </Grid>
+
+        <!-- Spinner Type: Pulse -->
+        <Grid x:Name="PulseSpinner"
+              Visibility="{Binding SpinnerType, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Pulse}">
+            
+            <Ellipse x:Name="PulsingElement"
+                     Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                     Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                     Fill="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Spinner Type: Dots -->
+        <Grid x:Name="DotsSpinner"
+              Visibility="{Binding SpinnerType, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Dots}">
+            
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                
+                <Ellipse x:Name="Dot1"
+                         Width="{Binding DotSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Height="{Binding DotSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Fill="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Margin="2"/>
+                
+                <Ellipse x:Name="Dot2"
+                         Width="{Binding DotSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Height="{Binding DotSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Fill="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Margin="2"/>
+                
+                <Ellipse x:Name="Dot3"
+                         Width="{Binding DotSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Height="{Binding DotSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Fill="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Margin="2"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Spinner Type: Ripple -->
+        <Grid x:Name="RippleSpinner"
+              Visibility="{Binding SpinnerType, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Ripple}">
+            
+            <Grid Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+                
+                <Ellipse x:Name="RippleRing1"
+                         Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Stroke="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         StrokeThickness="2"
+                         Fill="Transparent">
+                    <Ellipse.RenderTransform>
+                        <ScaleTransform CenterX="0.5" CenterY="0.5"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                
+                <Ellipse x:Name="RippleRing2"
+                         Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Stroke="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         StrokeThickness="2"
+                         Fill="Transparent">
+                    <Ellipse.RenderTransform>
+                        <ScaleTransform CenterX="0.5" CenterY="0.5"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </Grid>
+        </Grid>
+
+        <!-- Spinner Type: ProgressRing -->
+        <Grid x:Name="ProgressRingSpinner"
+              Visibility="{Binding SpinnerType, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=ProgressRing}">
+            
+            <Grid Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+                
+                <Ellipse x:Name="ProgressRing"
+                         Width="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Height="{Binding Size, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         Stroke="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         StrokeThickness="3"
+                         Fill="Transparent"
+                         StrokeDashArray="15,85"
+                         StrokeDashCap="Round">
+                    <Ellipse.RenderTransform>
+                        <RotateTransform CenterX="0.5" CenterY="0.5"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </Grid>
+        </Grid>
+
+        <!-- Loading Text -->
+        <TextBlock Text="{Binding LoadingText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Style="{DynamicResource ModernBody2}"
+                   Foreground="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,16"
+                   Visibility="{Binding ShowText, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                               Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+        <!-- Progress Percentage (if applicable) -->
+        <TextBlock Text="{Binding ProgressPercentage, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat='{}{0:0}%'}"
+                   Style="{DynamicResource ModernBody1}"
+                   Foreground="{Binding SpinnerBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   FontWeight="Medium"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Visibility="{Binding ShowProgress, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                               Converter={StaticResource BooleanToVisibilityConverter}}"/>
+    </Grid>
+
+    <!-- Triggers for Animation Control -->
+    <UserControl.Triggers>
+        <DataTrigger Binding="{Binding IsSpinning, RelativeSource={RelativeSource Self}}" Value="True">
+            <DataTrigger.EnterActions>
+                <BeginStoryboard Name="RotationStoryboard" Storyboard="{StaticResource RotationAnimation}"/>
+                <BeginStoryboard Name="PulseStoryboard" Storyboard="{StaticResource PulseAnimation}"/>
+                <BeginStoryboard Name="DotsStoryboard" Storyboard="{StaticResource DotsAnimation}"/>
+                <BeginStoryboard Name="RippleStoryboard" Storyboard="{StaticResource RippleAnimation}"/>
+                <BeginStoryboard Name="ProgressRingStoryboard" Storyboard="{StaticResource ProgressRingAnimation}"/>
+            </DataTrigger.EnterActions>
+            <DataTrigger.ExitActions>
+                <StopStoryboard BeginStoryboardName="RotationStoryboard"/>
+                <StopStoryboard BeginStoryboardName="PulseStoryboard"/>
+                <StopStoryboard BeginStoryboardName="DotsStoryboard"/>
+                <StopStoryboard BeginStoryboardName="RippleStoryboard"/>
+                <StopStoryboard BeginStoryboardName="ProgressRingStoryboard"/>
+            </DataTrigger.ExitActions>
+        </DataTrigger>
+    </UserControl.Triggers>
+</UserControl>

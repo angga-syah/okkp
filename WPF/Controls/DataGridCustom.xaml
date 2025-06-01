@@ -1,0 +1,360 @@
+<!-- E:\kp\4 invoice\WPF\Controls\DataGridCustom.xaml -->
+<UserControl x:Class="InvoiceApp.WPF.Controls.DataGridCustom"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors">
+
+    <UserControl.Resources>
+        <!-- Modern DataGrid Style -->
+        <Style x:Key="ModernDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource DividerBrush}"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="FontFamily" Value="{DynamicResource ModernFontFamily}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="RowHeight" Value="48"/>
+            <Setter Property="ColumnHeaderHeight" Value="56"/>
+            <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="12,8"/>
+            <Setter Property="materialDesign:DataGridAssist.ColumnHeaderPadding" Value="12,12"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="EnableRowVirtualization" Value="True"/>
+            <Setter Property="EnableColumnVirtualization" Value="True"/>
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+            <Setter Property="SelectionMode" Value="Extended"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+        </Style>
+
+        <!-- Modern Row Style -->
+        <Style x:Key="ModernDataGridRowStyle" TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DataGridSelectedRowBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="BorderThickness" Value="1,0"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DataGridHoverRowBrush}"/>
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="False"/>
+                        <Condition Property="AlternationIndex" Value="1"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource DataGridAlternatingRowBrush}"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Modern Column Header Style -->
+        <Style x:Key="ModernDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Background" Value="{DynamicResource DataGridHeaderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="12,12"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridColumnHeader">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Header Content -->
+                                <ContentPresenter Grid.Column="0"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+
+                                <!-- Sort Indicator -->
+                                <materialDesign:PackIcon Grid.Column="1"
+                                                       Kind="ArrowUp"
+                                                       Width="16" Height="16"
+                                                       Foreground="{DynamicResource PrimaryBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="4,0"
+                                                       Visibility="{Binding SortDirection, RelativeSource={RelativeSource TemplatedParent}, 
+                                                                   Converter={StaticResource SortDirectionToVisibilityConverter}}">
+                                    <materialDesign:PackIcon.Style>
+                                        <Style TargetType="materialDesign:PackIcon">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SortDirection, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                           Value="Descending">
+                                                    <Setter Property="Kind" Value="ArrowDown"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </materialDesign:PackIcon.Style>
+                                </materialDesign:PackIcon>
+
+                                <!-- Filter Indicator -->
+                                <materialDesign:PackIcon Grid.Column="2"
+                                                       Kind="Filter"
+                                                       Width="14" Height="14"
+                                                       Foreground="{DynamicResource PrimaryBrush}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="2,0,4,0"
+                                                       Visibility="{Binding HasFilter, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                                                                   Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                                <!-- Resize Grip -->
+                                <Thumb Grid.Column="2"
+                                       Name="PART_RightHeaderGripper"
+                                       HorizontalAlignment="Right"
+                                       Width="8"
+                                       Background="Transparent"
+                                       Cursor="SizeWE"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Cell Style -->
+        <Style x:Key="ModernDataGridCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                </Trigger>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Loading Animation -->
+        <Storyboard x:Key="LoadingAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="LoadingIcon"
+                           Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                           From="0" To="360" Duration="0:0:1"/>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Main DataGrid -->
+        <DataGrid x:Name="MainDataGrid"
+                  Style="{StaticResource ModernDataGridStyle}"
+                  RowStyle="{StaticResource ModernDataGridRowStyle}"
+                  ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
+                  CellStyle="{StaticResource ModernDataGridCellStyle}"
+                  ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                  SelectedItems="{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                  CanUserSortColumns="{Binding CanUserSort, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  CanUserReorderColumns="{Binding CanUserReorderColumns, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  CanUserResizeColumns="{Binding CanUserResizeColumns, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  AlternationCount="2"
+                  Visibility="{Binding IsLoading, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                              Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+
+            <DataGrid.Columns>
+                <!-- Columns are dynamically generated in code-behind -->
+            </DataGrid.Columns>
+
+            <!-- Context Menu -->
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Refresh" 
+                              Icon="{materialDesign:PackIcon Refresh}"
+                              Command="{Binding RefreshCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <Separator/>
+                    <MenuItem Header="Copy" 
+                              Icon="{materialDesign:PackIcon ContentCopy}"
+                              Command="{Binding CopyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <MenuItem Header="Export to Excel" 
+                              Icon="{materialDesign:PackIcon FileExcel}"
+                              Command="{Binding ExportCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <Separator/>
+                    <MenuItem Header="Select All" 
+                              Icon="{materialDesign:PackIcon SelectAll}"
+                              Command="{Binding SelectAllCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <MenuItem Header="Clear Selection" 
+                              Icon="{materialDesign:PackIcon Close}"
+                              Command="{Binding ClearSelectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+            <!-- Row Details Template -->
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <Border Background="{DynamicResource Gray50Brush}" 
+                            Padding="16,12"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="0,1">
+                        <ContentPresenter Content="{Binding}" 
+                                          ContentTemplate="{Binding RowDetailsTemplate, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    </Border>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+        </DataGrid>
+
+        <!-- Loading Overlay -->
+        <Grid Background="{DynamicResource SurfaceBrush}"
+              Opacity="0.9"
+              Visibility="{Binding IsLoading, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource BooleanToVisibilityConverter}}">
+            
+            <StackPanel HorizontalAlignment="Center" 
+                       VerticalAlignment="Center">
+                
+                <materialDesign:PackIcon x:Name="LoadingIcon"
+                                       Kind="Loading"
+                                       Width="48" Height="48"
+                                       Foreground="{DynamicResource PrimaryBrush}"
+                                       HorizontalAlignment="Center">
+                    <materialDesign:PackIcon.RenderTransform>
+                        <RotateTransform/>
+                    </materialDesign:PackIcon.RenderTransform>
+                </materialDesign:PackIcon>
+                
+                <TextBlock Text="{Binding LoadingText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Style="{DynamicResource ModernBody1}"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Empty State -->
+        <Grid Visibility="{Binding ShowEmptyState, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource BooleanToVisibilityConverter}}">
+            
+            <StackPanel HorizontalAlignment="Center" 
+                       VerticalAlignment="Center">
+                
+                <materialDesign:PackIcon Kind="{Binding EmptyStateIcon, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       Width="64" Height="64"
+                                       Foreground="{DynamicResource TextHintBrush}"
+                                       HorizontalAlignment="Center"/>
+                
+                <TextBlock Text="{Binding EmptyStateTitle, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Style="{DynamicResource ModernHeadline3}"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,8"/>
+                
+                <TextBlock Text="{Binding EmptyStateMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Style="{DynamicResource ModernBody2}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           MaxWidth="400"
+                           TextWrapping="Wrap"/>
+                
+                <Button Style="{DynamicResource ModernButtonStyle}"
+                        Content="{Binding EmptyStateActionText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        Command="{Binding EmptyStateActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        Margin="0,24,0,0"
+                        Visibility="{Binding EmptyStateActionText, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                                    Converter={StaticResource NullToVisibilityConverter}}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Error State -->
+        <Grid Background="{DynamicResource ErrorBrush}"
+              Opacity="0.1"
+              Visibility="{Binding HasError, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                          Converter={StaticResource BooleanToVisibilityConverter}}">
+            
+            <StackPanel HorizontalAlignment="Center" 
+                       VerticalAlignment="Center">
+                
+                <materialDesign:PackIcon Kind="AlertCircle"
+                                       Width="64" Height="64"
+                                       Foreground="{DynamicResource ErrorBrush}"
+                                       HorizontalAlignment="Center"/>
+                
+                <TextBlock Text="Error Loading Data"
+                           Style="{DynamicResource ModernHeadline3}"
+                           Foreground="{DynamicResource ErrorBrush}"
+                           HorizontalAlignment="Center"
+                           Margin="0,16,0,8"/>
+                
+                <TextBlock Text="{Binding ErrorMessage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Style="{DynamicResource ModernBody2}"
+                           Foreground="{DynamicResource ErrorBrush}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           MaxWidth="400"
+                           TextWrapping="Wrap"/>
+                
+                <Button Style="{DynamicResource ModernOutlinedButtonStyle}"
+                        Content="Retry"
+                        Command="{Binding RetryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        Margin="0,24,0,0">
+                    <Button.Foreground>
+                        <SolidColorBrush Color="{DynamicResource ErrorColor}"/>
+                    </Button.Foreground>
+                    <Button.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource ErrorColor}"/>
+                    </Button.BorderBrush>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Selection Info Bar -->
+        <Border Background="{DynamicResource PrimaryLightBrush}"
+                BorderBrush="{DynamicResource PrimaryBrush}"
+                BorderThickness="0,1,0,0"
+                VerticalAlignment="Bottom"
+                Padding="16,8"
+                Visibility="{Binding ShowSelectionInfo, RelativeSource={RelativeSource AncestorType=UserControl}, 
+                            Converter={StaticResource BooleanToVisibilityConverter}}">
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0"
+                           Text="{Binding SelectionInfo, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           Style="{DynamicResource ModernBody2}"
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1" 
+                           Orientation="Horizontal">
+                    
+                    <Button Style="{DynamicResource MaterialDesignToolButton}"
+                            Content="Clear"
+                            Command="{Binding ClearSelectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Behaviors -->
+        <behaviors:Interaction.Triggers>
+            <!-- Loading Animation -->
+            <behaviors:DataTrigger Binding="{Binding IsLoading, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <behaviors:BeginStoryboard Storyboard="{StaticResource LoadingAnimation}"/>
+            </behaviors:DataTrigger>
+        </behaviors:Interaction.Triggers>
+    </Grid>
+</UserControl>
